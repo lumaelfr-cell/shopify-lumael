@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumael — Luminaires d'exception</title>
+  <meta name="description" content="Lumael crée des luminaires d'exception, dessinés et fabriqués en France. Suspensions, lampadaires et appliques qui sculptent la lumière.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='38' fill='%23e8b25c'/></svg>">
+</head>
+<body>
+
+  <!-- Préloader -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__bulb">
+      <span class="preloader__glow"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.7 1.3 1.5 1.5 2.5h5c.2-1 .7-1.8 1.5-2.5A6 6 0 0 0 12 3z"/>
+      </svg>
+    </div>
+    <p class="preloader__text">Lumael</p>
+  </div>
+
+  <!-- Curseur lumineux -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <a class="skip-link" href="#main">Aller au contenu principal</a>
+
+  <!-- Navigation -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#" class="nav__logo" aria-label="Lumael — accueil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.7 1.3 1.5 1.5 2.5h5c.2-1 .7-1.8 1.5-2.5A6 6 0 0 0 12 3z"/>
+        </svg>
+        <span>Lumael</span>
+      </a>
+      <nav class="nav__links" id="navLinks" aria-label="Navigation principale">
+        <a href="#collections">Collections</a>
+        <a href="#savoir-faire">Savoir-faire</a>
+        <a href="#ambiances">Ambiances</a>
+        <a href="#temoignages">Témoignages</a>
+      </nav>
+      <div class="nav__actions">
+        <a href="#contact" class="btn btn--ghost nav__cta">Nous contacter</a>
+        <button class="nav__burger" id="navBurger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ══════════════ HERO ══════════════ -->
+    <section class="hero" id="hero">
+      <div class="hero__vignette" aria-hidden="true"></div>
+
+      <!-- Lampes suspendues -->
+      <div class="hero__lamps" aria-hidden="true">
+        <div class="lamp lamp--1">
+          <div class="lamp__cord"></div>
+          <div class="lamp__shade lamp__shade--dome"></div>
+          <div class="lamp__bulb"></div>
+          <div class="lamp__light"></div>
+        </div>
+        <div class="lamp lamp--2">
+          <div class="lamp__cord"></div>
+          <div class="lamp__shade lamp__shade--cone"></div>
+          <div class="lamp__bulb"></div>
+          <div class="lamp__light"></div>
+        </div>
+        <div class="lamp lamp--3">
+          <div class="lamp__cord"></div>
+          <div class="lamp__shade lamp__shade--globe"></div>
+          <div class="lamp__bulb"></div>
+          <div class="lamp__light"></div>
+        </div>
+      </div>
+
+      <div class="hero__content">
+        <p class="hero__eyebrow reveal">Maison française de luminaires — depuis 2016</p>
+        <h1 class="hero__title">
+          <span class="hero__line"><span>La lumière,</span></span>
+          <span class="hero__line"><span class="hero__accent">sculptée.</span></span>
+        </h1>
+        <p class="hero__sub reveal">
+          Suspensions, lampadaires et appliques d'exception, dessinés dans nos ateliers
+          et façonnés à la main. Chaque pièce transforme l'espace qu'elle éclaire.
+        </p>
+        <div class="hero__cta reveal">
+          <a href="#collections" class="btn btn--primary">Découvrir les collections</a>
+          <a href="#savoir-faire" class="btn btn--ghost">Notre savoir-faire</a>
+        </div>
+      </div>
+
+      <a href="#collections" class="hero__scroll" aria-label="Faire défiler vers les collections">
+        <span class="hero__scroll-line"></span>
+        <span class="hero__scroll-text">Défiler</span>
+      </a>
+    </section>
+
+    <!-- ══════════════ BANDEAU DÉFILANT ══════════════ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>Fabriqué en France</span><i>✦</i>
+        <span>Laiton massif</span><i>✦</i>
+        <span>Verre soufflé bouche</span><i>✦</i>
+        <span>Édition limitée</span><i>✦</i>
+        <span>Garantie 10 ans</span><i>✦</i>
+        <span>Fabriqué en France</span><i>✦</i>
+        <span>Laiton massif</span><i>✦</i>
+        <span>Verre soufflé bouche</span><i>✦</i>
+        <span>Édition limitée</span><i>✦</i>
+        <span>Garantie 10 ans</span><i>✦</i>
+      </div>
+    </div>
+
+    <!-- ══════════════ COLLECTIONS ══════════════ -->
+    <section class="collections section" id="collections">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">Nos collections</p>
+          <h2 class="section__title">Des pièces qui ne s'éteignent<br>jamais vraiment</h2>
+          <p class="section__sub">Six familles de luminaires, une même obsession : la justesse de la lumière.</p>
+        </header>
+
+        <div class="collections__grid">
+
+          <!-- Éclat — suspension -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <line x1="100" y1="0" x2="100" y2="60" stroke="#57534e" stroke-width="2"/>
+                <path d="M60 60 Q100 40 140 60 L128 96 Q100 108 72 96 Z" fill="#26221e" stroke="#e8b25c" stroke-width="1.2"/>
+                <circle class="glow-bulb" cx="100" cy="108" r="10" fill="#ffd9a0"/>
+                <path d="M55 210 Q100 130 145 210 Z" fill="url(#coneA)" opacity="0.5"/>
+                <defs>
+                  <linearGradient id="coneA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.9"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Suspension</p>
+              <h3 class="card__name">Éclat</h3>
+              <p class="card__desc">Coupole en laiton brossé, lumière descendante et enveloppante.</p>
+              <div class="card__foot">
+                <span class="card__price">890&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Aurore — lampadaire -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <line x1="70" y1="200" x2="70" y2="80" stroke="#57534e" stroke-width="3"/>
+                <path d="M70 80 Q70 46 118 42" stroke="#57534e" stroke-width="3" fill="none"/>
+                <ellipse cx="60" cy="202" rx="26" ry="5" fill="#26221e"/>
+                <path d="M100 42 Q118 30 136 42 L130 66 Q118 72 106 66 Z" fill="#26221e" stroke="#e8b25c" stroke-width="1.2"/>
+                <circle class="glow-bulb" cx="118" cy="66" r="8" fill="#ffd9a0"/>
+                <path d="M84 190 Q118 90 156 190 Z" fill="url(#coneB)" opacity="0.45"/>
+                <defs>
+                  <linearGradient id="coneB" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.9"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Lampadaire</p>
+              <h3 class="card__name">Aurore</h3>
+              <p class="card__desc">Arc élancé en acier noir, abat-jour orientable pour un éclairage de lecture.</p>
+              <div class="card__foot">
+                <span class="card__price">1&nbsp;240&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Halo — applique -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <rect x="30" y="20" width="8" height="180" fill="#1b1815"/>
+                <line x1="38" y1="110" x2="86" y2="110" stroke="#57534e" stroke-width="3"/>
+                <circle cx="112" cy="110" r="30" fill="none" stroke="#e8b25c" stroke-width="2.5"/>
+                <circle class="glow-bulb" cx="112" cy="110" r="14" fill="#ffd9a0"/>
+                <circle cx="112" cy="110" r="52" fill="url(#haloC)"/>
+                <defs>
+                  <radialGradient id="haloC">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.5"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Applique murale</p>
+              <h3 class="card__name">Halo</h3>
+              <p class="card__desc">Anneau lumineux flottant, un clair de lune permanent sur votre mur.</p>
+              <div class="card__foot">
+                <span class="card__price">520&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Solstice — lampe de table -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <ellipse cx="100" cy="196" rx="34" ry="7" fill="#26221e"/>
+                <rect x="96" y="130" width="8" height="66" fill="#57534e"/>
+                <circle class="glow-bulb" cx="100" cy="100" r="34" fill="#ffd9a0"/>
+                <circle cx="100" cy="100" r="34" fill="none" stroke="#e8b25c" stroke-width="1.2" opacity="0.6"/>
+                <circle cx="100" cy="100" r="60" fill="url(#orbD)"/>
+                <defs>
+                  <radialGradient id="orbD">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.45"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Lampe de table</p>
+              <h3 class="card__name">Solstice</h3>
+              <p class="card__desc">Globe en verre soufflé bouche, posé sur un fût de laiton patiné.</p>
+              <div class="card__foot">
+                <span class="card__price">640&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Nébuleuse — lustre -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <line x1="60" y1="0" x2="60" y2="70" stroke="#57534e" stroke-width="1.5"/>
+                <line x1="100" y1="0" x2="100" y2="110" stroke="#57534e" stroke-width="1.5"/>
+                <line x1="140" y1="0" x2="140" y2="86" stroke="#57534e" stroke-width="1.5"/>
+                <circle class="glow-bulb" cx="60" cy="82" r="12" fill="#ffd9a0"/>
+                <circle class="glow-bulb glow-bulb--d2" cx="100" cy="122" r="15" fill="#ffd9a0"/>
+                <circle class="glow-bulb glow-bulb--d3" cx="140" cy="98" r="10" fill="#ffd9a0"/>
+                <circle cx="60" cy="82" r="24" fill="url(#nebE)"/>
+                <circle cx="100" cy="122" r="30" fill="url(#nebE)"/>
+                <circle cx="140" cy="98" r="20" fill="url(#nebE)"/>
+                <defs>
+                  <radialGradient id="nebE">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.5"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Lustre</p>
+              <h3 class="card__name">Nébuleuse</h3>
+              <p class="card__desc">Constellation de globes en cascade, chaque sphère soufflée à la main.</p>
+              <div class="card__foot">
+                <span class="card__price">2&nbsp;180&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Lueur — baladeuse -->
+          <article class="card reveal" data-tilt>
+            <div class="card__stage">
+              <span class="card__halo"></span>
+              <svg class="card__art" viewBox="0 0 200 220" aria-hidden="true">
+                <path d="M78 190 L122 190 L114 120 L86 120 Z" fill="#26221e" stroke="#e8b25c" stroke-width="1.2"/>
+                <path d="M86 120 Q100 96 114 120" fill="none" stroke="#57534e" stroke-width="3"/>
+                <circle class="glow-bulb" cx="100" cy="146" r="16" fill="#ffd9a0"/>
+                <circle cx="100" cy="146" r="42" fill="url(#lueurF)"/>
+                <defs>
+                  <radialGradient id="lueurF">
+                    <stop offset="0" stop-color="#ffcf8f" stop-opacity="0.45"/>
+                    <stop offset="1" stop-color="#ffcf8f" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="card__body">
+              <p class="card__tag">Baladeuse nomade</p>
+              <h3 class="card__name">Lueur</h3>
+              <p class="card__desc">Sans fil, 40 heures d'autonomie. La lumière vous suit partout.</p>
+              <div class="card__foot">
+                <span class="card__price">290&nbsp;€</span>
+                <a href="#contact" class="card__link">Découvrir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ SAVOIR-FAIRE ══════════════ -->
+    <section class="craft section" id="savoir-faire">
+      <div class="container craft__layout">
+        <div class="craft__text">
+          <p class="section__eyebrow reveal">Savoir-faire</p>
+          <h2 class="section__title reveal">Huit mains,<br>une seule lampe</h2>
+          <p class="craft__para reveal">
+            Chaque luminaire Lumael naît dans notre atelier lyonnais. Le laiton est coulé,
+            tourné puis brossé à la main. Le verre est soufflé bouche par nos maîtres verriers,
+            si bien qu'aucune pièce n'est parfaitement identique à une autre — et c'est voulu.
+          </p>
+          <p class="craft__para reveal">
+            Nous ne produisons que ce que nous pouvons signer. Les séries sont courtes,
+            numérotées, et garanties dix ans.
+          </p>
+          <ul class="craft__steps reveal">
+            <li><span>01</span>Dessin &amp; prototypage à Lyon</li>
+            <li><span>02</span>Fonte du laiton, soufflage du verre</li>
+            <li><span>03</span>Assemblage &amp; câblage à la main</li>
+            <li><span>04</span>Signature, numérotation, expédition</li>
+          </ul>
+        </div>
+        <div class="craft__stats">
+          <div class="stat reveal">
+            <p class="stat__number" data-count="27">0</p>
+            <p class="stat__label">artisans à l'atelier</p>
+          </div>
+          <div class="stat reveal">
+            <p class="stat__number" data-count="142">0</p>
+            <p class="stat__label">heures pour un lustre Nébuleuse</p>
+          </div>
+          <div class="stat reveal">
+            <p class="stat__number" data-count="10">0</p>
+            <p class="stat__label">ans de garantie, pièces et main-d'œuvre</p>
+          </div>
+          <div class="stat reveal">
+            <p class="stat__number" data-count="98">0</p>
+            <p class="stat__label">% de matériaux sourcés en Europe</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ AMBIANCES — VARIATEUR ══════════════ -->
+    <section class="dimmer section" id="ambiances">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">Ambiances</p>
+          <h2 class="section__title">Composez votre lumière</h2>
+          <p class="section__sub">Glissez le variateur et voyez la pièce changer d'âme.</p>
+        </header>
+
+        <div class="dimmer__room reveal" id="dimmerRoom">
+          <div class="dimmer__scene" aria-hidden="true">
+            <div class="dimmer__window"></div>
+            <div class="dimmer__lamp">
+              <div class="dimmer__cord"></div>
+              <div class="dimmer__shade"></div>
+              <div class="dimmer__bulb"></div>
+              <div class="dimmer__pool"></div>
+            </div>
+            <div class="dimmer__sofa"></div>
+            <div class="dimmer__table"></div>
+            <div class="dimmer__plant">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="dimmer__floor"></div>
+          </div>
+
+          <div class="dimmer__controls">
+            <label for="dimmerRange" class="dimmer__label">
+              Intensité <output id="dimmerValue" for="dimmerRange">75&nbsp;%</output>
+            </label>
+            <input type="range" id="dimmerRange" min="5" max="100" value="75"
+                   aria-label="Intensité lumineuse de la pièce" aria-describedby="dimmerMood">
+            <p class="dimmer__mood" id="dimmerMood" aria-live="polite">Ambiance — Soirée conviviale</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ TÉMOIGNAGES ══════════════ -->
+    <section class="quotes section" id="temoignages">
+      <div class="container">
+        <header class="section__head reveal">
+          <p class="section__eyebrow">Ils nous éclairent</p>
+          <h2 class="section__title">Paroles de clients</h2>
+        </header>
+        <div class="quotes__grid">
+          <figure class="quote reveal">
+            <svg class="quote__mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8c-3 0-5 2.2-5 5.2C5 16 6.8 18 9.2 18c2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4C9.6 9.9 10.6 9 12 8.6L10 8zm9 0c-3 0-5 2.2-5 5.2 0 2.8 1.8 4.8 4.2 4.8 2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4c.4-1.7 1.4-2.6 2.8-3L19 8z"/></svg>
+            <blockquote>La suspension Éclat a changé notre salon. Les invités demandent toujours d'où elle vient — la lumière est chaude sans jamais éblouir.</blockquote>
+            <figcaption><strong>Camille R.</strong><span>Architecte d'intérieur, Paris</span></figcaption>
+          </figure>
+          <figure class="quote reveal">
+            <svg class="quote__mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8c-3 0-5 2.2-5 5.2C5 16 6.8 18 9.2 18c2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4C9.6 9.9 10.6 9 12 8.6L10 8zm9 0c-3 0-5 2.2-5 5.2 0 2.8 1.8 4.8 4.2 4.8 2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4c.4-1.7 1.4-2.6 2.8-3L19 8z"/></svg>
+            <blockquote>Nous avons équipé nos deux restaurants avec les lustres Nébuleuse. Trois ans plus tard, ils sont toujours la première chose que remarquent nos clients.</blockquote>
+            <figcaption><strong>Julien M.</strong><span>Restaurateur, Bordeaux</span></figcaption>
+          </figure>
+          <figure class="quote reveal">
+            <svg class="quote__mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8c-3 0-5 2.2-5 5.2C5 16 6.8 18 9.2 18c2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4C9.6 9.9 10.6 9 12 8.6L10 8zm9 0c-3 0-5 2.2-5 5.2 0 2.8 1.8 4.8 4.2 4.8 2 0 3.4-1.4 3.4-3.3 0-1.8-1.3-3.1-3-3.1h-.4c.4-1.7 1.4-2.6 2.8-3L19 8z"/></svg>
+            <blockquote>Le service est à la hauteur des pièces : conseils précis, installation soignée, et une lampe numérotée qu'on gardera toute une vie.</blockquote>
+            <figcaption><strong>Anne-Sophie L.</strong><span>Collectionneuse, Lyon</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ CTA / CONTACT ══════════════ -->
+    <section class="cta section" id="contact">
+      <div class="container cta__inner reveal">
+        <div class="cta__glow" aria-hidden="true"></div>
+        <h2 class="cta__title">Recevez notre lookbook<br><em>Lumières d'hiver</em></h2>
+        <p class="cta__sub">Nouvelles collections, coulisses d'atelier et ventes privées. Un e-mail par mois, jamais plus.</p>
+        <form class="cta__form" id="newsletterForm" novalidate>
+          <div class="cta__field">
+            <label for="email" class="visually-hidden">Votre adresse e-mail</label>
+            <input type="email" id="email" name="email" placeholder="votre@email.fr" autocomplete="email" required>
+            <button type="submit" class="btn btn--primary">S'inscrire</button>
+          </div>
+          <p class="cta__feedback" id="formFeedback" aria-live="polite"></p>
+        </form>
+        <p class="cta__note">Showroom sur rendez-vous — 14 quai Saint-Antoine, 69002 Lyon</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════ PIED DE PAGE ══════════════ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#" class="nav__logo" aria-label="Lumael — retour en haut">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.7 1.3 1.5 1.5 2.5h5c.2-1 .7-1.8 1.5-2.5A6 6 0 0 0 12 3z"/>
+          </svg>
+          <span>Lumael</span>
+        </a>
+        <p>Luminaires d'exception,<br>dessinés et fabriqués en France.</p>
+      </div>
+      <nav class="footer__col" aria-label="Collections">
+        <h3>Collections</h3>
+        <a href="#collections">Suspensions</a>
+        <a href="#collections">Lampadaires</a>
+        <a href="#collections">Appliques</a>
+        <a href="#collections">Lampes nomades</a>
+      </nav>
+      <nav class="footer__col" aria-label="Maison">
+        <h3>La maison</h3>
+        <a href="#savoir-faire">Savoir-faire</a>
+        <a href="#ambiances">Ambiances</a>
+        <a href="#temoignages">Témoignages</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="footer__col">
+        <h3>Showroom</h3>
+        <p>14 quai Saint-Antoine<br>69002 Lyon, France</p>
+        <a href="mailto:lumael.fr@gmail.com">lumael.fr@gmail.com</a>
+      </div>
+    </div>
+    <div class="container footer__legal">
+      <p>© 2026 Lumael. Tous droits réservés.</p>
+      <p>Conçu à Lyon, éclairé partout.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
