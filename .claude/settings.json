@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-code-plugins-plus": {
+      "source": {
+        "source": "github",
+        "repo": "jeremylongshore/claude-code-plugins-plus-skills"
+      }
+    }
+  }
+}
