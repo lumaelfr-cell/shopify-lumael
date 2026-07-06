@@ -1,0 +1,8 @@
+# Claude Code — préférences personnelles non partagées
+.claude/settings.local.json
+
+# Divers
+.DS_Store
+*.log
+node_modules/
+__pycache__/
