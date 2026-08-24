@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bundle Picker — preview</title>
+<link rel="stylesheet" href="../assets/bundle-picker.css">
+<style>
+  body { margin: 0; padding: 28px 0 60px; background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="bp" data-bundle-picker data-preview>
+
+  <script type="application/json" data-bundle-picker-config>
+  {
+    "optionNames": ["Color", "Model"],
+    "variants": [
+      { "id": 1001, "options": ["Clear", "Standard"], "available": true,  "price": 1795 },
+      { "id": 1002, "options": ["Clear", "Pro"],      "available": true,  "price": 2195 },
+      { "id": 1003, "options": ["Black", "Standard"], "available": true,  "price": 1795 },
+      { "id": 1004, "options": ["Black", "Pro"],      "available": true,  "price": 2195 }
+    ],
+    "routes": { "cartAdd": "/cart/add.js", "cart": "/cart" }
+  }
+  </script>
+
+  <div class="bp__header"><span class="bp__header-text">Pick Your Bundle &amp; Save More</span></div>
+
+  <div class="bp__cards">
+
+    <label class="bp-card is-selected" data-bp-card data-bp-name="Standard Edition" data-bp-locked="{}">
+      <div class="bp-card__main">
+        <input class="bp-card__radio" type="radio" name="bp-tier" value="standard" data-bp-radio checked>
+        <span class="bp-card__radio-ui" aria-hidden="true"></span>
+        <div class="bp-card__media">
+          <img src="device.svg" alt="Standard Edition">
+          <span class="bp-card__qty">x1</span>
+        </div>
+        <div class="bp-card__info">
+          <div class="bp-card__title">Standard Edition</div>
+          <ul class="bp-card__features"><li>3 Sealing Modes</li></ul>
+          <p class="bp-card__desc">Perfect for everyday</p>
+        </div>
+        <div class="bp-card__prices">
+          <div class="bp-card__price">&euro;17,95</div>
+          <div class="bp-card__compare">&euro;25,95</div>
+        </div>
+      </div>
+      <div class="bp-card__options">
+        <div class="bp-card__options-label">Color, Model</div>
+        <div class="bp-unit" data-bp-unit>
+          <span class="bp-unit__n">#1</span>
+          <span class="bp-select"><select data-bp-option="Color"><option>Clear</option><option>Black</option></select></span>
+          <span class="bp-select"><select data-bp-option="Model"><option>Standard</option><option>Pro</option></select></span>
+        </div>
+      </div>
+    </label>
+
+    <label class="bp-card" data-bp-card data-bp-name="Pro Edition" data-bp-locked="{}">
+      <span class="bp-card__badge">MOST POPULAR</span>
+      <div class="bp-card__main">
+        <input class="bp-card__radio" type="radio" name="bp-tier" value="pro" data-bp-radio>
+        <span class="bp-card__radio-ui" aria-hidden="true"></span>
+        <div class="bp-card__media">
+          <img src="device.svg" alt="Pro Edition">
+          <span class="bp-card__qty">x1</span>
+        </div>
+        <div class="bp-card__info">
+          <div class="bp-card__title">Pro Edition</div>
+          <ul class="bp-card__features"><li>6 Sealing Modes fast</li><li>Cutter</li></ul>
+          <p class="bp-card__desc">More control for different bag</p>
+        </div>
+        <div class="bp-card__prices">
+          <div class="bp-card__price">&euro;21,95</div>
+          <div class="bp-card__compare">&euro;30,95</div>
+        </div>
+      </div>
+      <div class="bp-card__options">
+        <div class="bp-card__options-label">Color, Model</div>
+        <div class="bp-unit" data-bp-unit>
+          <span class="bp-unit__n">#1</span>
+          <span class="bp-select"><select data-bp-option="Color"><option>Clear</option><option>Black</option></select></span>
+          <span class="bp-select"><select data-bp-option="Model"><option>Pro</option><option>Standard</option></select></span>
+        </div>
+      </div>
+    </label>
+
+    <label class="bp-card" data-bp-card data-bp-name="Duo Pack" data-bp-locked="{}">
+      <span class="bp-card__badge">BEST VALUE</span>
+      <div class="bp-card__main">
+        <input class="bp-card__radio" type="radio" name="bp-tier" value="duo" data-bp-radio>
+        <span class="bp-card__radio-ui" aria-hidden="true"></span>
+        <div class="bp-card__media">
+          <img src="device.svg" alt="Duo Pack">
+          <span class="bp-card__qty">x2</span>
+        </div>
+        <div class="bp-card__info">
+          <div class="bp-card__title">Duo Pack</div>
+          <p class="bp-card__desc">One for home, one for wherever you go</p>
+        </div>
+        <div class="bp-card__prices">
+          <div class="bp-card__price">&euro;35,90</div>
+          <div class="bp-card__compare">&euro;51,90</div>
+        </div>
+      </div>
+      <div class="bp-card__options">
+        <div class="bp-card__options-label">Color, Model</div>
+        <div class="bp-unit" data-bp-unit>
+          <span class="bp-unit__n">#1</span>
+          <span class="bp-select"><select data-bp-option="Color"><option>Clear</option><option>Black</option></select></span>
+          <span class="bp-select"><select data-bp-option="Model"><option>Standard</option><option>Pro</option></select></span>
+        </div>
+        <div class="bp-unit" data-bp-unit>
+          <span class="bp-unit__n">#2</span>
+          <span class="bp-select"><select data-bp-option="Color"><option>Clear</option><option>Black</option></select></span>
+          <span class="bp-select"><select data-bp-option="Model"><option>Standard</option><option>Pro</option></select></span>
+        </div>
+      </div>
+      <div class="bp-card__perk">+ Free shipping</div>
+    </label>
+
+  </div>
+
+  <button type="button" class="bp__atc" data-bp-atc
+          data-label-default="Add to cart"
+          data-label-sold-out="Sold out"
+          data-label-unavailable="Unavailable">Add to cart</button>
+
+  <p class="bp__error" data-bp-error></p>
+
+  <div class="bp__stock"><span class="bp__stock-dot" aria-hidden="true"></span>Hurry! Only 3 Left in Stock</div>
+
+      <div class="bp__pay" role="list" aria-label="Moyens de paiement acceptés">
+        <svg role="listitem" viewBox="0 0 28 32" aria-label="PayPal" fill="#111">
+          <path d="M6.6 31.2H1.9c-.5 0-.8-.4-.7-.9L5.4 2.6c.1-.6.6-1 1.2-1h9.1c5.3 0 8.6 2.7 7.9 8-.7 5.4-4.7 8.2-10 8.2H9.2c-.6 0-1 .4-1.1 1l-1 6.4c-.1.5-.4.9-.5 6zm4.2-15.6h1.9c2.8 0 5.3-.8 5.7-4 .2-1.2-.1-2.1-.7-2.7-.8-.8-2.2-1-3.8-1h-1.6l-1.5 7.7z"/>
+          <path d="M24.9 8.9c.1 1.1 0 2.3-.2 3.6-.9 6.2-5.4 9.4-11.4 9.4h-2c-.6 0-1.1.4-1.2 1.1l-1.4 8.5c-.1.5.3.9.8.9h4.1c.6 0 1-.4 1.1-.9l1.2-7.3c.1-.6.5-.9 1.1-.9h1.6c4.9 0 8.7-2.6 9.4-7.6.4-2.9-.2-5.1-1.6-6.4-.4-.2-.9-.4-1.5-.4z" opacity=".55"/>
+        </svg>
+
+        <svg role="listitem" viewBox="0 0 64 22" aria-label="Visa" fill="#111">
+          <text x="0" y="18" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" font-style="italic" letter-spacing="1.2">VISA</text>
+        </svg>
+
+        <svg role="listitem" viewBox="0 0 46 28" aria-label="Mastercard">
+          <circle cx="16" cy="14" r="13" fill="#111"/>
+          <circle cx="30" cy="14" r="13" fill="#111" opacity=".62"/>
+        </svg>
+
+        <svg role="listitem" viewBox="0 0 46 28" aria-label="American Express">
+          <rect width="46" height="28" rx="2" fill="#111"/>
+          <text x="23" y="12.5" text-anchor="middle" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-size="7.4" font-weight="700">AMERICAN</text>
+          <text x="23" y="21.5" text-anchor="middle" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-size="7.4" font-weight="700">EXPRESS</text>
+        </svg>
+
+        <svg role="listitem" viewBox="0 0 58 28" aria-label="Apple Pay">
+          <rect x=".7" y=".7" width="56.6" height="26.6" rx="4.5" fill="none" stroke="#111" stroke-width="1.4"/>
+          <path fill="#111" d="M17.5 10.3c-.4.5-1.1.9-1.7.8-.1-.7.2-1.4.6-1.8.4-.5 1.1-.8 1.7-.9.1.7-.2 1.4-.6 1.9zm.6 1c-1-.1-1.8.5-2.2.5-.5 0-1.2-.5-1.9-.5-1 0-1.9.6-2.4 1.5-1 1.7-.3 4.3.7 5.7.5.7 1.1 1.5 1.8 1.4.7 0 1-.4 1.9-.4s1.1.4 1.9.4c.8 0 1.3-.7 1.8-1.4.6-.8.8-1.6.8-1.6s-1.5-.6-1.6-2.3c0-1.4 1.2-2.1 1.2-2.2-.6-1-1.7-1.1-2-1.1z"/>
+          <text x="24" y="20" fill="#111" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="500">Pay</text>
+        </svg>
+
+        <svg role="listitem" viewBox="0 0 62 28" aria-label="Google Pay">
+          <path fill="#111" d="M13.4 13.1v3.1h4.4c-.2 1-.7 1.9-1.5 2.5-.7.6-1.7.9-2.9.9-2.4 0-4.4-1.6-5.1-3.8-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9c.7-2.2 2.7-3.8 5.1-3.8 1.4 0 2.6.5 3.5 1.4l2.3-2.3C17.8 5.9 15.8 5 13.4 5 9.9 5 6.8 7 5.3 10c-.6 1.2-1 2.6-1 4.1s.4 2.9 1 4.1c1.5 3 4.6 5 8.1 5 2.4 0 4.4-.8 5.9-2.2 1.7-1.5 2.6-3.8 2.6-6.5 0-.6-.1-1.2-.2-1.7l-8.3.3z"/>
+          <text x="24" y="20" fill="#111" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="500">Pay</text>
+        </svg>
+      </div>
+
+</div>
+
+<script src="../assets/bundle-picker.js"></script>
+</body>
+</html>
