@@ -6,10 +6,42 @@ autonome, avec bouton **Add to cart** fonctionnel (Cart AJAX API).
 ```
 assets/bundle-picker.css                    styles (source unique preview + thème)
 assets/bundle-picker.js                     sélection, résolution des variantes, panier
-sections/bundle-picker.liquid               la section (schema + presets)
+blocks/bundle-picker.liquid                 bloc de thème (Horizon et dérivés)
+blocks/ulveo-bundle-picker.liquid           même bloc, réglages hérités du thème Ulvéo
+sections/bundle-picker.liquid               section classique (thèmes non-Horizon)
 snippets/bundle-picker-payment-icons.liquid logos de paiement, en SVG inline
 preview/index.html                          maquette statique pour vérifier le rendu
 ```
+
+## Bloc ou section ?
+
+- **Thèmes Horizon** (Horizon, Canyon…) : la page produit est une section
+  `product-information` composée de blocs. Utiliser `blocks/bundle-picker.liquid`,
+  qui s'insère dans la colonne d'informations produit à côté du prix et du titre.
+- **Thèmes classiques** (Dawn et dérivés) : utiliser `sections/bundle-picker.liquid`.
+
+Les deux partagent le même CSS, le même JS et le même rendu.
+
+## État de l'installation sur la boutique Ulvéo
+
+Installé dans le thème **« Ulvéo — sélecteur d'édition »** (non publié) :
+
+| Fichier | État |
+|---|---|
+| `assets/bundle-picker.css` | envoyé |
+| `assets/bundle-picker.js` | envoyé |
+| `snippets/bundle-picker-payment-icons.liquid` | envoyé |
+| `blocks/bundle-picker.liquid` | envoyé (disponible à l'ajout dans l'éditeur) |
+| `blocks/ulveo-bundle-picker.liquid` | **remplacé** par la nouvelle implémentation |
+
+Le modèle `templates/product.json` n'a pas été touché : il référençait déjà un bloc
+`ulveo-bundle-picker`, dont le fichier porte désormais le nouveau design. Les
+réglages déjà saisis (titre, arguments, descriptions, bandeaux) sont conservés ;
+les nouveaux réglages prennent leurs valeurs par défaut.
+
+Le réglage *Masquer le sélecteur et les boutons natifs* est activé par défaut,
+puisque le bloc porte son propre bouton d'ajout au panier. Le décocher rétablit
+le sélecteur de variantes et les boutons d'achat du thème.
 
 ## Vérifier le rendu
 
@@ -34,17 +66,16 @@ celui des captures, le bouton simule l'ajout au panier.
 
 ### Réglage pour « Scelleuse de sachets magnétique Ulvéo »
 
-Le produit a trois options — Modèle, Couleur, Gravure. Configuration qui reproduit
-les captures :
+Le produit a trois options : Édition (Standard / Pro / Duo Pack), Couleur
+(Blanc / Bleu nuit) et Gravure. Le bloc crée une carte par valeur d'Édition et
+affiche les menus Couleur et Gravure sous la carte sélectionnée.
 
-| Bloc | Quantité | Options imposées | Bandeau |
-|---|---|---|---|
-| Standard Edition | 1 | `Modèle:Standard` | — |
-| Pro Edition | 1 | `Modèle:Pro` | MOST POPULAR |
-| Duo Pack | 2 | `Modèle:Standard` | BEST VALUE |
-
-Les menus restants (Couleur, Gravure) s'affichent alors par exemplaire, comme
-« Color, Model » dans les captures.
+Le Duo Pack est une valeur d'Édition, donc une seule variante à 40,90 € : la
+carte montre bien deux lignes `#1` et `#2`, mais le panier reçoit une seule
+ligne. La couleur du second appareil part en propriété de ligne (`#2 Couleur`)
+et apparaît sur la commande. Le réglage *Options des exemplaires supplémentaires*
+contrôle les menus proposés pour ce second appareil — Couleur uniquement par
+défaut, pour ne pas offrir une gravure facturée 5 € en supplément.
 
 ## Prix des offres
 

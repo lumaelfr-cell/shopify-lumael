@@ -212,8 +212,8 @@
                         data-bp-option="{{ option.name | escape }}"
                         aria-label="{{ option.name | escape }} — #{{ i }}"
                       >
-                        {%- for value in option.values -%}
-                          <option value="{{ value | escape }}">{{ value }}</option>
+                        {%- for option_value in option.values -%}
+                          <option value="{{ option_value.name | escape }}">{{ option_value.name }}</option>
                         {%- endfor -%}
                       </select>
                     </span>

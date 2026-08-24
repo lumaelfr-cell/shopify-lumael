@@ -106,10 +106,14 @@
         unit.querySelectorAll("select[data-bp-option]").forEach(function (sel) {
           chosen[sel.getAttribute("data-bp-option")] = sel.value;
         });
+        var propertyOnly = unit.hasAttribute("data-bp-property-only");
         return {
           node: unit,
+          index: Number(unit.getAttribute("data-bp-index") || 0),
+          propertyOnly: propertyOnly,
+          selected: chosen,
           options: chosen,
-          variant: self.findVariant(chosen)
+          variant: propertyOnly ? null : self.findVariant(chosen)
         };
       });
   };
@@ -132,7 +136,9 @@
     var card = this.selectedCard();
     if (!card || !this.atc) return;
 
-    var units = this.unitSelections(card);
+    var units = this.unitSelections(card).filter(function (unit) {
+      return !unit.propertyOnly;
+    });
     var resolved = units.every(function (unit) {
       return unit.variant;
     });
@@ -162,13 +168,15 @@
   BundlePicker.prototype.buildItems = function (card) {
     var bundleName = card.getAttribute("data-bp-name") || "";
     var units = this.unitSelections(card);
+    var cartUnits = units.filter(function (unit) { return !unit.propertyOnly; });
+    var extraUnits = units.filter(function (unit) { return unit.propertyOnly; });
     var items = [];
 
-    units.forEach(function (unit, index) {
+    cartUnits.forEach(function (unit, position) {
       if (!unit.variant) return;
       var properties = {};
       if (bundleName) properties._bundle = bundleName;
-      if (units.length > 1) properties._bundle_item = "#" + (index + 1);
+      if (cartUnits.length > 1) properties._bundle_item = "#" + (position + 1);
 
       var existing = items.filter(function (item) {
         return (
@@ -187,6 +195,17 @@
         });
       }
     });
+
+    // Exemplaires non vendus séparément (ex. 2e appareil d'un Duo Pack) :
+    // leurs choix voyagent en propriétés de ligne sur le premier article.
+    if (items.length && extraUnits.length) {
+      extraUnits.forEach(function (unit) {
+        var label = "#" + (unit.index || 2);
+        Object.keys(unit.selected).forEach(function (name) {
+          items[0].properties[label + " " + name] = unit.selected[name];
+        });
+      });
+    }
 
     return items;
   };
