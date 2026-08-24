@@ -1,0 +1,324 @@
+{%- comment -%}
+  Bundle Picker — "Pick Your Bundle & Save More"
+  Sélecteur d'offres (x1 / x1 / x2) avec choix des options par exemplaire
+  et ajout au panier via la Cart AJAX API.
+
+  Installation : voir README.md
+{%- endcomment -%}
+
+{{ 'bundle-picker.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'bundle-picker.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign product = section.settings.product
+  if product == blank
+    assign product = all_products[section.settings.product]
+  endif
+-%}
+
+{%- if product == blank -%}
+  {%- if request.design_mode -%}
+    <div class="bp"><p class="bp__error is-visible">Sélectionnez un produit dans les réglages de la section.</p></div>
+  {%- endif -%}
+{%- else -%}
+
+<div
+  class="bp"
+  data-bundle-picker
+  id="bp-{{ section.id }}"
+>
+  {%- comment -%} Matrice de variantes consommée par le JS {%- endcomment -%}
+  <script type="application/json" data-bundle-picker-config>
+    {
+      "optionNames": {{ product.options_with_values | map: 'name' | json }},
+      "behaviour": {{ section.settings.after_add | json }},
+      "routes": {
+        "cartAdd": {{ routes.cart_add_url | json }},
+        "cart": {{ routes.cart_url | json }}
+      },
+      "strings": {
+        "unavailable": {{ section.settings.unavailable_label | json }}
+      },
+      "variants": [
+        {%- for variant in product.variants -%}
+          {
+            "id": {{ variant.id }},
+            "options": {{ variant.options | json }},
+            "available": {{ variant.available }},
+            "price": {{ variant.price }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  {%- if section.settings.heading != blank -%}
+    <div class="bp__header">
+      <span class="bp__header-text">{{ section.settings.heading | escape }}</span>
+    </div>
+  {%- endif -%}
+
+  <div class="bp__cards">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign quantity = block.settings.quantity | at_least: 1
+
+        # --- options verrouillées pour ce palier : "Modèle:Pro, Couleur:Blanc"
+        assign locked_json = ''
+        assign locked_names = ''
+        assign locked_values = ''
+        if block.settings.locked_options != blank
+          assign pairs = block.settings.locked_options | split: ','
+          for pair in pairs
+            assign bits = pair | split: ':'
+            if bits.size == 2
+              assign lname = bits[0] | strip
+              assign lvalue = bits[1] | strip
+              assign locked_names = locked_names | append: lname | append: '|'
+              assign locked_values = locked_values | append: lvalue | append: '|'
+              if locked_json != ''
+                assign locked_json = locked_json | append: ','
+              endif
+              assign locked_json = locked_json | append: '"' | append: lname | append: '":"' | append: lvalue | append: '"'
+            endif
+          endfor
+        endif
+        assign locked_names = locked_names | split: '|'
+        assign locked_values = locked_values | split: '|'
+
+        # --- variante représentative du palier (pour le prix affiché)
+        assign tier_variant = product.selected_or_first_available_variant
+        if locked_names.size > 0
+          for variant in product.variants
+            assign matches = true
+            for lname in locked_names
+              assign position = 0
+              for option in product.options_with_values
+                if option.name == lname
+                  assign position = forloop.index0
+                endif
+              endfor
+              assign expected = locked_values[forloop.index0]
+              unless variant.options[position] == expected
+                assign matches = false
+              endunless
+            endfor
+            if matches and variant.available
+              assign tier_variant = variant
+              break
+            endif
+          endfor
+        endif
+
+        assign tier_price = block.settings.price_override
+        if tier_price == blank
+          assign computed = tier_variant.price | times: quantity
+          assign tier_price = computed | money
+        endif
+
+        assign tier_compare = block.settings.compare_override
+        if tier_compare == blank and tier_variant.compare_at_price > tier_variant.price
+          assign computed_compare = tier_variant.compare_at_price | times: quantity
+          assign tier_compare = computed_compare | money
+        endif
+
+        assign tier_image = block.settings.image
+        if tier_image == blank
+          assign tier_image = product.featured_image
+        endif
+
+        assign is_selected = false
+        if block.settings.preselected
+          assign is_selected = true
+        endif
+      -%}
+
+      <label
+        class="bp-card{% if is_selected %} is-selected{% endif %}"
+        data-bp-card
+        data-bp-name="{{ block.settings.title | escape }}"
+        data-bp-locked="{ {{- locked_json -}} }"
+        {% if block.settings.discount_code != blank %}data-bp-discount="{{ block.settings.discount_code | escape }}"{% endif %}
+        {{ block.shopify_attributes }}
+      >
+        {%- if block.settings.badge != blank -%}
+          <span class="bp-card__badge">{{ block.settings.badge | escape }}</span>
+        {%- endif -%}
+
+        <div class="bp-card__main">
+          <input
+            class="bp-card__radio"
+            type="radio"
+            name="bp-tier-{{ section.id }}"
+            value="{{ block.id }}"
+            data-bp-radio
+            {% if is_selected %}checked{% endif %}
+          >
+          <span class="bp-card__radio-ui" aria-hidden="true"></span>
+
+          <div class="bp-card__media">
+            {%- if tier_image != blank -%}
+              {{ tier_image | image_url: width: 180 | image_tag:
+                 loading: 'lazy', width: 90, height: 90, alt: block.settings.title }}
+            {%- endif -%}
+            <span class="bp-card__qty">x{{ quantity }}</span>
+          </div>
+
+          <div class="bp-card__info">
+            <div class="bp-card__title">{{ block.settings.title | escape }}</div>
+
+            {%- assign features = block.settings.features | newline_to_br | split: '<br />' -%}
+            {%- if block.settings.features != blank -%}
+              <ul class="bp-card__features">
+                {%- for feature in features -%}
+                  {%- assign feature = feature | strip -%}
+                  {%- if feature != blank -%}<li>{{ feature }}</li>{%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            {%- if block.settings.description != blank -%}
+              <p class="bp-card__desc">{{ block.settings.description | escape }}</p>
+            {%- endif -%}
+          </div>
+
+          <div class="bp-card__prices">
+            <div class="bp-card__price">{{ tier_price }}</div>
+            {%- if tier_compare != blank -%}
+              <div class="bp-card__compare">{{ tier_compare }}</div>
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- comment -%} Un sélecteur d'options par exemplaire du palier {%- endcomment -%}
+        {%- assign visible_options = '' -%}
+        {%- for option in product.options_with_values -%}
+          {%- unless locked_names contains option.name -%}
+            {%- assign visible_options = visible_options | append: option.name | append: ', ' -%}
+          {%- endunless -%}
+        {%- endfor -%}
+        {%- assign visible_options = visible_options | remove_last: ', ' -%}
+
+        {%- if visible_options != blank -%}
+          <div class="bp-card__options">
+            <div class="bp-card__options-label">{{ visible_options }}</div>
+            {%- for i in (1..quantity) -%}
+              <div class="bp-unit" data-bp-unit>
+                {%- if quantity > 1 -%}<span class="bp-unit__n">#{{ i }}</span>{%- endif -%}
+                {%- for option in product.options_with_values -%}
+                  {%- unless locked_names contains option.name -%}
+                    <span class="bp-select">
+                      <select
+                        data-bp-option="{{ option.name | escape }}"
+                        aria-label="{{ option.name | escape }} — #{{ i }}"
+                      >
+                        {%- for option_value in option.values -%}
+                          <option value="{{ option_value.name | escape }}">{{ option_value.name }}</option>
+                        {%- endfor -%}
+                      </select>
+                    </span>
+                  {%- endunless -%}
+                {%- endfor -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if block.settings.perk != blank -%}
+          <div class="bp-card__perk">{{ block.settings.perk | escape }}</div>
+        {%- endif -%}
+      </label>
+    {%- endfor -%}
+  </div>
+
+  <button
+    type="button"
+    class="bp__atc"
+    data-bp-atc
+    data-label-default="{{ section.settings.cta_label | escape }}"
+    data-label-sold-out="{{ section.settings.sold_out_label | escape }}"
+    data-label-unavailable="{{ section.settings.unavailable_label | escape }}"
+  >{{ section.settings.cta_label }}</button>
+
+  <p class="bp__error" data-bp-error role="alert"></p>
+
+  {%- if section.settings.stock_text != blank -%}
+    <div class="bp__stock">
+      <span class="bp__stock-dot" aria-hidden="true"></span>{{ section.settings.stock_text }}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_payment_icons -%}
+    {%- render 'bundle-picker-payment-icons' -%}
+  {%- endif -%}
+</div>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Bundle picker",
+  "tag": "section",
+  "class": "bundle-picker-section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Produit" },
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Pick Your Bundle & Save More" },
+    { "type": "text", "id": "cta_label", "label": "Bouton", "default": "Add to cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Bouton — rupture", "default": "Sold out" },
+    { "type": "text", "id": "unavailable_label", "label": "Bouton — combinaison indisponible", "default": "Unavailable" },
+    { "type": "text", "id": "stock_text", "label": "Message de stock", "default": "Hurry! Only 3 Left in Stock" },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Afficher les moyens de paiement", "default": true },
+    {
+      "type": "select",
+      "id": "after_add",
+      "label": "Après l'ajout au panier",
+      "options": [
+        { "value": "drawer", "label": "Ouvrir le tiroir du panier" },
+        { "value": "cart", "label": "Aller au panier" },
+        { "value": "checkout", "label": "Aller au paiement" }
+      ],
+      "default": "drawer"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tier",
+      "name": "Offre",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Nom", "default": "Standard Edition" },
+        { "type": "range", "id": "quantity", "label": "Quantité", "min": 1, "max": 5, "step": 1, "default": 1 },
+        { "type": "text", "id": "badge", "label": "Bandeau (MOST POPULAR…)" },
+        { "type": "textarea", "id": "features", "label": "Points forts (une ligne = une puce)" },
+        { "type": "text", "id": "description", "label": "Description" },
+        { "type": "text", "id": "price_override", "label": "Prix affiché (laisser vide = calculé)" },
+        { "type": "text", "id": "compare_override", "label": "Prix barré (laisser vide = calculé)" },
+        { "type": "image_picker", "id": "image", "label": "Visuel" },
+        { "type": "text", "id": "perk", "label": "Bandeau bas de carte", "info": "Ex. : + Free shipping" },
+        {
+          "type": "text",
+          "id": "locked_options",
+          "label": "Options imposées",
+          "info": "Format : Modèle:Pro, Couleur:Blanc — ces options sont masquées dans la carte."
+        },
+        {
+          "type": "text",
+          "id": "discount_code",
+          "label": "Code de réduction",
+          "info": "Appliqué automatiquement après l'ajout au panier pour obtenir le prix de l'offre."
+        },
+        { "type": "checkbox", "id": "preselected", "label": "Sélectionnée par défaut", "default": false }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle picker",
+      "blocks": [
+        { "type": "tier", "settings": { "title": "Standard Edition", "quantity": 1, "features": "3 Sealing Modes", "description": "Perfect for everyday", "locked_options": "", "preselected": true } },
+        { "type": "tier", "settings": { "title": "Pro Edition", "quantity": 1, "badge": "MOST POPULAR", "features": "6 Sealing Modes fast\nCutter", "description": "More control for different bag" } },
+        { "type": "tier", "settings": { "title": "Duo Pack", "quantity": 2, "badge": "BEST VALUE", "description": "One for home, one for wherever you go", "perk": "+ Free shipping" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

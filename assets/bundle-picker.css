@@ -1,0 +1,519 @@
+/* ==========================================================================
+   Bundle Picker — "Pick Your Bundle & Save More"
+   Réplique pixel du bloc bundle (mobile-first, référence 462px de large).
+
+   Le bloc s'insère dans des thèmes dont on ne contrôle pas la feuille de
+   styles : chaque règle est donc portée par la racine `.bp` (spécificité 0,2,0)
+   pour passer devant les règles de thème du type `.product-details label`.
+   Les quelques `!important` marquent les propriétés structurelles qui, si le
+   thème les gagne, cassent la mise en page (colonnes réduites à zéro).
+   ========================================================================== */
+
+.bp {
+  --bp-ink: #111111;
+  --bp-muted: #7a7a7a;
+  --bp-line: #e3e3e3;
+  --bp-line-strong: #b5b5b5;
+  --bp-surface: #f4f4f4;
+  --bp-chip: #ededed;
+  --bp-chip-ink: #6f6f6f;
+  --bp-badge: #1a1a1a;
+  --bp-perk: #b8b8b8;
+  --bp-cta: #ffd400;
+  --bp-cta-ink: #111111;
+  --bp-radius: 15px;
+  --bp-pad: 22px;
+  --bp-gap: 16px;
+
+  display: block !important;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 19px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  color: var(--bp-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.bp *,
+.bp *::before,
+.bp *::after { box-sizing: border-box; }
+
+/* ---------- Titre de section --------------------------------------------- */
+
+.bp .bp__header {
+  display: flex !important;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+}
+
+.bp .bp__header::before,
+.bp .bp__header::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1.5px;
+  background: #d9d9d9;
+}
+
+.bp .bp__header-text {
+  flex: 0 0 auto;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* ---------- Liste de cartes ---------------------------------------------- */
+
+.bp .bp__cards {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--bp-gap);
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.bp .bp-card {
+  position: relative;
+  display: block !important;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1.5px solid var(--bp-line);
+  border-radius: var(--bp-radius);
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bp .bp-card:not(.is-selected):hover { border-color: #cfcfcf; }
+
+.bp .bp-card.is-selected {
+  border-color: var(--bp-line-strong);
+  border-width: 2px;
+  background: var(--bp-surface);
+}
+
+/* le bandeau "MOST POPULAR" / "BEST VALUE" ------------------------------- */
+
+.bp .bp-card__badge {
+  position: absolute;
+  top: -13px;
+  right: 28px;
+  z-index: 2;
+  display: inline-flex !important;
+  align-items: center;
+  height: 26px;
+  padding: 0 14px 0 16px;
+  border-radius: 6px 6px 6px 0;
+  background: var(--bp-badge);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bp .bp-card__badge::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  border-width: 6px 8px 0 0;
+  border-style: solid;
+  border-color: var(--bp-badge) transparent transparent transparent;
+}
+
+/* ligne principale : radio | visuel | texte | prix ------------------------ */
+
+.bp .bp-card__main {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 14px var(--bp-pad);
+}
+
+.bp .bp-card__radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bp .bp-card__radio-ui {
+  position: relative;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 22px;
+  height: 22px;
+  margin: 0 2px 0 0;
+  border: 2px solid #cfcfcf;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: border-color 0.18s ease;
+}
+
+.bp .bp-card.is-selected .bp-card__radio-ui { border-color: #9e9e9e; }
+
+.bp .bp-card.is-selected .bp-card__radio-ui::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #9e9e9e;
+}
+
+.bp .bp-card__radio:focus-visible + .bp-card__radio-ui {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+.bp .bp-card__media {
+  position: relative;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  background: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.bp .bp-card.is-selected .bp-card__media { background: #ffffff; }
+
+.bp .bp-card__media img,
+.bp .bp-card__media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.bp .bp-card__qty {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #d5d5d5;
+  color: #4a4a4a;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* La colonne de texte absorbe l'espace restant. Sans `min-width: 0` elle se
+   réduit à un caractère de large dès qu'un thème contraint la ligne. */
+.bp .bp-card__info {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  padding-left: 8px;
+  overflow-wrap: break-word;
+}
+
+.bp .bp-card__title {
+  display: block;
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.bp .bp-card__features {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 100%;
+  margin: 6px 0 0;
+  padding: 5px 10px 5px 8px;
+  border-radius: 8px;
+  background: var(--bp-chip);
+  list-style: none;
+}
+
+.bp .bp-card__features li {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  color: var(--bp-chip-ink);
+  font-size: 14.5px;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.bp .bp-card__features li::before {
+  content: "✔";
+  flex: 0 0 auto;
+  color: #3a3a3a;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bp .bp-card__desc {
+  display: block;
+  margin: 5px 0 0;
+  padding: 0;
+  color: var(--bp-muted);
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.bp .bp-card__prices {
+  display: block !important;
+  flex: 0 0 auto !important;
+  padding-left: 6px;
+  text-align: right;
+}
+
+.bp .bp-card__price {
+  display: block;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bp .bp-card__compare {
+  display: block;
+  margin-top: 3px;
+  color: #8a8a8a;
+  font-size: 17px;
+  line-height: 1.2;
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+/* ---------- Panneau d'options (visible sur la carte sélectionnée) -------- */
+
+.bp .bp-card__options {
+  display: none !important;
+  padding: 0 var(--bp-pad) 16px;
+}
+
+.bp .bp-card.is-selected .bp-card__options { display: block !important; }
+
+.bp .bp-card__options-label {
+  display: block;
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bp .bp-unit {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bp .bp-unit:first-of-type { margin-top: 0; }
+
+.bp .bp-unit__n {
+  flex: 0 0 auto;
+  min-width: 22px;
+  color: #5f5f5f;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.bp .bp-select {
+  position: relative;
+  display: inline-block !important;
+  flex: 0 1 auto;
+}
+
+.bp .bp-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: auto;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0 30px 0 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #555555;
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.bp .bp-select select:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 1px;
+}
+
+.bp .bp-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  margin-top: -5px;
+  border-right: 1.6px solid #666;
+  border-bottom: 1.6px solid #666;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ---------- Bandeau avantage bas de carte ------------------------------- */
+
+.bp .bp-card__perk {
+  display: none !important;
+  align-items: center;
+  height: 39px;
+  padding: 0 var(--bp-pad);
+  border-radius: 0 0 13px 13px;
+  background: var(--bp-perk);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.bp .bp-card.is-selected .bp-card__perk { display: flex !important; }
+
+/* ---------- Call to action ---------------------------------------------- */
+
+.bp .bp__atc {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  height: 54px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--bp-cta);
+  color: var(--bp-cta-ink);
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.06s ease;
+}
+
+.bp .bp__atc:hover { filter: brightness(0.96); }
+.bp .bp__atc:active { transform: translateY(1px); }
+
+.bp .bp__atc[disabled] {
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(1.15);
+}
+
+.bp .bp__atc.is-loading { position: relative; color: transparent; }
+
+.bp .bp__atc.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(0, 0, 0, 0.25);
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: bp-spin 0.7s linear infinite;
+}
+
+@keyframes bp-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Réassurance -------------------------------------------------- */
+
+.bp .bp__stock {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 22px 0 0;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.bp .bp__stock-dot {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e8352b;
+  box-shadow: 0 0 0 6px rgba(232, 53, 43, 0.16);
+}
+
+.bp .bp__error {
+  display: none;
+  margin: 12px 0 0;
+  color: #c0261d;
+  font-size: 15px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.bp .bp__error.is-visible { display: block; }
+
+.bp .bp__pay {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 26px 0 0;
+}
+
+.bp .bp__pay svg {
+  display: block;
+  flex: 0 0 auto;
+  height: 26px;
+  width: auto;
+}
+
+/* ---------- Cartes étroites ---------------------------------------------- */
+
+@media (max-width: 400px) {
+  .bp { --bp-pad: 16px; }
+  .bp .bp-card__title { font-size: 19px; }
+  .bp .bp-card__price { font-size: 19px; }
+  .bp .bp-card__desc { font-size: 15px; }
+  .bp .bp-card__compare { font-size: 15px; }
+  .bp .bp-card__features li { font-size: 13.5px; }
+}
