@@ -1,397 +1,469 @@
-# Graph Report - .  (2026-06-30)
+# Graph Report - shopify-lumael  (2026-08-25)
 
 ## Corpus Check
-- 107 files · ~91,112 words
+- 120 files · ~98,909 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1014 nodes · 1336 edges · 108 communities (52 shown, 56 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 122 edges (avg confidence: 0.81)
+- 1065 nodes · 1418 edges · 119 communities (68 shown, 51 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 57 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Brand|Brand]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Banner Design|Banner Design]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Ui Ux Pro Max Data|Ui Ux Pro Max Data]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Slides|Slides]]
-- [[_COMMUNITY_Brand|Brand]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Brand|Brand]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Design System|Design System]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Ux Pro Max|Ui Ux Pro Max]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Ui Styling|Ui Styling]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Misc Group|Misc Group]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Design|Design]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
-- [[_COMMUNITY_Ui Styling Canvas Fonts|Ui Styling Canvas Fonts]]
+- Design Token Templates
+- CIP Search Core (BM25)
+- Slide Search CLI
+- shadcn Component Reference
+- Semantic Color Tokens
+- Design Token Templates
+- Tailwind Config Tests
+- HTML Token Validator
+- Slides Copywriting Formulas
+- Logo Search Core (BM25)
+- Brand & Banner Guidelines
+- Tailwind Config Generator
+- Slide Deck Generator
+- Design System Formatter
+- Background Image Fetcher
+- Design System Reasoning Engine
+- Icon Generation Script
+- Design Token Templates
+- shadcn Installer Tests
+- shadcn Accessibility Reference
+- Brand Color Extractor (JS)
+- Asset Filename Validator
+- UI Reasoning Data Sync
+- Design Token Templates
+- Token Usage Validator (JS)
+- Canvas Design System & Tailwind Responsive
+- shadcn Add Script & Tests
+- shadcn Installer Core
+- Tailwind Config String Generator
+- Brand Context Injector (JS)
+- Token Embedding Script (JS)
+- Design Token Templates
+- UI Styling Skill Overview
+- shadcn Add Error-Path Tests
+- Tailwind Config Generation Tests
+- Scripts Search Core (BM25)
+- Design Skill Routing Guide
+- Tailwind Config Class Init
+- Logo Generation Script
+- Design Token CSS Generator (JS)
+- Design Token Templates
+- Tailwind Customization Reference
+- CIP & Logo Prompt Engineering
+- Brand-to-Tokens Sync Script (JS)
+- Token Validator Regression Tests
+- shadcn Button & Theming Reference
+- BM25 Ranking Algorithm
+- CIP Design Style Guide
+- Logo Style Guide (Types)
+- Design Token Templates
+- Design Token Templates
+- Design Token Templates
+- Tailwind Utilities Reference
+- UI/UX Pro Max Skill Overview
+- CIP Scripts & Deliverables
+- Screenshot Capture Scripts
+- Design Token Templates
+- Page Override Generator
+- Design Tokens Starter Template
+- Design Token Templates
+- Design Token Templates
+- shadcn Theming & CSS Variables
+- Banner Art Direction Styles
+- Design Token Templates
+- Design Token Templates
+- Design Token Templates
+- Design Token Templates
+- Design Token Templates
+- Brand-to-Tokens Sync Tests
+- Slide Token Validator
+- shadcn Installer Init
+- Test Fixture: Temp Project
+- Font Licenses (Big Shoulders, DM Mono)
+- Font Licenses (Gloock, Italiana)
+- Font Licenses (Libre Baskerville, Lora)
+- shadcn Add: No Config Test
+- shadcn Add: Already Installed Test
+- shadcn Installer Default Root Test
+- shadcn Installer Dry Run Test
+- shadcn Config Check Test
+- shadcn Installed Components Empty Test
+- shadcn Installed Components Test
+- Tailwind Custom Fonts Test
+- Tailwind Plugin Recommendation Test
+- Tailwind TypeScript Config Test
+- Tailwind Custom Colors Test
+- Tailwind Plugin Config Test
+- Tailwind Content Path Validation Test
+- Tailwind Theme Extension Test
+- Tailwind Config Write Test
+- Tailwind JavaScript Init Test
+- Tailwind Config Content Test
+- Tailwind Invalid Path Test
+- Tailwind Full JS Config Test
+- Tailwind TypeScript Output Path Test
+- Tailwind Base Config Structure Test
+- Tailwind Vue Content Paths Test
+- Tailwind Custom Colors Add Test
+- Font License (Arsenal SC)
+- Font License (Boldonse)
+- Font License (Bricolage Grotesque)
+- Font License (Crimson Pro)
+- Font License (Erica One)
+- Font License (Geist Mono)
+- Font License (IBM Plex Mono)
+- Font License (Instrument Sans)
+- Font License (JetBrains Mono)
+- Font License (Jura)
+- Font License (National Park)
+- Font License (Nothing You Could Do)
+- Font License (Outfit)
+- Font License (Pixelify Sans)
+- Font License (Poiret One)
+- Font License (Red Hat Mono)
+- Font License (Silkscreen)
+- Font License (Smooch Sans)
+- Font License (Tektur)
+- Font License (Work Sans)
+- Font License (Young Serif)
 
 ## God Nodes (most connected - your core abstractions)
-1. `TailwindConfigGenerator` - 57 edges
+1. `TailwindConfigGenerator` - 58 edges
 2. `TestTailwindConfigGenerator` - 35 edges
-3. `ShadcnInstaller` - 33 edges
-4. `TestShadcnInstaller` - 26 edges
-5. `Brand Skill` - 19 edges
-6. `Design System Skill` - 18 edges
-7. `color` - 15 edges
-8. `UI Styling Skill` - 14 edges
-9. `Banner Design Skill` - 13 edges
-10. `Social Photos Design Sub-Skill` - 13 edges
+3. `ShadcnInstaller` - 34 edges
+4. `shadcn-components.md reference` - 27 edges
+5. `TestShadcnInstaller` - 26 edges
+6. `color` - 15 edges
+7. `UI Styling Skill` - 15 edges
+8. `shadcn-accessibility.md reference` - 15 edges
+9. `Brand Skill` - 14 edges
+10. `search_with_context()` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Banner Sizes & Art Direction Styles Reference (design)` --semantically_similar_to--> `Banner Sizes & Art Direction Styles Reference (banner-design)`  [INFERRED] [semantically similar]
-  .claude/skills/design/references/banner-sizes-and-styles.md → .claude/skills/banner-design/references/banner-sizes-and-styles.md
-- `CIP Style: Luxury Premium` --semantically_similar_to--> `Logo Aesthetic Styles (Minimalist, Vintage, Luxury, Geometric, Organic, Gradient)`  [INFERRED] [semantically similar]
+- `Luxury Premium Style` --semantically_similar_to--> `Logo Style Guide`  [INFERRED] [semantically similar]
   .claude/skills/design/references/cip-style-guide.md → .claude/skills/design/references/logo-style-guide.md
-- `Slide Deck HTML Base Structure (slides skill copy)` --semantically_similar_to--> `Slide Deck HTML Base Structure`  [INFERRED] [semantically similar]
-  .claude/skills/slides/references/html-template.md → .claude/skills/design/references/slides-html-template.md
-- `Slide Layout Selection (slides skill copy)` --semantically_similar_to--> `Slide Layout Selection by Use Case (25 layouts)`  [INFERRED] [semantically similar]
-  .claude/skills/slides/references/layout-patterns.md → .claude/skills/design/references/slides-layout-patterns.md
-- `TestShadcnInstaller` --uses--> `ShadcnInstaller`  [INFERRED]
-  .claude/skills/ui-styling/scripts/tests/test_shadcn_add.py → .claude/skills/ui-styling/scripts/shadcn_add.py
+- `Color Palette Management` --semantically_similar_to--> `Primitive Tokens`  [INFERRED] [semantically similar]
+  .claude/skills/brand/references/color-palette-management.md → .claude/skills/design-system/references/primitive-tokens.md
+- `Typography Specifications` --semantically_similar_to--> `Primitive Tokens`  [INFERRED] [semantically similar]
+  .claude/skills/brand/references/typography-specifications.md → .claude/skills/design-system/references/primitive-tokens.md
+- `States and Variants` --semantically_similar_to--> `Semantic Tokens`  [INFERRED] [semantically similar]
+  .claude/skills/design-system/references/states-and-variants.md → .claude/skills/design-system/references/semantic-tokens.md
+- `Tailwind Integration` --semantically_similar_to--> `Semantic Tokens`  [INFERRED] [semantically similar]
+  .claude/skills/design-system/references/tailwind-integration.md → .claude/skills/design-system/references/semantic-tokens.md
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Brand-to-Tokens Sync Pipeline** — docs_brand_guidelines, assets_design_tokens_json, assets_design_tokens_css, _claude_skills_brand_scripts_sync_brand_to_tokens_cjs [EXTRACTED 1.00]
-- **Design Skill Sub-skill Routing** — _claude_skills_design_skill_design, _claude_skills_brand_skill_brand, _claude_skills_design_system_skill_design_system, _claude_skills_design_skill_banner_design_built_in [EXTRACTED 1.00]
-- **Slide Contextual Decision CSV Pipeline** — data_slide_strategies_csv, data_slide_layout_logic_csv, data_slide_typography_csv, data_slide_color_logic_csv, data_slide_backgrounds_csv [EXTRACTED 0.90]
-- **Brand to Implementation Skill Dependency Flow** — design_references_design_routing_brand_skill, design_references_design_routing_design_system_skill, design_references_design_routing_ui_styling_skill [EXTRACTED 1.00]
-- **CIP Brief-Mockup-Presentation Generation Pipeline** — design_references_cip_design_search_py, design_references_cip_design_generate_py, design_references_cip_design_render_html_py [EXTRACTED 1.00]
-- **Slide Deck Creation Pipeline (layout, copy, template, strategy)** — design_references_slides_layout_patterns_layout_selection, design_references_slides_copywriting_formulas_formula_slide_mapping, design_references_slides_html_template_base_structure, design_references_slides_strategies_strategy_matching [EXTRACTED 1.00]
-- **Bundled Canvas Fonts (SIL OFL Licensed)** — ui_styling_canvas_fonts_arsenalsc_ofl, ui_styling_canvas_fonts_bigshoulders_ofl, ui_styling_canvas_fonts_boldonse_ofl, ui_styling_canvas_fonts_bricolagegrotesque_ofl, ui_styling_canvas_fonts_crimsonpro_ofl, ui_styling_canvas_fonts_dmmono_ofl, ui_styling_canvas_fonts_ericaone_ofl, ui_styling_canvas_fonts_geistmono_ofl, ui_styling_canvas_fonts_gloock_ofl, ui_styling_canvas_fonts_ibmplexmono_ofl, ui_styling_canvas_fonts_instrumentsans_ofl, ui_styling_canvas_fonts_italiana_ofl, ui_styling_canvas_fonts_jetbrainsmono_ofl, ui_styling_canvas_fonts_jura_ofl, ui_styling_canvas_fonts_librebaskerville_ofl, ui_styling_canvas_fonts_lora_ofl, ui_styling_canvas_fonts_nationalpark_ofl [INFERRED 0.85]
-- **UI Styling Core Stack (shadcn/ui + Tailwind + Canvas)** — ui_styling_shadcn_ui, ui_styling_tailwind_css, ui_styling_canvas_visual_design [EXTRACTED 1.00]
-- **shadcn/ui Styling Stack (Components, Theming, Accessibility)** — ui_styling_references_shadcn_components_shadcn_components, ui_styling_references_shadcn_theming_shadcn_theming, ui_styling_references_shadcn_accessibility_shadcn_accessibility [INFERRED 0.85]
-- **Tailwind CSS Reference Documentation Set** — ui_styling_references_tailwind_customization_tailwind_customization, ui_styling_references_tailwind_responsive_tailwind_responsive, ui_styling_references_tailwind_utilities_tailwind_utilities [INFERRED 0.85]
-- **Canvas Fonts OFL License Bundle** — claude_skills_ui_styling_canvas_fonts_outfit_ofl_outfit_license, claude_skills_ui_styling_canvas_fonts_worksans_ofl_worksans_license, claude_skills_ui_styling_canvas_fonts_youngserif_ofl_youngserif_license [INFERRED 0.65]
+- **Three-Layer Token Architecture (Primitive→Semantic→Component)** — claude_skills_design_system_references_token_architecture, claude_skills_design_system_references_primitive_tokens, claude_skills_design_system_references_semantic_tokens, claude_skills_design_system_references_component_tokens [EXTRACTED 0.90]
+- **Brand-to-Design-Tokens Sync Workflow** — claude_skills_brand_skill, claude_skills_brand_references_update, claude_skills_design_system_skill, claude_skills_brand_templates_brand_guidelines_starter [EXTRACTED 0.85]
+- **Unified Design Skill Sub-Skill Routing** — claude_skills_design_skill, claude_skills_brand_skill, claude_skills_design_system_skill, claude_skills_banner_design_skill [EXTRACTED 0.85]
+- **CIP Design Generation Workflow** — design_scripts_cip_search_py, design_scripts_cip_generate_py, design_scripts_cip_render_html_py [EXTRACTED 1.00]
+- **Brand to Design-System to UI-Styling Dependency Chain** — skill_brand, skill_design_system, skill_ui_styling [EXTRACTED 1.00]
+- **Duplicated Slides Reference Content Across design and slides Skills** — design_references_slides_slides_reference, claude_skills_slides_skill_slides_skill, slides_references_html_template_html_slide_template [INFERRED 0.85]
+- **UI Styling Core Stack** — claude_skills_ui_styling_skill_shadcn_ui, claude_skills_ui_styling_skill_tailwind_css, claude_skills_ui_styling_skill_canvas_design_system [EXTRACTED 0.90]
+- **Fonts under SIL OFL 1.1 (Arsenal SC to Red Hat Mono)** — claude_skills_ui_styling_canvas_fonts_arsenalsc_ofl_font, claude_skills_ui_styling_canvas_fonts_bigshoulders_ofl_font, claude_skills_ui_styling_canvas_fonts_boldonse_ofl_font, claude_skills_ui_styling_canvas_fonts_bricolagegrotesque_ofl_font, claude_skills_ui_styling_canvas_fonts_crimsonpro_ofl_font, claude_skills_ui_styling_canvas_fonts_dmmono_ofl_font, claude_skills_ui_styling_canvas_fonts_ericaone_ofl_font, claude_skills_ui_styling_canvas_fonts_geistmono_ofl_font, claude_skills_ui_styling_canvas_fonts_gloock_ofl_font, claude_skills_ui_styling_canvas_fonts_ibmplexmono_ofl_font, claude_skills_ui_styling_canvas_fonts_instrumentsans_ofl_font, claude_skills_ui_styling_canvas_fonts_italiana_ofl_font, claude_skills_ui_styling_canvas_fonts_jetbrainsmono_ofl_font, claude_skills_ui_styling_canvas_fonts_jura_ofl_font, claude_skills_ui_styling_canvas_fonts_librebaskerville_ofl_font, claude_skills_ui_styling_canvas_fonts_lora_ofl_font, claude_skills_ui_styling_canvas_fonts_nationalpark_ofl_font, claude_skills_ui_styling_canvas_fonts_nothingyoucoulddo_ofl_font, claude_skills_ui_styling_canvas_fonts_outfit_ofl_font, claude_skills_ui_styling_canvas_fonts_pixelifysans_ofl_font, claude_skills_ui_styling_canvas_fonts_poiretone_ofl_font, claude_skills_ui_styling_canvas_fonts_redhatmono_ofl_font [EXTRACTED 0.98]
+- **Fonts under SIL OFL 1.1** — claude_skills_ui_styling_canvas_fonts_silkscreen_ofl_font, claude_skills_ui_styling_canvas_fonts_smoochsans_ofl_font, claude_skills_ui_styling_canvas_fonts_tektur_ofl_font, claude_skills_ui_styling_canvas_fonts_worksans_ofl_font, claude_skills_ui_styling_canvas_fonts_youngserif_ofl_font [EXTRACTED 0.95]
+- **shadcn/ui Accessible Component Documentation Across References** — claude_skills_ui_styling_references_shadcn_accessibility, claude_skills_ui_styling_references_shadcn_components, claude_skills_ui_styling_references_shadcn_theming [INFERRED 0.85]
+- **Tailwind Styling Reference Set (Customization, Responsive, Utilities)** — claude_skills_ui_styling_references_tailwind_customization, claude_skills_ui_styling_references_tailwind_responsive, claude_skills_ui_styling_references_tailwind_utilities [INFERRED 0.85]
+- **UI Styling Skill Set (ui-styling + ui-ux-pro-max) Sharing Design Intelligence Workflow** — claude_skills_ui_styling_scripts_requirements, claude_skills_ui_ux_pro_max_skill, claude_skills_ui_styling_references_shadcn_theming [INFERRED 0.65]
 
-## Communities (108 total, 56 thin omitted)
+## Communities (119 total, 51 thin omitted)
 
-### Community 0 - "Design System"
+### Community 0 - "Design Token Templates"
 Cohesion: 0.05
 Nodes (53): $type, $value, $type, $value, $type, $value, $type, $value (+45 more)
 
-### Community 1 - "Design"
-Cohesion: 0.06
+### Community 1 - "CIP Search Core (BM25)"
+Cohesion: 0.07
 Nodes (42): BM25, detect_domain(), get_cip_brief(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection (+34 more)
 
-### Community 2 - "Design System"
-Cohesion: 0.04
-Nodes (48): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+40 more)
-
-### Community 3 - "Design"
-Cohesion: 0.05
-Nodes (46): CIP Design Skill, cip/core.py (BM25 search engine), CIP Deliverable Categories, CIP Design Styles, gemini-2.5-flash-image model, gemini-3-pro-image-preview model, cip/generate.py, cip/render-html.py (+38 more)
-
-### Community 4 - "Design System"
-Cohesion: 0.06
-Nodes (45): $type, $value, $type, $value, bg, fg, font-size, hover-bg (+37 more)
-
-### Community 5 - "Design System"
+### Community 2 - "Slide Search CLI"
 Cohesion: 0.08
 Nodes (36): format_context(), format_result(), main(), Format a single search result for display, Format contextual recommendations for display., BM25, calculate_pattern_break(), detect_domain() (+28 more)
 
-### Community 6 - "Design System"
+### Community 3 - "shadcn Component Reference"
+Cohesion: 0.05
+Nodes (39): shadcn-components.md reference, Accordion Component, Alert Component, AlertDialog Component, Avatar Component, Badge Component, Calendar / Date Picker Component, Card Component (+31 more)
+
+### Community 4 - "Semantic Color Tokens"
+Cohesion: 0.05
+Nodes (37): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+29 more)
+
+### Community 5 - "Design Token Templates"
 Cohesion: 0.06
 Nodes (34): $type, $value, $type, $value, $type, $value, $type, $value (+26 more)
 
-### Community 7 - "Ui Styling"
-Cohesion: 0.07
-Nodes (32): Accessibility Category (Priority 1, CRITICAL), Rule Categories by Priority (1-10), shadcn/ui MCP Integration, Touch & Interaction Category (Priority 2, CRITICAL), UI/UX Pro Max Skill, Analog Meditation Design Movement, Canvas Design System Reference, Chromatic Language Design Movement (+24 more)
+### Community 6 - "Tailwind Config Tests"
+Cohesion: 0.06
+Nodes (16): Test adding colors multiple times., Test adding full color palette., Test adding custom breakpoints., Test TailwindConfigGenerator class., Test that adding same plugin twice doesn't duplicate., Test plugin recommendations for Next.js., Test initialization with default settings., Test generating JavaScript configuration. (+8 more)
 
-### Community 8 - "Design"
-Cohesion: 0.09
-Nodes (30): Slides Skill (skill definition), AIDA Formula, Before-After-Bridge Formula, Cost of Inaction Formula, FAB Formula (Features-Advantages-Benefits), Formula-to-Slide Mapping, PAS Formula (Problem-Agitate-Solution), search-slides.py (design-system scripts) (+22 more)
-
-### Community 9 - "Ui Styling"
-Cohesion: 0.07
-Nodes (15): Test adding colors multiple times., Test adding custom breakpoints., Test TailwindConfigGenerator class., Test generating TypeScript configuration., Test generating JavaScript configuration., Test generating config with custom colors., Test generating config with plugins., Test validating valid configuration. (+7 more)
-
-### Community 10 - "Design System"
-Cohesion: 0.14
+### Community 7 - "HTML Token Validator"
+Cohesion: 0.13
 Nodes (24): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+16 more)
 
-### Community 11 - "Design"
+### Community 8 - "Slides Copywriting Formulas"
+Cohesion: 0.09
+Nodes (27): Slides Skill, AIDA formula (design), Before-After-Bridge formula (design), Copywriting Formulas (design), Cost of Inaction formula (design), FAB formula (design), PAS formula (design), Slides Create Command (design) (+19 more)
+
+### Community 9 - "Logo Search Core (BM25)"
 Cohesion: 0.11
 Nodes (19): BM25, detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+11 more)
 
-### Community 12 - "Brand"
-Cohesion: 0.11
-Nodes (22): Approval Checklist Reference, WCAG Contrast Requirement, Color Palette Management Reference, Color System Hierarchy, Brand Compliance Validation Rules, WCAG 2.1 Contrast Ratios, Consistency Checklist Reference, Logo Usage Rules Reference (+14 more)
+### Community 10 - "Brand & Banner Guidelines"
+Cohesion: 0.14
+Nodes (24): Banner Sizes & Art Direction Styles Reference, Banner Design Skill, Asset Approval Checklist, Asset Organization Guide, Brand Guidelines Template, Color Palette Management, Brand Consistency Checklist, Logo Usage Rules (+16 more)
 
-### Community 13 - "Design System"
+### Community 11 - "Tailwind Config Generator"
+Cohesion: 0.10
+Nodes (12): main(), Add custom font families. Args: fonts: Dict of font_type: [font_names] e.g.,…, Add custom spacing values. Args: spacing: Dict of name: value e.g., {'18':…, Add custom breakpoints. Args: breakpoints: Dict of name: width e.g., {'3xl':…, Add plugin requirements. Args: plugins: List of plugin names e.g.,…, Get plugin recommendations based on configuration. Returns: List of recommended…, Generate Tailwind CSS configuration files., Validate configuration. Returns: Tuple of (valid, message) (+4 more)
+
+### Community 12 - "Slide Deck Generator"
 Cohesion: 0.15
 Nodes (19): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+11 more)
 
-### Community 14 - "Ui Styling"
-Cohesion: 0.10
-Nodes (11): Generate Tailwind CSS configuration files., Add full color palette (50-950 shades) for a base color.          Args:, TailwindConfigGenerator, Test adding full color palette., Test adding custom spacing., Test plugin recommendations for Next.js., Test validating config with no content paths., Test writing configuration to file. (+3 more)
+### Community 13 - "Design System Formatter"
+Cohesion: 0.15
+Nodes (18): ansi_ljust(), format_ascii_box(), format_markdown(), format_master_md(), generate_design_system(), hex_to_ansi(), persist_design_system(), Convert hex color to ANSI True Color swatch (██) with fallback. (+10 more)
 
-### Community 15 - "Design System"
+### Community 14 - "Background Image Fetcher"
 Cohesion: 0.17
 Nodes (17): generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors(), main() (+9 more)
 
-### Community 16 - "Ui Ux Pro Max"
+### Community 15 - "Design System Reasoning Engine"
 Cohesion: 0.16
 Nodes (9): DesignSystemGenerator, Select best matching result based on priority keywords., Extract results list from search result dict., Generate complete design system recommendation., Generates design system recommendations from aggregated searches., Load reasoning rules from CSV., Execute searches across multiple domains., Find matching reasoning rule for a category. (+1 more)
 
-### Community 17 - "Banner Design"
-Cohesion: 0.19
-Nodes (16): Banner Sizes & Art Direction Styles Reference (banner-design), 22 Art Direction Styles, 3-Zone Visual Hierarchy Rule, gemini_batch_process.py, ai-artist Skill, ai-multimodal Skill, assets-organizing Skill, Banner Design Skill (+8 more)
-
-### Community 18 - "Design System"
-Cohesion: 0.18
-Nodes (16): Brand Update Reference, sync-brand-to-tokens.cjs, Tailwind Integration Reference, HSL Format for Opacity Modifiers, shadcn/ui Alignment, Design System Skill, fetch-background.py, generate-tokens.cjs (+8 more)
-
-### Community 19 - "Design"
+### Community 16 - "Icon Generation Script"
 Cohesion: 0.20
 Nodes (15): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+7 more)
 
-### Community 20 - "Design System"
+### Community 17 - "Design Token Templates"
 Cohesion: 0.12
 Nodes (16): $type, $value, $type, $value, $type, $value, $type, $value (+8 more)
 
-### Community 21 - "Ui Styling Canvas Fonts"
-Cohesion: 0.13
-Nodes (16): ui-styling Apache License 2.0, UI Styling Skill, canvas-design-system.md reference, ArsenalSC Font License (SIL OFL 1.1), Canvas Visual Design Layer, Radix UI Primitives, shadcn-accessibility.md reference, shadcn_add.py script (+8 more)
-
-### Community 22 - "Ui Styling"
+### Community 18 - "shadcn Installer Tests"
 Cohesion: 0.12
-Nodes (9): Test adding components without shadcn config., Test adding components that are already installed., Test ShadcnInstaller class., Test adding all components in dry run mode., Create temporary project structure., Test successful addition of all components., Test listing installed components when none exist., Test checking for non-existent shadcn config. (+1 more)
+Nodes (9): Test adding components in dry run mode., Test ShadcnInstaller class., Test adding all components without config., Test adding all components in dry run mode., Test listing installed components without config., Test listing installed components when none exist., Test initialization with custom project root., Test checking for non-existent shadcn config. (+1 more)
 
-### Community 23 - "Design"
-Cohesion: 0.16
-Nodes (16): banner-design skill, brand skill, cip-design skill, Design Routing Guide, design-system skill, icon-design skill, logo-design skill, Skill Dependency Chain (brand -> design-system -> ui-styling) (+8 more)
-
-### Community 24 - "Ui Styling"
+### Community 19 - "shadcn Accessibility Reference"
 Cohesion: 0.13
-Nodes (8): main(), Add custom font families.          Args:             fonts: Dict of font_type: [, Add custom spacing values.          Args:             spacing: Dict of name: val, Add custom breakpoints.          Args:             breakpoints: Dict of name: wi, Add plugin requirements.          Args:             plugins: List of plugin name, Get plugin recommendations based on configuration.          Returns:, Validate configuration.          Returns:             Tuple of (valid, message), Add custom colors to theme.          Args:             colors: Dict of color_nam
+Nodes (15): shadcn-accessibility.md reference, Accordion Component (accessibility), Alert Component (accessibility), @axe-core/react, Checkbox Component (accessibility), Command Palette Component, Dialog Component, DropdownMenu Component (+7 more)
 
-### Community 25 - "Ui Ux Pro Max"
-Cohesion: 0.19
-Nodes (14): _detect_page_type(), format_markdown(), format_master_md(), format_page_override_md(), generate_design_system(), _generate_intelligent_overrides(), persist_design_system(), Detect page type from context and search results. (+6 more)
+### Community 20 - "Brand Color Extractor (JS)"
+Cohesion: 0.22
+Nodes (11): calculateCompliance(), colorDistance(), displayPalette(), extractHexColors(), findNearestBrandColor(), fs, generateImageMagickCommand(), hexToRgb() (+3 more)
 
-### Community 26 - "Ui Ux Pro Max Data"
+### Community 21 - "Asset Filename Validator"
+Cohesion: 0.25
+Nodes (13): checkManifest(), formatBytes(), formatOutput(), fs, main(), parseFilename(), path, RULES (+5 more)
+
+### Community 22 - "UI Reasoning Data Sync"
 Cohesion: 0.29
 Nodes (13): blend(), derive_row(), derive_ui_reasoning(), h2r(), is_dark(), lum(), on_color(), r2h() (+5 more)
 
-### Community 27 - "Ui Styling"
-Cohesion: 0.22
-Nodes (7): main(), Add all available shadcn/ui components.          Args:             overwrite: If, List installed components.          Returns:             Tuple of (success, mess, Check if shadcn is initialized in project.          Returns:             True if, Get list of already installed components.          Returns:             List of, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components.          Args:             components: List of compone
-
-### Community 28 - "Design"
+### Community 23 - "Design Token Templates"
 Cohesion: 0.18
-Nodes (13): ai-artist skill, assets-organizing skill, chrome-devtools skill, Chrome Headless CLI Screenshot Method, /ck:frontend-design command, /ck:ui-ux-pro-max command, /ckm:brand command, /ckm:design-system command (+5 more)
+Nodes (13): $type, $value, border, padding, radius, shadow, border, card (+5 more)
 
-### Community 29 - "Ui Styling"
+### Community 24 - "Token Usage Validator (JS)"
+Cohesion: 0.24
+Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), path, patterns (+3 more)
+
+### Community 25 - "Canvas Design System & Tailwind Responsive"
 Cohesion: 0.17
-Nodes (7): Handle shadcn/ui component installation., ShadcnInstaller, Test component addition with subprocess error., Test listing installed components when they exist., Test initialization with custom project root., Test checking for existing shadcn config., Test getting installed components without config.
+Nodes (12): Canvas Design System, Canvas Design Movement Examples (Concrete Poetry, Chromatic Language, etc.), oklch Color Space, Two-Phase Design Process (Philosophy then Expression), @theme Directive, tailwind-responsive.md reference, Default Breakpoint System (sm/md/lg/xl/2xl), Container Queries (@container) (+4 more)
 
-### Community 30 - "Ui Styling"
+### Community 26 - "shadcn Add Script & Tests"
 Cohesion: 0.20
-Nodes (6): Generate configuration file content.          Returns:             Configuration, Generate TypeScript configuration., Generate JavaScript configuration., Format plugins array for config.          Validates each plugin name against a s, Add indentation to JSON string., Write configuration to file.          Returns:             Tuple of (success, me
+Nodes (7): main(), Handle shadcn/ui component installation., ShadcnInstaller, Tests for shadcn_add.py, Test listing installed components when they exist., Test getting installed components without config., Test adding components with empty list.
 
-### Community 31 - "Design System"
+### Community 27 - "shadcn Installer Core"
+Cohesion: 0.21
+Nodes (6): Add all available shadcn/ui components. Args: overwrite: If True, overwrite…, List installed components. Returns: Tuple of (success, message with component…, Check if shadcn is initialized in project. Returns: True if components.json…, Get list of already installed components. Returns: List of installed component…, Read shadcn version from project package.json; fall back to a pinned default., Add shadcn/ui components. Args: components: List of component names to add…
+
+### Community 28 - "Tailwind Config String Generator"
+Cohesion: 0.20
+Nodes (6): Generate configuration file content. Returns: Configuration file as string, Generate TypeScript configuration., Generate JavaScript configuration., Format plugins array for config. Validates each plugin name against a strict…, Add indentation to JSON string., Write configuration to file. Returns: Tuple of (success, message)
+
+### Community 29 - "Brand Context Injector (JS)"
+Cohesion: 0.31
+Nodes (10): extractColorsFromTable(), extractCoreAttributes(), extractHexColors(), extractImageStyle(), extractTypography(), extractVoice(), fs, generatePromptAddition() (+2 more)
+
+### Community 30 - "Token Embedding Script (JS)"
 Cohesion: 0.18
-Nodes (11): Contextual Decision Flow, Duarte Sparkline Pattern Breaking, Slide System (Brand-compliant Presentations), slide-backgrounds.csv, slide-charts.csv, slide-color-logic.csv, slide-copy.csv, slide-layout-logic.csv (+3 more)
+Nodes (8): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle
 
-### Community 32 - "Design System"
+### Community 31 - "Design Token Templates"
 Cohesion: 0.18
 Nodes (11): fast, normal, slow, $type, $value, $type, $value, primitive (+3 more)
 
-### Community 33 - "Ui Styling"
-Cohesion: 0.20
-Nodes (7): Tests for tailwind_config_gen.py, Reduce a generated TS/JS config to a bare assignable object so it can be     han, Regression guard for the missing-comma bug between the ``theme`` block and     `, The property preceding ``plugins`` must end with a comma (pure-Python         ch, The emitted config parses as valid JS via ``node --check``., _strip_to_object(), TestGeneratedConfigIsValidJs
+### Community 32 - "UI Styling Skill Overview"
+Cohesion: 0.27
+Nodes (11): Apache License 2.0 (ui-styling skill), canvas-design-system.md reference, shadcn_add.py, Accessibility Patterns, Canvas-based Visual Design System, Dark Mode Implementation, Radix UI, shadcn/ui (+3 more)
 
-### Community 34 - "Ui Ux Pro Max"
+### Community 33 - "shadcn Add Error-Path Tests"
+Cohesion: 0.18
+Nodes (6): Test adding components with overwrite flag., Test successful component addition., Test component addition with subprocess error., Test component addition when npx is not found., Test successful addition of all components., patch
+
+### Community 34 - "Tailwind Config Generation Tests"
+Cohesion: 0.22
+Nodes (8): Tests for tailwind_config_gen.py, Reduce a generated TS/JS config to a bare assignable object so it can be handed…, Regression guard for the missing-comma bug between the ``theme`` block and…, The property preceding ``plugins`` must end with a comma (pure-Python check, so…, The emitted config parses as valid JS via ``node --check``., _strip_to_object(), TestGeneratedConfigIsValidJs, parametrize
+
+### Community 35 - "Scripts Search Core (BM25)"
 Cohesion: 0.25
 Nodes (10): detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search stack-specific guidelines, search() (+2 more)
 
-### Community 35 - "Ui Styling"
-Cohesion: 0.22
-Nodes (6): Any, Path, Initialize generator.          Args:             typescript: If True, generate ., Determine default output path., Create base configuration structure., Get default content paths for framework.
+### Community 36 - "Design Skill Routing Guide"
+Cohesion: 0.27
+Nodes (11): Design Routing Guide, gemini-3.1-pro-preview model, Icon Design Reference, scripts/icon/generate.py, brand skill, cip-design skill, design-system skill, icon-design skill (+3 more)
 
-### Community 36 - "Design"
+### Community 37 - "Tailwind Config Class Init"
+Cohesion: 0.22
+Nodes (6): Any, Path, Initialize generator. Args: typescript: If True, generate .ts config, else .js…, Determine default output path., Create base configuration structure., Get default content paths for framework.
+
+### Community 38 - "Logo Generation Script"
 Cohesion: 0.29
-Nodes (9): enhance_prompt(), generate_batch(), generate_logo(), load_env(), main(), Enhance the logo prompt with style and industry modifiers, Generate a logo using Gemini models with image generation      Args:         asp, Generate multiple logo variants with different styles (+1 more)
+Nodes (9): enhance_prompt(), generate_batch(), generate_logo(), load_env(), main(), Enhance the logo prompt with style and industry modifiers, Generate a logo using Gemini models with image generation Args: aspect_ratio:…, Generate multiple logo variants with different styles (+1 more)
 
-### Community 37 - "Design"
-Cohesion: 0.22
-Nodes (9): CIP Deliverable Guide Reference, CIP Core Identity Deliverables, CIP Digital Assets, CIP Stationery Set, cip/core.py (BM25 Search Engine), cip/generate.py, cip/render-html.py, cip/search.py (+1 more)
+### Community 39 - "Design Token CSS Generator (JS)"
+Cohesion: 0.36
+Nodes (9): flattenTokens(), fs, generateCSS(), generateTailwind(), main(), parseArgs(), path, resolveReference() (+1 more)
 
-### Community 38 - "Design"
-Cohesion: 0.22
-Nodes (9): icon/generate.py, logo/core.py (BM25 Search Engine), logo/generate.py, logo/search.py, Design Skill (Unified), Icon Design (Built-in), Logo Design (Built-in), Slides (Built-in) (+1 more)
+### Community 40 - "Design Token Templates"
+Cohesion: 0.20
+Nodes (10): fg, font-size, hover-bg, button, $type, $value, $type, $value (+2 more)
 
-### Community 39 - "Ui Ux Pro Max"
+### Community 41 - "Tailwind Customization Reference"
+Cohesion: 0.20
+Nodes (10): tailwind-customization.md reference, @apply Directive, @tailwindcss/container-queries Plugin, Custom Tailwind Plugin (tailwindcss/plugin), @utility Custom Utility Classes, @custom-variant Directive, @tailwindcss/forms Plugin, @layer Organization (base/components/utilities) (+2 more)
+
+### Community 42 - "CIP & Logo Prompt Engineering"
+Cohesion: 0.20
+Nodes (10): CIP Base Prompt Structure, CIP Mockup Prompt Engineering, Logo Color Psychology, Logo Design Reference, Logo Core Prompt Structure, Logo AI Prompt Engineering, scripts/logo/core.py, scripts/logo/generate.py (+2 more)
+
+### Community 43 - "Brand-to-Tokens Sync Script (JS)"
+Cohesion: 0.33
+Nodes (8): adjustBrightness(), { execFileSync }, extractColorsFromMarkdown(), fs, generateColorScale(), main(), path, updateDesignTokens()
+
+### Community 44 - "Token Validator Regression Tests"
+Cohesion: 0.28
+Nodes (8): Path, Regression tests for validate-tokens.cjs. The validator used to skip any line…, A hardcoded hex on the same line as a var() token is still a violation., A line that references only tokens produces no false positives., _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation(), CompletedProcess
+
+### Community 45 - "shadcn Button & Theming Reference"
+Cohesion: 0.25
+Nodes (9): Button Component, shadcn-theming.md reference, components.json Configuration, cva (class-variance-authority) Component Variants, shadcn/ui Theme Generator (ui.shadcn.com/themes), Multiple Themes via data-theme Attribute, next-themes, Style Variants: Default vs New York (+1 more)
+
+### Community 46 - "BM25 Ranking Algorithm"
 Cohesion: 0.28
 Nodes (5): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query
 
-### Community 40 - "Design System"
+### Community 47 - "CIP Design Style Guide"
+Cohesion: 0.22
+Nodes (9): Bold Dynamic Style, CIP Design Style Guide, Classic Traditional Style, Corporate Minimal Style, Fresh Modern Style, Luxury Premium Style, Modern Tech Style, Soft Elegant Style (+1 more)
+
+### Community 48 - "Logo Style Guide (Types)"
+Cohesion: 0.22
+Nodes (9): Abstract Mark logo type, Combination Mark logo type, Emblem logo type, Lettermark logo type, Logo Style Guide, Mascot logo type, Pictorial Mark logo type, Logo Scalability Checklist (+1 more)
+
+### Community 49 - "Design Token Templates"
+Cohesion: 0.29
+Nodes (8): padding-y, input, $type, $value, focus-ring, padding-y, $type, $value
+
+### Community 50 - "Design Token Templates"
+Cohesion: 0.25
+Nodes (8): $type, $value, $type, $value, semantic, spacing, component, section
+
+### Community 51 - "Design Token Templates"
 Cohesion: 0.29
 Nodes (8): $type, $value, $type, $value, radius, default, full, default
 
-### Community 41 - "Ui Ux Pro Max"
+### Community 52 - "Tailwind Utilities Reference"
 Cohesion: 0.25
-Nodes (8): ansi_ljust(), format_ascii_box(), hex_to_ansi(), Convert hex color to ANSI True Color swatch (██) with fallback., Like str.ljust but accounts for zero-width ANSI escape sequences., Create a Unicode section separator: ├─── NAME ───...┤, Format design system as Unicode box with ANSI color swatches., section_header()
+Nodes (8): tailwind-utilities.md reference, Arbitrary Values (square bracket syntax), Borders & Shadows Utilities, Color Utilities (text/bg/gradient), Flexbox Utilities, Grid Utilities, Tailwind Spacing Scale, Typography Utilities
 
-### Community 42 - "Ui Styling"
-Cohesion: 0.32
-Nodes (8): pytest>=8.0.0, pytest-cov>=4.1.0, pytest-mock>=3.12.0, ui-styling scripts requirements.txt, pytest>=7.4.0, pytest-cov>=4.1.0, pytest-mock>=3.11.1, ui-styling scripts/tests requirements.txt
+### Community 53 - "UI/UX Pro Max Skill Overview"
+Cohesion: 0.25
+Nodes (8): UI/UX Pro Max Skill, --design-system Flag, Search Domains (product, style, color, typography, chart, ux, react, web, prompt), Persist Master + Overrides Pattern (design-system/MASTER.md), scripts/search.py, shadcn/ui MCP Integration, Supported Stacks (react, nextjs, vue, svelte, shadcn, swiftui, flutter, react-native, etc.), ui-reasoning.csv
 
-### Community 43 - "Design System"
+### Community 54 - "CIP Scripts & Deliverables"
 Cohesion: 0.29
-Nodes (7): Component Specs Reference, Button Component Spec, Card Component Spec, Dialog Component Spec, States and Variants Reference, Focus Ring Spec, Interactive State Priority Order
+Nodes (8): CIP Deliverable Guide, CIP Design Reference, gemini-2.5-flash-image model, gemini-3-pro-image-preview model, scripts/cip/core.py, scripts/cip/generate.py, scripts/cip/render-html.py, scripts/cip/search.py
 
-### Community 44 - "Design System"
+### Community 55 - "Screenshot Capture Scripts"
+Cohesion: 0.29
+Nodes (8): Chrome Headless CLI Screenshot Capture, Playwright Screenshot Capture Script, Puppeteer Screenshot Capture Script, Social Photos Design Guide, ai-artist skill, assets-organizing skill, chrome-devtools skill, project-management skill
+
+### Community 56 - "Design Token Templates"
 Cohesion: 0.47
 Nodes (6): sm, shadow, sm, sm, $type, $value
 
-### Community 45 - "Slides"
-Cohesion: 0.40
-Nodes (6): Duarte Sparkline Pattern, Product Demo Strategy, Sales Pitch Strategy, search-slides.py script, Slide Strategies Reference, YC Seed Deck Strategy
+### Community 57 - "Page Override Generator"
+Cohesion: 0.33
+Nodes (6): _detect_page_type(), format_page_override_md(), _generate_intelligent_overrides(), Detect page type from context and search results., Format a page-specific override file with intelligent AI-generated content., Generate intelligent overrides based on page type using layered search. Uses…
 
-### Community 46 - "Brand"
+### Community 58 - "Design Tokens Starter Template"
 Cohesion: 0.40
-Nodes (5): Brand Guideline Template Reference, Brand Guidelines Document Structure, Brand Update Color Presets, Brand Guidelines Starter Template, AI Image Generation Base Prompt Template
+Nodes (4): component, dark, semantic, $schema
 
-### Community 47 - "Design System"
+### Community 59 - "Design Token Templates"
+Cohesion: 0.60
+Nodes (5): $type, $value, bg, bg, bg
+
+### Community 60 - "Design Token Templates"
 Cohesion: 0.60
 Nodes (5): lg, $type, $value, lg, lg
 
-### Community 48 - "Brand"
-Cohesion: 0.50
-Nodes (4): Asset Organization Reference, manifest.json (Asset Registry), Asset Naming Convention, Asset Tagging System
+### Community 61 - "shadcn Theming & CSS Variables"
+Cohesion: 0.40
+Nodes (5): WCAG Color Contrast Requirements, CSS Variable System (HSL tokens), Tailwind Config Color Mapping to CSS Variables, tailwind.config.ts, tailwindcss-animate
 
-### Community 49 - "Design System"
+### Community 62 - "Banner Art Direction Styles"
+Cohesion: 0.40
+Nodes (5): 22 Art Direction Styles, Visual Hierarchy 3-Zone Rule, Banner Sizes & Art Direction Styles Reference, Banner Safe Zones, banner-design skill
+
+### Community 63 - "Design Token Templates"
+Cohesion: 0.67
+Nodes (4): padding-x, padding-x, $type, $value
+
+### Community 64 - "Design Token Templates"
+Cohesion: 0.67
+Nodes (4): radius, radius, $type, $value
+
+### Community 65 - "Design Token Templates"
 Cohesion: 0.67
 Nodes (4): xl, xl, $type, $value
 
-### Community 50 - "Design System"
+### Community 66 - "Design Token Templates"
 Cohesion: 0.67
 Nodes (4): $type, $value, md, md
 
-### Community 51 - "Design System"
+### Community 67 - "Design Token Templates"
 Cohesion: 0.67
 Nodes (4): $type, $value, none, none
 
-## Ambiguous Edges - Review These
-- `Banner Sizes & Art Direction Styles Reference (banner-design)` → `gemini_batch_process.py`  [AMBIGUOUS]
-  .claude/skills/banner-design/references/banner-sizes-and-styles.md · relation: references
-
 ## Knowledge Gaps
-- **243 isolated node(s):** `$schema`, `$value`, `$type`, `$value`, `$type` (+238 more)
+- **264 isolated node(s):** `fs`, `path`, `fs`, `path`, `fs` (+259 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **56 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **51 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **What is the exact relationship between `Banner Sizes & Art Direction Styles Reference (banner-design)` and `gemini_batch_process.py`?**
-  _Edge tagged AMBIGUOUS (relation: references) - confidence is low._
-- **Why does `primitive` connect `Design System` to `Design System`, `Design System`, `Design System`, `Design System`, `Design System`, `Design System`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `color` connect `Design System` to `Design System`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Are the 36 inferred relationships involving `TailwindConfigGenerator` (e.g. with `TestGeneratedConfigIsValidJs` and `.test_node_check_parses_generated_config()`) actually correct?**
-  _`TailwindConfigGenerator` has 36 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 23 inferred relationships involving `ShadcnInstaller` (e.g. with `TestShadcnInstaller` and `.test_add_all_components_dry_run()`) actually correct?**
-  _`ShadcnInstaller` has 23 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Resolve token reference like {primitive.color.ocean-blue.500} to hex value.`, `Load colors from assets/design-tokens.json for overlay gradients.      Resolves`, `Load background configuration from CSV.` to the rest of the system?**
-  _465 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Design System` be split into smaller, more focused modules?**
+- **Why does `primitive` connect `Design Token Templates` to `Design Token Templates`, `Design Token Templates`, `Design Token Templates`, `Design Token Templates`, `Design Token Templates`, `Design Tokens Starter Template`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `color` connect `Design Token Templates` to `Design Token Templates`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `component` connect `Design Tokens Starter Template` to `Design Token Templates`, `Design Token Templates`, `Design Token Templates`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Are the 2 inferred relationships involving `TailwindConfigGenerator` (e.g. with `TestGeneratedConfigIsValidJs` and `TestTailwindConfigGenerator`) actually correct?**
+  _`TailwindConfigGenerator` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `fs`, `path`, `fs` to the rest of the system?**
+  _264 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Design Token Templates` be split into smaller, more focused modules?**
   _Cohesion score 0.05370101596516691 - nodes in this community are weakly interconnected._
+- **Should `CIP Search Core (BM25)` be split into smaller, more focused modules?**
+  _Cohesion score 0.0653061224489796 - nodes in this community are weakly interconnected._
