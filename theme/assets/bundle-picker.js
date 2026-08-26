@@ -98,6 +98,11 @@
    * Un menu peut aussi porter `data-bp-maps-to` : il s'affiche sous un intitulé
    * (« Modèle ») mais choisit en réalité une autre option produit (« Édition »).
    * C'est ce qui fait changer le prix et la photo d'une carte à un exemplaire.
+   *
+   * Enfin, une carte peut porter un bloc `data-bp-shared` : des menus valables
+   * pour tout le pack (la gravure) plutôt que pour un appareil. Ils entrent dans
+   * la résolution de chaque exemplaire, jamais dans les propriétés de ligne —
+   * ils sont déjà lisibles dans le titre de la variante.
    */
   BundlePicker.prototype.unitSelections = function (card) {
     var self = this;
@@ -108,6 +113,13 @@
       locked = {};
     }
 
+    var shared = {};
+    card
+      .querySelectorAll("[data-bp-shared] select[data-bp-option]")
+      .forEach(function (sel) {
+        shared[sel.getAttribute("data-bp-option")] = sel.value;
+      });
+
     return Array.prototype.slice
       .call(card.querySelectorAll("[data-bp-unit]"))
       .map(function (unit) {
@@ -117,6 +129,9 @@
 
         Object.keys(locked).forEach(function (name) {
           resolve[name] = locked[name];
+        });
+        Object.keys(shared).forEach(function (name) {
+          resolve[name] = shared[name];
         });
 
         unit.querySelectorAll("select[data-bp-option]").forEach(function (sel) {

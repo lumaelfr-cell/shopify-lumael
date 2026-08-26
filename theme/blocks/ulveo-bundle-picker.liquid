@@ -17,6 +17,12 @@
     modèle de chaque appareil part en propriété de ligne. C'est ainsi que le Duo
     Pack propose deux couleurs et deux modèles en restant une seule variante.
 
+  Le réglage « Options communes au pack » sort une option des lignes #1, #2… sur
+  les cartes à plusieurs exemplaires, pour la poser une seule fois au-dessus.
+  C'est ce qu'il faut pour la gravure : elle vaut pour tout le pack, elle est
+  facturée une fois, et elle ne peut pas être choisie appareil par appareil
+  puisqu'un pack ne se vend qu'à travers une seule variante.
+
   Prix, prix barré et photo de chaque carte sont repeints par le script dès
   qu'un menu change, sauf si un prix a été forcé dans les réglages de la carte.
 
@@ -31,6 +37,7 @@
   assign product = closest.product
   assign lock_name = block.settings.lock_option | strip
   assign unit_option_names = block.settings.unit_options | split: ','
+  assign shared_option_names = block.settings.shared_options | split: ','
   assign model_label = block.settings.model_label | strip
   assign model_values = block.settings.model_values | split: ','
 
@@ -241,6 +248,27 @@
             assign show_model = true
           endif
 
+          assign is_pack = false
+          if units > 1
+            assign is_pack = true
+          endif
+
+          assign shared_label = ''
+          if is_pack
+            for raw_name in shared_option_names
+              assign shared_name = raw_name | strip
+              if shared_name == blank
+                continue
+              endif
+              for option in product.options_with_values
+                if option.name == shared_name and option.name != lock_name
+                  assign shared_label = shared_label | append: shared_name | append: ', '
+                endif
+              endfor
+            endfor
+            assign shared_label = shared_label | remove_last: ', '
+          endif
+
           assign model_drives = false
           if show_model and units == 1
             for raw_value in model_values
@@ -257,6 +285,20 @@
             if unit_name == blank
               continue
             endif
+
+            assign is_shared = false
+            if is_pack
+              for raw_shared in shared_option_names
+                assign shared_name = raw_shared | strip
+                if shared_name == unit_name
+                  assign is_shared = true
+                endif
+              endfor
+            endif
+            if is_shared
+              continue
+            endif
+
             if unit_name == model_label
               if show_model
                 assign options_label = options_label | append: unit_name | append: ', '
@@ -272,9 +314,37 @@
           assign options_label = options_label | remove_last: ', '
         -%}
 
-        {%- if options_label != blank -%}
+        {%- if options_label != blank or shared_label != blank -%}
           <div class="bp-card__options">
-            <div class="bp-card__options-label">{{ options_label }}</div>
+            {%- if shared_label != blank -%}
+              <div class="bp-card__options-label">{{ shared_label }}</div>
+              <div class="bp-unit" data-bp-shared>
+                {%- for raw_name in shared_option_names -%}
+                  {%- assign shared_name = raw_name | strip -%}
+                  {%- for option in product.options_with_values -%}
+                    {%- if option.name == shared_name and option.name != lock_name -%}
+                      <span class="bp-select">
+                        <select
+                          data-bp-option="{{ option.name | escape }}"
+                          aria-label="{{ option.name | escape }} — {{ value.name | escape }}"
+                        >
+                          {%- for option_value in option.values -%}
+                            <option value="{{ option_value.name | escape }}">{{ option_value.name }}</option>
+                          {%- endfor -%}
+                        </select>
+                      </span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {%- if options_label != blank -%}
+              <div
+                class="bp-card__options-label"
+                {% if shared_label != blank %}style="margin-top: 16px"{% endif %}
+              >{{ options_label }}</div>
+            {%- endif -%}
 
             {%- for i in (1..units) -%}
               <div
@@ -288,6 +358,19 @@
                 {%- for raw_name in unit_option_names -%}
                   {%- assign unit_name = raw_name | strip -%}
                   {%- if unit_name == blank -%}
+                    {%- continue -%}
+                  {%- endif -%}
+
+                  {%- assign is_shared = false -%}
+                  {%- if is_pack -%}
+                    {%- for raw_shared in shared_option_names -%}
+                      {%- assign shared_name = raw_shared | strip -%}
+                      {%- if shared_name == unit_name -%}
+                        {%- assign is_shared = true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                  {%- if is_shared -%}
                     {%- continue -%}
                   {%- endif -%}
 
@@ -394,6 +477,7 @@
     { "type": "text", "id": "heading", "label": "Titre", "default": "Choisissez votre édition" },
     { "type": "text", "id": "lock_option", "label": "Option de palier", "default": "Édition", "info": "Une carte par valeur de cette option." },
     { "type": "text", "id": "unit_options", "label": "Options par exemplaire", "default": "Couleur, Modèle, Gravure", "info": "Liste ordonnée des menus affichés sur chaque ligne « #1 », « #2 »… Un nom d'option produit rend un vrai menu de variante ; le nom du menu Modèle ci-dessous rend le menu décrit plus bas." },
+    { "type": "text", "id": "shared_options", "label": "Options communes au pack", "default": "Gravure", "info": "Sur une carte à plusieurs exemplaires, ces options sortent des lignes « #1 », « #2 »… et sont proposées une seule fois pour tout le pack. Sans effet sur une carte à un exemplaire." },
     { "type": "text", "id": "model_label", "label": "Menu Modèle — intitulé", "default": "Modèle", "info": "Sur une carte à un exemplaire, ce menu pilote l'option de palier : le prix et la photo de la carte suivent le choix. Sur un pack, il part en propriété de ligne. Laissez vide pour le désactiver." },
     { "type": "text", "id": "model_values", "label": "Menu Modèle — valeurs", "default": "Standard, Pro", "info": "Séparées par des virgules. Les valeurs de l'option de palier vendues à l'unité, packs exclus." },
     { "type": "range", "id": "preselected", "label": "Carte sélectionnée au chargement", "min": 1, "max": 3, "step": 1, "default": 1 },
