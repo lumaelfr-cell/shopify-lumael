@@ -66,13 +66,45 @@ Couleur, Modèle
 #2  [Bleu nuit ▾] [Standard ▾]
 ```
 
+## Vendre chaque exemplaire séparément
+
+Réglage `split_units`, **coché par défaut**. Sur une carte à plusieurs
+exemplaires :
+
+- chaque ligne `#1`, `#2`… résout sa propre variante — plus aucune n'est
+  `data-bp-property-only` — et devient sa propre ligne de panier ;
+- le menu Modèle de **chaque** ligne porte `data-bp-maps-to`, donc pilote
+  l'option de palier ;
+- le prix de la carte est la **somme** des exemplaires, calculée par
+  `BundlePicker.paint()` ;
+- « Options communes au pack » est sans effet : la gravure redevient un choix
+  par appareil, facturé par appareil ;
+- la variante du palier (`Édition = Duo Pack`) n'est plus vendue.
+
+Décoché, on retrouve le pack vendu à travers la variante de son palier, à son
+prix, avec les exemplaires suivants en propriétés de ligne.
+
+### Le prix d'une somme
+
+Aucune variante ne porte le montant d'un pack vendu à l'exemplaire, donc aucun
+libellé rendu par Liquid ne convient. Le bloc expose `moneyFormat`
+(`shop.money_format`) et `compareAt` en centimes par variante ; `formatMoney()`
+reformate la somme côté script. Une carte à une seule variante garde le libellé
+Liquid, au format exact de la boutique.
+
+Le rendu initial est déjà juste : quand `split_pack` est vrai, le Liquid affiche
+`prix du premier modèle × exemplaires`, ce que le script retrouve au chargement.
+
 ## Grille tarifaire
 
 | Édition | Sans gravure | Avec gravure |
 | --- | --- | --- |
 | Standard | 17,95 € | 22,95 € |
-| Pro | 22,95 € | 26,95 € |
-| Duo Pack | 39,90 € | 49,90 € — les deux appareils gravés |
+| Pro | 22,95 € | 27,95 € |
+
+La gravure vaut +5 € sur chaque appareil. Le Duo Pack n'a plus de prix propre :
+il vaut la somme de ses deux appareils, de 35,90 € (2 × Standard) à 55,90 €
+(2 × Pro gravés).
 
 ## Prix et photo réactifs
 

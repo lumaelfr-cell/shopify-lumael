@@ -6,6 +6,49 @@
   "use strict";
 
   var ROOT_SELECTOR = "[data-bundle-picker]";
+  var MONEY_PLACEHOLDER = /\{\{\s*(\w+)\s*\}\}/;
+
+  /*
+   * Le prix d'un pack vendu à l'exemplaire est une somme : aucune variante ne
+   * porte ce montant, donc aucun libellé rendu par Liquid ne convient. On
+   * reformate à partir du `money_format` de la boutique, comme le fait Shopify.
+   */
+  function formatMoney(cents, format) {
+    var pattern = format || "{{ amount }}";
+
+    function digits(precision, thousands, decimal) {
+      var amount = (Number(cents) / 100).toFixed(precision);
+      var parts = amount.split(".");
+      var whole = parts[0].replace(/(\d)(?=(\d\d\d)+$)/g, "$1" + thousands);
+      return parts[1] ? whole + decimal + parts[1] : whole;
+    }
+
+    var match = pattern.match(MONEY_PLACEHOLDER);
+    var value;
+    switch (match && match[1]) {
+      case "amount_no_decimals":
+        value = digits(0, ",", ".");
+        break;
+      case "amount_with_comma_separator":
+        value = digits(2, ".", ",");
+        break;
+      case "amount_no_decimals_with_comma_separator":
+        value = digits(0, ".", ",");
+        break;
+      case "amount_with_space_separator":
+        value = digits(2, " ", ",");
+        break;
+      case "amount_no_decimals_with_space_separator":
+        value = digits(0, " ", ",");
+        break;
+      case "amount_with_apostrophe_separator":
+        value = digits(2, "'", ".");
+        break;
+      default:
+        value = digits(2, ",", ".");
+    }
+    return pattern.replace(MONEY_PLACEHOLDER, value);
+  }
 
   function parseConfig(root) {
     var node = root.querySelector("[data-bundle-picker-config]");
@@ -92,16 +135,16 @@
    *    séparément, qui servent à retrouver la variante ;
    *  - ceux qui n'ont pas de variante derrière eux — menu marqué
    *    `data-bp-property`, ou n'importe quel menu d'un exemplaire
-   *    `data-bp-property-only` (2e appareil d'un Duo Pack) — qui partent en
-   *    propriété de ligne.
+   *    `data-bp-property-only` (2e appareil d'un pack vendu à travers la
+   *    variante de son palier) — qui partent en propriété de ligne.
    *
    * Un menu peut aussi porter `data-bp-maps-to` : il s'affiche sous un intitulé
    * (« Modèle ») mais choisit en réalité une autre option produit (« Édition »).
-   * C'est ce qui fait changer le prix et la photo d'une carte à un exemplaire.
+   * C'est ce qui fait changer le prix et la photo d'un exemplaire vendu.
    *
    * Enfin, une carte peut porter un bloc `data-bp-shared` : des menus valables
-   * pour tout le pack (la gravure) plutôt que pour un appareil. Ils entrent dans
-   * la résolution de chaque exemplaire, jamais dans les propriétés de ligne —
+   * pour tout le pack plutôt que pour un appareil. Ils entrent dans la
+   * résolution de chaque exemplaire, jamais dans les propriétés de ligne —
    * ils sont déjà lisibles dans le titre de la variante.
    */
   BundlePicker.prototype.unitSelections = function (card) {
@@ -185,28 +228,56 @@
   };
 
   /*
-   * Prix, prix barré et photo d'une carte suivent la variante que ses menus
-   * désignent. Un prix forcé dans les réglages porte `data-bp-static` et n'est
-   * jamais repeint.
+   * Une carte affiche ce que coûte ce qu'elle met au panier : le prix de son
+   * unique variante sur une carte simple, la somme des exemplaires sur un pack
+   * vendu à l'exemplaire. Un prix forcé dans les réglages porte
+   * `data-bp-static` et n'est jamais repeint.
    */
   BundlePicker.prototype.paint = function (card) {
     var units = this.sellableUnits(card);
-    var variant = units.length ? units[0].variant : null;
-    if (!variant) return;
+    if (!units.length) return;
+
+    var variants = units.map(function (unit) { return unit.variant; });
+    var missing = variants.filter(function (variant) { return !variant; });
+    if (missing.length) return;
+
+    var total = 0;
+    var compareTotal = 0;
+    variants.forEach(function (variant) {
+      total += Number(variant.price) || 0;
+      compareTotal += Number(variant.compareAt || variant.price) || 0;
+    });
+
+    // Une seule variante : on garde le libellé rendu par Liquid, au format exact
+    // de la boutique. Une somme n'existe nulle part, elle doit être reformatée.
+    var single = variants.length === 1;
+    var format = this.config.moneyFormat;
+    var priceLabel =
+      single && variants[0].priceLabel
+        ? variants[0].priceLabel
+        : formatMoney(total, format);
+
+    var compareLabel = "";
+    if (compareTotal > total) {
+      compareLabel =
+        single && variants[0].compareLabel
+          ? variants[0].compareLabel
+          : formatMoney(compareTotal, format);
+    }
 
     var priceNode = card.querySelector("[data-bp-price]");
-    if (priceNode && !priceNode.hasAttribute("data-bp-static") && variant.priceLabel) {
-      priceNode.textContent = variant.priceLabel;
+    if (priceNode && !priceNode.hasAttribute("data-bp-static")) {
+      priceNode.textContent = priceLabel;
     }
 
     var compareNode = card.querySelector("[data-bp-compare]");
     if (compareNode && !compareNode.hasAttribute("data-bp-static")) {
-      compareNode.textContent = variant.compareLabel || "";
-      compareNode.style.display = variant.compareLabel ? "" : "none";
+      compareNode.textContent = compareLabel;
+      compareNode.style.display = compareLabel ? "" : "none";
     }
 
     var imageNode = card.querySelector("[data-bp-image]");
-    var source = variant.image || this.config.fallbackImage;
+    var source = variants[0].image || this.config.fallbackImage;
     if (imageNode && source && imageNode.getAttribute("src") !== source) {
       imageNode.removeAttribute("srcset");
       imageNode.setAttribute("src", source);
@@ -287,8 +358,8 @@
       }
     });
 
-    // Exemplaires non vendus séparément (ex. 2e appareil d'un Duo Pack) :
-    // leurs choix voyagent en propriétés de ligne sur le premier article.
+    // Exemplaires non vendus séparément : leurs choix voyagent en propriétés de
+    // ligne sur le premier article.
     if (items.length && extraUnits.length) {
       extraUnits.forEach(function (unit) {
         var label = "#" + (unit.index || 2);

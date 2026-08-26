@@ -17,11 +17,16 @@
     modèle de chaque appareil part en propriété de ligne. C'est ainsi que le Duo
     Pack propose deux couleurs et deux modèles en restant une seule variante.
 
-  Le réglage « Options communes au pack » sort une option des lignes #1, #2… sur
-  les cartes à plusieurs exemplaires, pour la poser une seule fois au-dessus.
-  C'est ce qu'il faut pour la gravure : elle vaut pour tout le pack, elle est
-  facturée une fois, et elle ne peut pas être choisie appareil par appareil
-  puisqu'un pack ne se vend qu'à travers une seule variante.
+  Un pack se vend de deux façons, selon « Vendre chaque exemplaire séparément » :
+
+  - coché (par défaut) — chaque ligne résout sa propre variante et devient sa
+    propre ligne de panier. Le modèle et la gravure sont choisis appareil par
+    appareil et facturés appareil par appareil ; le prix de la carte est la
+    somme des exemplaires. La variante du palier n'est alors pas vendue ;
+  - décoché — le pack se vend à travers la variante du palier, à son prix. Les
+    choix des exemplaires suivants ne sont plus que des propriétés de ligne, et
+    le réglage « Options communes au pack » sort une option des lignes #1, #2…
+    pour la poser une seule fois au-dessus, facturée une fois.
 
   Prix, prix barré et photo de chaque carte sont repeints par le script dès
   qu'un menu change, sauf si un prix a été forcé dans les réglages de la carte.
@@ -72,6 +77,7 @@
         "cart": {{ routes.cart_url | json }}
       },
       "strings": { "unavailable": {{ block.settings.unavailable_label | json }} },
+      "moneyFormat": {{ shop.money_format | json }},
       "fallbackImage": {%- if product.featured_image != blank -%}{{ product.featured_image | image_url: width: 180 | json }}{%- else -%}null{%- endif -%},
       "variants": [
         {%- for variant in product.variants -%}
@@ -82,6 +88,7 @@
             "price": {{ variant.price }},
             "priceLabel": {{ variant.price | money | json }},
             "compareLabel": {%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money | json }}{%- else -%}null{%- endif -%},
+            "compareAt": {%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price }}{%- else -%}null{%- endif -%},
             "image": {%- if variant.image != blank -%}{{ variant.image | image_url: width: 180 | json }}{%- else -%}null{%- endif -%}
           }{% unless forloop.last %},{% endunless %}
         {%- endfor -%}
@@ -130,6 +137,16 @@
 
         assign units = units | at_least: 1
 
+        assign is_pack = false
+        if units > 1
+          assign is_pack = true
+        endif
+
+        assign split_pack = false
+        if is_pack and block.settings.split_units
+          assign split_pack = true
+        endif
+
         assign tier_variant = null
         for variant in product.variants
           if tier_variant == null and variant.options[lock_position] == value.name and variant.available
@@ -157,6 +174,38 @@
         assign tier_image = tier_variant.image
         if tier_image == blank
           assign tier_image = product.featured_image
+        endif
+
+        comment
+          Un pack vendu à l'exemplaire n'a pas de prix propre : il vaut ce que
+          valent ses appareils. On rend la somme des choix par défaut — le
+          premier modèle de la liste — pour que le script n'ait rien à corriger
+          au chargement.
+        endcomment
+        if split_pack
+          assign first_model = model_values.first | strip
+          assign split_variant = null
+          for variant in product.variants
+            if split_variant == null and variant.options[lock_position] == first_model and variant.available
+              assign split_variant = variant
+            endif
+          endfor
+
+          if split_variant != null
+            if price_override == blank
+              assign tier_price = split_variant.price | times: units | money
+            endif
+            if compare_override == blank
+              assign tier_compare = ''
+              if split_variant.compare_at_price > split_variant.price
+                assign tier_compare = split_variant.compare_at_price | times: units | money
+              endif
+            endif
+            assign tier_image = split_variant.image
+            if tier_image == blank
+              assign tier_image = product.featured_image
+            endif
+          endif
         endif
 
         assign is_selected = false
@@ -248,13 +297,8 @@
             assign show_model = true
           endif
 
-          assign is_pack = false
-          if units > 1
-            assign is_pack = true
-          endif
-
           assign shared_label = ''
-          if is_pack
+          if is_pack and split_pack == false
             for raw_name in shared_option_names
               assign shared_name = raw_name | strip
               if shared_name == blank
@@ -270,7 +314,9 @@
           endif
 
           assign model_drives = false
-          if show_model and units == 1
+          if show_model and split_pack
+            assign model_drives = true
+          elsif show_model and units == 1
             for raw_value in model_values
               assign model_value = raw_value | strip
               if model_value == value.name
@@ -287,7 +333,7 @@
             endif
 
             assign is_shared = false
-            if is_pack
+            if is_pack and split_pack == false
               for raw_shared in shared_option_names
                 assign shared_name = raw_shared | strip
                 if shared_name == unit_name
@@ -351,7 +397,7 @@
                 class="bp-unit"
                 data-bp-unit
                 data-bp-index="{{ i }}"
-                {% if i > 1 %}data-bp-property-only{% endif %}
+                {% if i > 1 and split_pack == false %}data-bp-property-only{% endif %}
               >
                 {%- if units > 1 -%}<span class="bp-unit__n">#{{ i }}</span>{%- endif -%}
 
@@ -376,10 +422,18 @@
 
                   {%- if unit_name == model_label -%}
                     {%- if show_model -%}
+                      {%- liquid
+                        assign model_maps = false
+                        if model_drives
+                          if split_pack or i == 1
+                            assign model_maps = true
+                          endif
+                        endif
+                      -%}
                       <span class="bp-select">
                         <select
                           data-bp-option="{{ unit_name | escape }}"
-                          {% if model_drives and i == 1 %}data-bp-maps-to="{{ lock_name | escape }}"{% else %}data-bp-property{% endif %}
+                          {% if model_maps %}data-bp-maps-to="{{ lock_name | escape }}"{% else %}data-bp-property{% endif %}
                           aria-label="{{ unit_name | escape }} — #{{ i }}"
                         >
                           {%- for raw_value in model_values -%}
@@ -477,7 +531,8 @@
     { "type": "text", "id": "heading", "label": "Titre", "default": "Choisissez votre édition" },
     { "type": "text", "id": "lock_option", "label": "Option de palier", "default": "Édition", "info": "Une carte par valeur de cette option." },
     { "type": "text", "id": "unit_options", "label": "Options par exemplaire", "default": "Couleur, Modèle, Gravure", "info": "Liste ordonnée des menus affichés sur chaque ligne « #1 », « #2 »… Un nom d'option produit rend un vrai menu de variante ; le nom du menu Modèle ci-dessous rend le menu décrit plus bas." },
-    { "type": "text", "id": "shared_options", "label": "Options communes au pack", "default": "Gravure", "info": "Sur une carte à plusieurs exemplaires, ces options sortent des lignes « #1 », « #2 »… et sont proposées une seule fois pour tout le pack. Sans effet sur une carte à un exemplaire." },
+    { "type": "checkbox", "id": "split_units", "label": "Vendre chaque exemplaire séparément", "default": true, "info": "Sur une carte à plusieurs exemplaires : chaque ligne « #1 », « #2 »… résout sa propre variante et devient sa propre ligne de panier, et le prix de la carte est la somme des exemplaires. Décochez pour vendre le pack à travers la variante du palier, à son prix." },
+    { "type": "text", "id": "shared_options", "label": "Options communes au pack", "default": "Gravure", "info": "Sur une carte à plusieurs exemplaires, ces options sortent des lignes « #1 », « #2 »… et sont proposées une seule fois pour tout le pack. Sans effet sur une carte à un exemplaire, ni quand chaque exemplaire est vendu séparément." },
     { "type": "text", "id": "model_label", "label": "Menu Modèle — intitulé", "default": "Modèle", "info": "Sur une carte à un exemplaire, ce menu pilote l'option de palier : le prix et la photo de la carte suivent le choix. Sur un pack, il part en propriété de ligne. Laissez vide pour le désactiver." },
     { "type": "text", "id": "model_values", "label": "Menu Modèle — valeurs", "default": "Standard, Pro", "info": "Séparées par des virgules. Les valeurs de l'option de palier vendues à l'unité, packs exclus." },
     { "type": "range", "id": "preselected", "label": "Carte sélectionnée au chargement", "min": 1, "max": 3, "step": 1, "default": 1 },
