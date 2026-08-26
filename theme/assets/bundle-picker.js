@@ -90,10 +90,14 @@
    * Chaque ligne « #N » porte deux familles de menus :
    *  - ceux qui désignent une vraie option produit sur un exemplaire vendu
    *    séparément, qui servent à retrouver la variante ;
-   *  - ceux qui n'ont pas de variante derrière eux — menu virtuel marqué
-   *    `data-bp-property` (ex. Modèle), ou n'importe quel menu d'un exemplaire
+   *  - ceux qui n'ont pas de variante derrière eux — menu marqué
+   *    `data-bp-property`, ou n'importe quel menu d'un exemplaire
    *    `data-bp-property-only` (2e appareil d'un Duo Pack) — qui partent en
    *    propriété de ligne.
+   *
+   * Un menu peut aussi porter `data-bp-maps-to` : il s'affiche sous un intitulé
+   * (« Modèle ») mais choisit en réalité une autre option produit (« Édition »).
+   * C'est ce qui fait changer le prix et la photo d'une carte à un exemplaire.
    */
   BundlePicker.prototype.unitSelections = function (card) {
     var self = this;
@@ -117,10 +121,11 @@
 
         unit.querySelectorAll("select[data-bp-option]").forEach(function (sel) {
           var name = sel.getAttribute("data-bp-option");
+          var mapsTo = sel.getAttribute("data-bp-maps-to");
           if (propertyOnly || sel.hasAttribute("data-bp-property")) {
             props[name] = sel.value;
           } else {
-            resolve[name] = sel.value;
+            resolve[mapsTo || name] = sel.value;
           }
         });
 
@@ -158,13 +163,49 @@
 
   /* --- État de l'interface ------------------------------------------------ */
 
+  BundlePicker.prototype.sellableUnits = function (card) {
+    return this.unitSelections(card).filter(function (unit) {
+      return !unit.propertyOnly;
+    });
+  };
+
+  /*
+   * Prix, prix barré et photo d'une carte suivent la variante que ses menus
+   * désignent. Un prix forcé dans les réglages porte `data-bp-static` et n'est
+   * jamais repeint.
+   */
+  BundlePicker.prototype.paint = function (card) {
+    var units = this.sellableUnits(card);
+    var variant = units.length ? units[0].variant : null;
+    if (!variant) return;
+
+    var priceNode = card.querySelector("[data-bp-price]");
+    if (priceNode && !priceNode.hasAttribute("data-bp-static") && variant.priceLabel) {
+      priceNode.textContent = variant.priceLabel;
+    }
+
+    var compareNode = card.querySelector("[data-bp-compare]");
+    if (compareNode && !compareNode.hasAttribute("data-bp-static")) {
+      compareNode.textContent = variant.compareLabel || "";
+      compareNode.style.display = variant.compareLabel ? "" : "none";
+    }
+
+    var imageNode = card.querySelector("[data-bp-image]");
+    var source = variant.image || this.config.fallbackImage;
+    if (imageNode && source && imageNode.getAttribute("src") !== source) {
+      imageNode.removeAttribute("srcset");
+      imageNode.setAttribute("src", source);
+    }
+  };
+
   BundlePicker.prototype.refresh = function () {
+    var self = this;
+    this.cards.forEach(function (item) { self.paint(item); });
+
     var card = this.selectedCard();
     if (!card || !this.atc) return;
 
-    var units = this.unitSelections(card).filter(function (unit) {
-      return !unit.propertyOnly;
-    });
+    var units = this.sellableUnits(card);
     var resolved = units.every(function (unit) {
       return unit.variant;
     });
@@ -202,7 +243,7 @@
     cartUnits.forEach(function (unit, position) {
       if (!unit.variant) return;
       var properties = {};
-      if (bundleName) properties._bundle = bundleName;
+      if (multiUnit && bundleName) properties._bundle = bundleName;
       if (cartUnits.length > 1) properties._bundle_item = "#" + (position + 1);
 
       // Menus sans variante derrière eux (ex. Modèle) : propriétés de ligne.
