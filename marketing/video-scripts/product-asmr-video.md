@@ -1,31 +1,40 @@
-# Product ASMR Video — Portable LED Sanitizer Case
+# Vidéo ASMR Produit — Boîtier LED portable
 
-No footage has been rendered. Artlist currently reports **0 free
-generations remaining and no active credit plan**, so this is a
-ready-to-use script + prompt package: generate the assets once credits
-are available (see "Generation notes" below).
+Aucune vidéo n'a été générée pour l'instant. Artlist indique
+actuellement **0 génération gratuite restante et aucun plan de
+crédits actif**, il s'agit donc d'un script + de prompts prêts à
+l'emploi : à générer une fois des crédits disponibles (voir « Notes de
+génération » ci-dessous).
 
-## Product reference (recreated from description)
+## Référence produit (reconstituée à partir de la description)
 
-The source photo could not be uploaded (pasted inline, no accessible
-file/URL), so the product is described here for prompting an image
-generator to recreate a close reference frame:
+La photo d'origine n'a pas pu être téléversée (collée directement dans
+le message, sans fichier/URL accessible), le produit est donc décrit
+ici pour permettre à un générateur d'images de recréer une image de
+référence proche :
 
-- Compact clamshell-style case, roughly palm-sized, rounded rectangular
-  footprint with softly rounded corners.
-- **Lid (top half):** glossy deep navy-blue, high-gloss reflective
-  finish. Set into the lid near the hinge is a small rectangular window
-  housing a digital LED display (segmented/clock-style digits, currently
-  reading "00") next to a small four-point sparkle/diamond icon.
-- **Base (bottom half):** matte black, slightly larger footprint than the
-  lid, soft-touch finish, contrasts with the glossy top.
-- **Front edge of the base:** one recessed circular power/function
-  button, and a USB-C charging port immediately to its right.
-- Overall aesthetic: minimalist two-tone tech gadget, premium/quiet-luxury
-  feel, sits on a plain light-grey seamless background in the reference
-  photo.
+- Boîtier compact de type clapet (clamshell), à peu près de la taille
+  d'une paume de main, forme rectangulaire aux coins arrondis.
+- **Couvercle (partie haute) :** bleu marine profond, finition brillante
+  très réfléchissante. Près de la charnière, une petite fenêtre
+  rectangulaire encastrée abrite un afficheur LED numérique (chiffres
+  segmentés façon horloge, affichant actuellement « 00 ») juste à côté
+  d'une petite icône scintillante/diamant à quatre pointes.
+- **Base (partie basse) :** noir mat, empreinte légèrement plus grande
+  que le couvercle, finition douce au toucher, contraste avec le haut
+  brillant.
+- **Bord avant de la base :** un bouton unique, circulaire et encastré
+  (marche/fonction), avec un port USB-C juste à côté.
+- Esthétique générale : gadget tech bicolore minimaliste, sensation
+  premium/discrète, posé sur un fond gris clair uni sans coutures sur
+  la photo de référence.
 
-### Reference image prompt (text-to-image)
+### Prompt image de référence (texte vers image)
+
+Les prompts de génération sont volontiers laissés en anglais ci-dessous :
+les modèles d'image/vidéo (Artlist, Midjourney, Kling, Veo, etc.)
+donnent des résultats nettement plus fiables et précis avec des prompts
+rédigés en anglais.
 
 ```
 Studio product photo of a compact two-tone clamshell case, palm-sized,
@@ -41,29 +50,31 @@ product photography, 4k.
 
 ## Concept
 
-Pure ASMR, no dialogue, no voiceover, no music track — only the
-product's own tactile sounds (clicks, taps, glass-smooth surface
-contact, soft mechanical hum) recorded/generated close-mic'd and in
-slow motion. Total runtime target: **18–24 seconds**, edited as a loop
-for Reels/TikTok/Shopify product page autoplay.
+ASMR pur, sans dialogue, sans voix off, sans musique — uniquement les
+sons tactiles propres au produit (clics, tapotements, contact sur
+surface lisse, léger ronronnement mécanique), captés/générés en gros
+plan sonore et au ralenti. Durée totale visée : **18 à 24 secondes**,
+montée en boucle pour Reels/TikTok/lecture automatique en fiche
+produit Shopify.
 
-## Shot list
+## Découpage plan par plan
 
-| # | Shot | Camera | Action | Sound cue |
-|---|------|--------|--------|-----------|
-| 1 | Extreme close-up, top-down | Static, slow push-in | Fingertip taps twice on the glossy navy lid | Two crisp, resonant taps |
-| 2 | Macro, 3/4 angle | Slow orbit left-to-right | Lid opens on hinge, brief resistance then a soft click at full open | Mechanical click + faint spring release |
-| 3 | Close-up on display window | Static, rack focus in | LED digits flicker on, "00" glows, sparkle icon blinks once | Soft electronic chime, subtle hum |
-| 4 | Macro on front edge | Static | Fingertip presses the recessed button; a satisfying tactile click | Deep, muted click |
-| 5 | Extreme close-up on seam | Slow horizontal pan | Fingernail glides along the glossy-to-matte seam line | Faint glassy drag / soft friction |
-| 6 | Side profile, low angle | Slow pull-back | Case rotates slightly in-hand, light rakes across gloss vs. matte | Ambient room-tone only (near silence) |
-| 7 | Top-down | Static, slow push-in | Lid closes, soft thud + magnetic-style snap | Muted thud + snap |
-| 8 | Full product hero | Static hold, 2s | Case rests closed, display fades out | Silence / room tone, hold for loop point |
+| # | Plan | Caméra | Action | Son |
+|---|------|--------|--------|-----|
+| 1 | Très gros plan, plongée | Fixe, lent zoom avant | Un doigt tapote deux fois le couvercle bleu marine brillant | Deux tapotements nets et résonnants |
+| 2 | Macro, angle 3/4 | Lente rotation gauche-droite | Le couvercle s'ouvre sur sa charnière, légère résistance puis un clic doux en fin de course | Clic mécanique + léger relâchement de ressort |
+| 3 | Gros plan sur la fenêtre d'affichage | Fixe, mise au point progressive | Les chiffres LED s'allument, « 00 » s'affiche, l'icône scintillante clignote une fois | Léger carillon électronique, ronronnement subtil |
+| 4 | Macro sur le bord avant | Fixe | Un doigt appuie sur le bouton encastré ; clic tactile satisfaisant | Clic profond et étouffé |
+| 5 | Très gros plan sur la jointure | Lent panoramique horizontal | Un ongle glisse le long de la ligne de jonction brillant/mat | Léger frottement, glissement quasi vitreux |
+| 6 | Profil, angle bas | Lent recul de caméra | Le boîtier pivote légèrement en main, la lumière accroche le contraste brillant/mat | Ambiance sonore seule (quasi silence) |
+| 7 | Plongée | Fixe, lent zoom avant | Le couvercle se referme, bruit sourd léger + clic façon aimant | Bruit sourd étouffé + clic |
+| 8 | Plan produit final | Fixe, maintien 2 s | Le boîtier fermé repose, l'affichage s'éteint en fondu | Silence / ambiance, pour permettre une boucle |
 
-## Single continuous generation prompt (image-to-video)
+## Prompt de génération unique et continu (image vers vidéo)
 
-Use this once a reference frame (from the prompt above, or the real
-product photo) is available as the input image:
+À utiliser une fois qu'une image de référence (issue du prompt
+ci-dessus, ou la vraie photo produit) est disponible comme image
+d'entrée :
 
 ```
 Extreme macro ASMR product video of a two-tone navy-and-black clamshell
@@ -79,28 +90,32 @@ thud. Calm, slow pacing, satisfying ASMR tone, 4k, shallow depth of
 field, seamless light-grey background.
 ```
 
-If the chosen model caps clip length below the full 18–24s target,
-split the shot list into 2–3 generations (e.g. shots 1–3, 4–6, 7–8) and
-stitch them, since each row above is already a self-contained beat.
+Si le modèle choisi limite la durée d'un clip en dessous des 18-24
+secondes visées, découper le tableau de plans en 2-3 générations (par
+exemple plans 1-3, 4-6, 7-8) et les assembler au montage : chaque ligne
+ci-dessus constitue déjà une séquence autonome.
 
-## Generation notes (for when credits are available)
+## Notes de génération (une fois les crédits disponibles)
 
-- **Reference frame:** `generate_image` (text-to-image) with the prompt
-  above, or upload the real product photo via a public URL once one
-  exists.
-- **Video:** `generate_video` with `input: { assetId }` pointing at the
-  reference frame, on an image-to-video model with native audio if the
-  tactile sound effects should be baked in (e.g. a Veo 3.1 "with audio"
-  or Kling "audio on" variant); otherwise generate silent and add SFX
-  in post.
-- **Duration:** request the closest supported length to 18–24s, or
-  generate the 2–3 shorter segments described above and stitch.
-- Check `get_generation_cost` before running, and re-check
-  `get_balance` first — this account currently shows 0 free
-  generations and no credit plan.
+- **Image de référence :** `generate_image` (texte vers image) avec le
+  prompt ci-dessus, ou téléversement de la vraie photo produit via une
+  URL publique dès qu'elle en aura une.
+- **Vidéo :** `generate_video` avec `input: { assetId }` pointant vers
+  l'image de référence, sur un modèle image-vers-vidéo avec audio natif
+  si les bruitages tactiles doivent être intégrés directement (par
+  exemple une variante Veo 3.1 « with audio » ou Kling « audio on ») ;
+  sinon générer en silence et ajouter les bruitages en post-production.
+- **Durée :** demander la durée disponible la plus proche de 18-24 s,
+  ou générer les 2-3 segments plus courts décrits ci-dessus puis les
+  assembler.
+- Vérifier `get_generation_cost` avant de lancer la génération, et
+  revérifier `get_balance` au préalable — ce compte affiche
+  actuellement 0 génération gratuite restante et aucun plan de
+  crédits.
 
-## Suggested caption / copy
+## Légende / accroche suggérée
 
-> The click you didn't know you needed. 🖤
+> Le clic auquel vous ne vous attendiez pas. 🖤
 
-Short, no-hashtag-stuffing caption; let the ASMR sound carry the post.
+Accroche courte, sans avalanche de hashtags ; laisser le son ASMR
+porter la publication.
