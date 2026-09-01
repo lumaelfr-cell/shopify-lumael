@@ -6,6 +6,11 @@ crédits actif**, il s'agit donc d'un script + de prompts prêts à
 l'emploi : à générer une fois des crédits disponibles (voir « Notes de
 génération » ci-dessous).
 
+Le concept est un ASMR pur, sans aucune parole (voir « Concept »
+ci-dessous) : il n'y a donc rien à traduire à l'écran. Tout le
+document — description du produit, découpage des plans et prompts de
+génération — est rédigé en français, comme demandé.
+
 ## Référence produit (reconstituée à partir de la description)
 
 La photo d'origine n'a pas pu être téléversée (collée directement dans
@@ -31,21 +36,18 @@ référence proche :
 
 ### Prompt image de référence (texte vers image)
 
-Les prompts de génération sont volontiers laissés en anglais ci-dessous :
-les modèles d'image/vidéo (Artlist, Midjourney, Kling, Veo, etc.)
-donnent des résultats nettement plus fiables et précis avec des prompts
-rédigés en anglais.
-
 ```
-Studio product photo of a compact two-tone clamshell case, palm-sized,
-rounded rectangular body. Top lid glossy deep navy-blue with a small
-rectangular cutout showing a digital LED display reading "00" next to a
-tiny sparkle icon. Bottom half matte black, slightly wider than the lid,
-soft-touch finish. Front edge has one recessed circular button and a
-USB-C port beside it. Shot on seamless light-grey background, soft
-diffused studio lighting, 45-degree hero angle, sharp macro detail on
-seams and finish contrast, no text or logo, no hands, ultra-realistic
-product photography, 4k.
+Photo produit en studio d'un boîtier compact bicolore de type clapet,
+taille d'une paume de main, corps rectangulaire aux coins arrondis.
+Couvercle supérieur bleu marine profond et brillant, avec une petite
+découpe rectangulaire montrant un afficheur LED numérique affichant
+« 00 » à côté d'une minuscule icône scintillante. Partie basse noir
+mat, légèrement plus large que le couvercle, finition douce au
+toucher. Le bord avant comporte un bouton circulaire encastré et un
+port USB-C juste à côté. Prise de vue sur fond gris clair uni sans
+coutures, éclairage studio doux et diffus, angle héros à 45 degrés,
+détail macro net sur les jointures et le contraste des finitions, sans
+texte ni logo, sans mains, photographie produit ultra-réaliste, 4K.
 ```
 
 ## Concept
@@ -77,17 +79,21 @@ ci-dessus, ou la vraie photo produit) est disponible comme image
 d'entrée :
 
 ```
-Extreme macro ASMR product video of a two-tone navy-and-black clamshell
-gadget case. Slow, deliberate camera moves: push-in, then slow orbit.
-A single fingertip taps the glossy lid twice, then opens it with a soft
-mechanical click; the LED display glows on inside the lid window. A
-fingertip presses the recessed front button with a satisfying click.
-Shallow depth of field, soft studio key light with subtle rim light
-catching the glossy-to-matte transition. No hands beyond fingertips, no
-face, no text overlays, no music — only close-mic'd tactile sounds:
-taps, a mechanical click, a soft electronic chime, a muted closing
-thud. Calm, slow pacing, satisfying ASMR tone, 4k, shallow depth of
-field, seamless light-grey background.
+Vidéo produit ASMR en très gros plan macro d'un boîtier gadget bicolore
+bleu marine et noir de type clapet. Mouvements de caméra lents et
+posés : zoom avant, puis lente rotation orbitale. Un unique bout de
+doigt tapote deux fois le couvercle brillant, puis l'ouvre avec un
+clic mécanique doux ; l'afficheur LED s'allume à l'intérieur de la
+fenêtre du couvercle. Un bout de doigt appuie sur le bouton avant
+encastré avec un clic satisfaisant. Faible profondeur de champ,
+lumière studio douce en clé avec un léger contre-jour qui accroche la
+transition brillant/mat. Aucune main visible au-delà du bout des
+doigts, aucun visage, aucun texte incrusté, aucune musique —
+uniquement des sons tactiles captés en gros plan sonore : tapotements,
+un clic mécanique, un léger carillon électronique, un bruit sourd
+étouffé à la fermeture. Rythme calme et lent, tonalité ASMR
+satisfaisante, 4K, faible profondeur de champ, fond gris clair uni
+sans coutures. Aucune parole, aucun dialogue, aucune voix off.
 ```
 
 Si le modèle choisi limite la durée d'un clip en dessous des 18-24
