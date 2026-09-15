@@ -1,0 +1,660 @@
+{%- doc -%}
+  Section avis clients Ulvéo — note moyenne, répartition par étoiles et liste d'avis vérifiés.
+  Chaque avis est un bloc modifiable depuis l'éditeur de thème.
+  Deux réglages permettent d'alléger la section : masquer les photos des avis,
+  ou n'afficher que les statistiques (note, nombre d'avis, répartition).
+{%- enddoc -%}
+
+{%- liquid
+  assign review_count = section.blocks.size
+  assign total_rating = 0
+  for block in section.blocks
+    assign total_rating = total_rating | plus: block.settings.rating
+  endfor
+  assign average_rating = 0
+  if review_count > 0
+    assign average_rating = total_rating | times: 1.0 | divided_by: review_count | round: 1
+  endif
+
+  if section.settings.manual_summary
+    assign display_rating = section.settings.manual_rating
+    assign display_count = section.settings.manual_review_count | times: 1
+  else
+    assign display_rating = average_rating
+    assign display_count = review_count
+  endif
+-%}
+
+<div
+  class="ulveo-avis color-{{ section.settings.color_scheme }}{% if section.settings.stats_only %} ulveo-avis--stats-only{% endif %}"
+  style="{% render 'spacing-padding', settings: section.settings %} --ulveo-avis-heading-size: {{ section.settings.heading_font_size }}px; --ulveo-avis-name-size: {{ section.settings.name_font_size }}px; --ulveo-avis-text-size: {{ section.settings.text_font_size }}px;"
+>
+  <div class="ulveo-avis__inner">
+    {%- if section.settings.heading != blank -%}
+      <div class="ulveo-avis__heading">{{ section.settings.heading }}</div>
+    {%- endif -%}
+
+    {%- if review_count > 0 or section.settings.manual_summary -%}
+      <div class="ulveo-avis__summary">
+        <div class="ulveo-avis__score-row">
+          <div class="ulveo-avis__score">
+            <span class="ulveo-avis__score-star" aria-hidden="true">★</span>
+            <span class="ulveo-avis__score-number">{{ display_rating }}</span>
+          </div>
+          {%- if section.settings.show_trust_badge -%}
+            <span class="ulveo-avis__trust-badge">
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="10" r="10"></circle>
+                <path
+                  d="M6 10.3l2.6 2.6L14.4 7"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              Avis vérifiés
+            </span>
+          {%- endif -%}
+        </div>
+        <p class="ulveo-avis__count">
+          {{ display_count }} avis{% if section.settings.show_verified_label %} vérifiés{% endif %}
+        </p>
+
+        {%- if section.settings.show_breakdown -%}
+          <div class="ulveo-avis__breakdown">
+            {%- for i in (1..5) -%}
+              {%- assign star_value = 6 | minus: forloop.index -%}
+              {%- assign star_count = 0 -%}
+              {%- if section.settings.manual_summary -%}
+                {%- case star_value -%}
+                  {%- when 5 -%}
+                    {%- assign star_count = section.settings.manual_stars_5 | times: 1 -%}
+                  {%- when 4 -%}
+                    {%- assign star_count = section.settings.manual_stars_4 | times: 1 -%}
+                  {%- when 3 -%}
+                    {%- assign star_count = section.settings.manual_stars_3 | times: 1 -%}
+                  {%- when 2 -%}
+                    {%- assign star_count = section.settings.manual_stars_2 | times: 1 -%}
+                  {%- when 1 -%}
+                    {%- assign star_count = section.settings.manual_stars_1 | times: 1 -%}
+                {%- endcase -%}
+              {%- else -%}
+                {%- for block in section.blocks -%}
+                  {%- if block.settings.rating == star_value -%}
+                    {%- assign star_count = star_count | plus: 1 -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+              {%- assign star_percent = 0 -%}
+              {%- if display_count > 0 -%}
+                {%- assign star_percent = star_count | times: 100 | divided_by: display_count -%}
+              {%- endif -%}
+              <div class="ulveo-avis__bar-row">
+                <span class="ulveo-avis__bar-label">{{ star_value }}</span>
+                <div class="ulveo-avis__bar-track">
+                  <div class="ulveo-avis__bar-fill" style="width: {{ star_percent }}%;"></div>
+                </div>
+                <span class="ulveo-avis__bar-count">({{ star_count }})</span>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- unless section.settings.stats_only -%}
+      <div class="ulveo-avis__list">
+        {%- for block in section.blocks -%}
+          <div class="ulveo-avis__card" {{ block.shopify_attributes }}>
+            {%- if block.settings.verified -%}
+              <span class="ulveo-avis__verified">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="10" cy="10" r="10"></circle>
+                  <path
+                    d="M6 10.3l2.6 2.6L14.4 7"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
+                Vérifié
+              </span>
+            {%- endif -%}
+            {%- if section.settings.show_photos and block.settings.image != blank -%}
+              <div class="ulveo-avis__photo">
+                {{
+                  block.settings.image
+                  | image_url: width: 300
+                  | image_tag: loading: 'lazy', alt: block.settings.name, widths: '150, 300'
+                }}
+              </div>
+            {%- endif -%}
+            <div class="ulveo-avis__card-body">
+              <div class="ulveo-avis__stars" aria-hidden="true">
+                {%- for s in (1..5) -%}
+                  <span class="{% if s <= block.settings.rating %}is-filled{% endif %}">★</span>
+                {%- endfor -%}
+              </div>
+              <div class="ulveo-avis__card-header">
+                <span class="ulveo-avis__name">{{ block.settings.name }}</span>
+                {%- if block.settings.city != blank -%}
+                  <span class="ulveo-avis__city">{{ block.settings.city }}</span>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.text != blank -%}
+                <div class="ulveo-avis__text">{{ block.settings.text }}</div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endunless -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .ulveo-avis {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    --ulveo-avis-star: #f0b400;
+    --ulveo-avis-star-empty: rgba(0, 0, 0, 0.15);
+  }
+
+  .ulveo-avis__inner {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding-inline: var(--padding-lg, 20px);
+  }
+
+  .ulveo-avis__heading {
+    max-width: 34rem;
+    margin: 0 auto var(--margin-lg, 24px);
+    text-align: center;
+    font-size: var(--ulveo-avis-heading-size, 16px);
+  }
+
+  .ulveo-avis__heading > :first-child {
+    margin-block-start: 0;
+  }
+
+  .ulveo-avis__heading > :last-child {
+    margin-block-end: 0;
+  }
+
+  .ulveo-avis__summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-block-end: var(--margin-lg, 32px);
+  }
+
+  .ulveo-avis--stats-only .ulveo-avis__summary {
+    margin-block-end: 0;
+  }
+
+  .ulveo-avis__score-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ulveo-avis__score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ulveo-avis__trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px 4px 8px;
+    border-radius: 100px;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    font-size: var(--font-size--xs, 0.75rem);
+    font-weight: 600;
+  }
+
+  .ulveo-avis__trust-badge svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  .ulveo-avis__score-star {
+    color: var(--ulveo-avis-star);
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .ulveo-avis__score-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .ulveo-avis__count {
+    margin: 8px 0 0;
+    color: var(--color-foreground-secondary);
+    font-size: var(--font-size--sm, 0.875rem);
+  }
+
+  .ulveo-avis__breakdown {
+    width: 100%;
+    max-width: 300px;
+    margin-block-start: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ulveo-avis__bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--font-size--xs, 0.75rem);
+  }
+
+  .ulveo-avis__bar-label {
+    flex: 0 0 auto;
+    width: 0.8em;
+    text-align: right;
+    color: var(--color-foreground-secondary);
+  }
+
+  .ulveo-avis__bar-track {
+    flex: 1 1 auto;
+    height: 8px;
+    border-radius: 100px;
+    background: var(--ulveo-avis-star-empty);
+    overflow: hidden;
+  }
+
+  .ulveo-avis__bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--ulveo-avis-star);
+  }
+
+  .ulveo-avis__bar-count {
+    flex: 0 0 auto;
+    width: 2em;
+    color: var(--color-foreground-secondary);
+  }
+
+  .ulveo-avis__list {
+    display: flex;
+    justify-content: center;
+    justify-content: safe center;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-block-end: 6px;
+    margin-inline: -20px;
+    padding-inline: 20px;
+    scrollbar-width: none;
+  }
+
+  .ulveo-avis__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media screen and (min-width: 700px) {
+    .ulveo-avis__list {
+      width: 100vw;
+      margin-inline: calc(50% - 50vw);
+      padding-inline: 24px;
+    }
+  }
+
+  .ulveo-avis__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    flex: 0 0 auto;
+    width: 68vw;
+    max-width: 260px;
+    scroll-snap-align: start;
+  }
+
+  @media screen and (min-width: 700px) {
+    .ulveo-avis__card {
+      width: 260px;
+    }
+  }
+
+  .ulveo-avis__photo {
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+  }
+
+  .ulveo-avis__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ulveo-avis__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ulveo-avis__stars span {
+    color: var(--ulveo-avis-star-empty);
+  }
+
+  .ulveo-avis__stars span.is-filled {
+    color: var(--ulveo-avis-star);
+  }
+
+  .ulveo-avis__card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding-inline-end: 90px;
+  }
+
+  .ulveo-avis__name {
+    font-weight: 600;
+    font-size: var(--ulveo-avis-name-size, 1rem);
+  }
+
+  .ulveo-avis__city {
+    color: var(--color-foreground-secondary);
+    font-size: var(--font-size--xs, 0.75rem);
+  }
+
+  .ulveo-avis__verified {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 3px 6px;
+    border-radius: 100px;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    font-size: var(--font-size--xs, 0.75rem);
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  .ulveo-avis__verified svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  .ulveo-avis__text {
+    color: var(--color-foreground-secondary);
+    font-size: var(--ulveo-avis-text-size, 15px);
+  }
+
+  .ulveo-avis__text > :first-child {
+    margin-block-start: 0;
+  }
+
+  .ulveo-avis__text > :last-child {
+    margin-block-end: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Avis clients Ulvéo",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Titre",
+      "default": "<p>✨ <strong>Ils l’ont adopté !</strong><br/>Découvrez pourquoi nos clients ne peuvent plus s’en passer.</p>"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Taille du titre",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "name_font_size",
+      "label": "Taille du nom du client",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Taille du texte des avis",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "checkbox",
+      "id": "manual_summary",
+      "label": "Modifier manuellement la note et la répartition",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "manual_rating",
+      "label": "Note affichée",
+      "info": "Ex : 5.0 ou 4.5",
+      "default": "5.0"
+    },
+    {
+      "type": "text",
+      "id": "manual_review_count",
+      "label": "Nombre d'avis affiché",
+      "default": "4"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_5",
+      "label": "Nombre d'avis à 5 étoiles",
+      "default": "4"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_4",
+      "label": "Nombre d'avis à 4 étoiles",
+      "default": "0"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_3",
+      "label": "Nombre d'avis à 3 étoiles",
+      "default": "0"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_2",
+      "label": "Nombre d'avis à 2 étoiles",
+      "default": "0"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_1",
+      "label": "Nombre d'avis à 1 étoile",
+      "default": "0"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breakdown",
+      "label": "Afficher la répartition par étoiles",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified_label",
+      "label": "Afficher « vérifiés » à côté du nombre d'avis",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_badge",
+      "label": "Afficher le badge « Avis vérifiés » à côté de la note",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_photos",
+      "label": "Afficher les photos des clients",
+      "info": "Décochez pour n'afficher que le texte des avis.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "stats_only",
+      "label": "Afficher uniquement les statistiques",
+      "info": "Masque les cartes d'avis : ne restent que la note, le nombre d'avis et la répartition.",
+      "default": false
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Jeu de couleurs",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Marge haute",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Marge basse",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "avis",
+      "name": "Avis client",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nom du client",
+          "default": "Prénom N."
+        },
+        {
+          "type": "text",
+          "id": "city",
+          "label": "Ville",
+          "default": "France"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Note",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Afficher le badge « Vérifié »",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Texte de l'avis",
+          "default": "<p>Très pratique, je recommande !</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo (optionnel)"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "Avis clients Ulvéo",
+      "blocks": [
+        {
+          "type": "avis",
+          "settings": {
+            "name": "Thomas M.",
+            "city": "Toulouse",
+            "rating": 5,
+            "text": "<p>Très pratique et facile à utiliser, je recommande à 100 % !</p>"
+          }
+        },
+        {
+          "type": "avis",
+          "settings": {
+            "name": "Amélie N.",
+            "city": "Lyon",
+            "rating": 5,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>"
+          }
+        },
+        {
+          "type": "avis",
+          "settings": {
+            "name": "Léo M.",
+            "city": "Bordeaux",
+            "rating": 5,
+            "text": "<p>Parfaite pour nous ! Rapide, efficace, et sans prise de tête. Le meilleur investissement récent.</p>"
+          }
+        },
+        {
+          "type": "avis",
+          "settings": {
+            "name": "Jade E.",
+            "city": "Troyes",
+            "rating": 5,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
