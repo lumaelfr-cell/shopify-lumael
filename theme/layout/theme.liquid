@@ -32,6 +32,8 @@
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
+    {% comment %} Ulvéo : bande de vignettes produit sur téléphone {% endcomment %}
+    {%- render 'ulveo-product-gallery' -%}
 
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}

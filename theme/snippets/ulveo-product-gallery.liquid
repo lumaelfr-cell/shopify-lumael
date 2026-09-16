@@ -1,0 +1,56 @@
+{%- comment -%}
+  Ulvéo — bande de vignettes du produit sur téléphone.
+
+  Horizon fige les vignettes mobiles à 44 px et les fait défiler en pastilles.
+  La référence en montre quatre qui remplissent la largeur, la suite restant
+  accessible par défilement horizontal. On repasse donc la bande en grille
+  dont chaque colonne vaut le quart de la largeur disponible.
+
+  Cotes relevées sur la capture (facteur 2,336) puis converties en px CSS :
+    bande 363 de large · vignette 87,7 · écart 4,3 · rayon 8
+    espace entre l'image principale et la bande : 12
+
+  Le rayon et le contour de la vignette active restent ceux du thème
+  (réglage « Rayon des coins » du bloc Galerie, à 8 px).
+
+  Rendu depuis layout/theme.liquid ; les règles ne mordent que sur la bande
+  mobile de la galerie produit.
+{%- endcomment -%}
+
+<style>
+  @media screen and (max-width: 749px) {
+    .media-gallery__mobile-controls[thumbnails] .slideshow-controls__thumbnails-container {
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .media-gallery__mobile-controls[thumbnails] .slideshow-controls__thumbnails-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* La colonne vaut le quart de la largeur, écarts déduits : quatre
+       vignettes tiennent exactement dans la bande, les suivantes débordent
+       et sont atteintes par défilement. */
+    .media-gallery__mobile-controls[thumbnails] .slideshow-controls__thumbnails {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: calc((100% - 3 * var(--ulveo-thumb-gap, 5px)) / 4);
+      gap: var(--ulveo-thumb-gap, 5px);
+      width: 100%;
+      margin-inline: 0;
+      padding-inline: 0;
+      padding-block: 12px 0;
+    }
+
+    /* Spécificité portée à (0,4,0) pour passer devant la largeur de 44 px
+       fixée par le thème sur les vignettes mobiles. */
+    .media-gallery__mobile-controls[thumbnails]
+      .slideshow-controls__thumbnails
+      .slideshow-controls__thumbnail {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+    }
+  }
+</style>

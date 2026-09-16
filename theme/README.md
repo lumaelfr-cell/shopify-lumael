@@ -64,3 +64,26 @@ Prix, variantes, avis et ordre des sections strictement inchangés.
   texte strictement identique. Leur contenu (« 20 % plus rapide », « zéro casse »,
   « choix pro ») ne correspond pas à une scelleuse de sachets.
 - **Note affichée** : 4,8 / 329 avis, saisie manuellement (`manual_summary`).
+
+---
+
+## Page produit — bande de vignettes sur téléphone (3e lot)
+
+Référence : rangée de 4 vignettes sous l'image principale.
+Cotes relevées dans `MESURES-VIGNETTES.md`.
+
+| Fichier | Modification |
+|---|---|
+| `snippets/ulveo-product-gallery.liquid` | Nouveau. Repasse la bande de vignettes mobile en grille : 4 vignettes remplissent la largeur, les suivantes défilent. |
+| `layout/theme.liquid` | Une ligne de rendu du snippet dans le `<head>`. |
+| `templates/product.json` | `slideshow_mobile_controls_style` : `counter` → `thumbnails`. Seul réglage touché. |
+
+Horizon figeait les vignettes mobiles à 44 px (6 visibles, serrées) et
+affichait un simple compteur tant que la pagination mobile restait sur
+`counter`. Mesuré au navigateur après correction : **86,5 × 89,5 px, 4 visibles
+sur 7**, écart 5, rayon 8, aucun débordement horizontal — pour une cible de
+87,7 × 92, écart 4,3, 4 visibles.
+
+Les images sont celles du produit Ulvéo : aucune n'a été remplacée ni
+supprimée. Le rayon (8 px) et le contour de la vignette active restent ceux
+du thème.
