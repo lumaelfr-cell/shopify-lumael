@@ -1,0 +1,555 @@
+/* ==========================================================================
+   Sélecteur de lot Ulvéo
+
+   Cotes relevées sur la capture de référence (918 px de large pour ~393 pt,
+   facteur 2,336) puis converties en px CSS :
+
+     carte 361 x 90 · rayon 12 · écart 20 · bordure 2 px si sélectionnée
+     radio 18 · vignette 56 (arrondie 10) · titre 20/700 · description 14
+     prix 19/700 · prix barré 14 · badge 17 de haut · bouton 48, rayon 12
+
+   Le bloc s'insère dans un thème dont on ne contrôle pas la feuille de
+   styles : chaque règle est portée par la racine `.bp` (spécificité 0,2,0)
+   pour passer devant les règles du type `.product-details label`. Les
+   `!important` marquent les propriétés structurelles qui, si le thème les
+   gagne, cassent la mise en page (colonnes réduites à zéro).
+   ========================================================================== */
+
+.bp {
+  --bp-ink: #140a05;
+  --bp-muted: #7a6a60;
+  --bp-line: #e0d6cf;
+  --bp-surface: #ffffff;
+  --bp-chip: #f4efec;
+  --bp-chip-ink: #6f6159;
+
+  /* Accent repris de la boutique : il colore la carte sélectionnée, le
+     bandeau et le bouton, comme l'accent unique de la référence. */
+  --bp-cta: #E8622C;
+  --bp-cta-ink: #ffffff;
+  --bp-accent-surface: #fdf3ed;
+
+  --bp-radius: 12px;
+  --bp-pad: 14px;
+  --bp-gap: 20px;
+  --bp-thumb: 56px;
+
+  display: block !important;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: var(--font-body--family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  color: var(--bp-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.bp *,
+.bp *::before,
+.bp *::after { box-sizing: border-box; }
+
+/* ---------- Titre de section --------------------------------------------- */
+
+.bp .bp__header {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.bp .bp__header::before,
+.bp .bp__header::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--bp-line);
+}
+
+.bp .bp__header-text {
+  flex: 0 0 auto;
+  font-family: var(--font-heading--family, inherit);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* ---------- Liste de cartes ---------------------------------------------- */
+
+.bp .bp__cards {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--bp-gap);
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.bp .bp-card {
+  position: relative;
+  display: block !important;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--bp-line);
+  border-radius: var(--bp-radius);
+  background: var(--bp-surface);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bp .bp-card:not(.is-selected):hover { border-color: #c9bab0; }
+
+/* La bordure passe de 1 à 2 px : on compense par le padding pour que la
+   hauteur de la carte ne bouge pas à la sélection. */
+.bp .bp-card.is-selected {
+  border-color: var(--bp-cta);
+  border-width: 2px;
+  background: var(--bp-accent-surface);
+}
+
+.bp .bp-card.is-selected .bp-card__main { padding: 15px calc(var(--bp-pad) - 1px); }
+
+/* ---------- Bandeau « Meilleure offre » ---------------------------------- */
+
+.bp .bp-card__badge {
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  z-index: 2;
+  display: inline-flex !important;
+  align-items: center;
+  height: 18px;
+  padding: 0 9px;
+  border-radius: 4px;
+  background: var(--bp-cta);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------- Ligne principale : radio | vignettes | texte | prix ---------- */
+
+.bp .bp-card__main {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  padding: 16px var(--bp-pad);
+}
+
+.bp .bp-card__radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bp .bp-card__radio-ui {
+  position: relative;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 18px;
+  height: 18px;
+  margin: 0 14px 0 0;
+  border: 1.5px solid #c2b4aa;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: border-color 0.18s ease;
+}
+
+.bp .bp-card.is-selected .bp-card__radio-ui { border-color: var(--bp-cta); }
+
+.bp .bp-card.is-selected .bp-card__radio-ui::after {
+  content: "";
+  position: absolute;
+  inset: 3.5px;
+  border-radius: 50%;
+  background: var(--bp-cta);
+}
+
+.bp .bp-card__radio:focus-visible + .bp-card__radio-ui {
+  outline: 2px solid var(--bp-ink);
+  outline-offset: 2px;
+}
+
+/* ---------- Vignettes produit -------------------------------------------- */
+
+/* Une vignette par exemplaire, légèrement superposées dans une boîte de
+   largeur fixe : les titres de toutes les cartes restent alignés quel que
+   soit le nombre d'exemplaires. `contain` garantit que le produit n'est
+   jamais rogné ni déformé ; l'arrondi porte sur la boîte. */
+.bp .bp-card__media {
+  position: relative;
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: var(--bp-thumb);
+  margin-right: 11px;
+}
+
+.bp .bp-card__media img,
+.bp .bp-card__media svg {
+  display: block;
+  flex: 0 0 auto;
+  width: var(--bp-thumb);
+  height: var(--bp-thumb);
+  max-width: none;
+  padding: 3px;
+  border: 1px solid rgba(20, 10, 5, 0.10);
+  border-radius: 10px;
+  background: #ffffff;
+  object-fit: contain;
+  object-position: center;
+}
+
+.bp .bp-card__media img + img,
+.bp .bp-card__media img + svg { margin-left: -32px; }
+
+.bp .bp-card__qty {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  z-index: 2;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--bp-ink);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* La colonne de texte absorbe l'espace restant. Sans `min-width: 0` elle se
+   réduit à un caractère de large dès qu'un thème contraint la ligne. */
+.bp .bp-card__info {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow-wrap: break-word;
+}
+
+.bp .bp-card__title {
+  display: block;
+  margin: 0;
+  font-family: var(--font-heading--family, inherit);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+/* Arguments sur une seule ligne : empilés, ils feraient dépasser la carte
+   de la hauteur relevée sur la référence. */
+.bp .bp-card__features {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  max-width: 100%;
+  margin: 4px 0 0;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  list-style: none;
+}
+
+.bp .bp-card__features li {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  color: var(--bp-chip-ink);
+  font-size: 12.5px;
+  line-height: 1.25;
+  list-style: none;
+}
+
+.bp .bp-card__features li::before {
+  content: "✔";
+  flex: 0 0 auto;
+  color: var(--bp-cta);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bp .bp-card__desc {
+  display: block;
+  margin: 3px 0 0;
+  padding: 0;
+  color: var(--bp-muted);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.bp .bp-card__prices {
+  display: block !important;
+  flex: 0 0 auto !important;
+  padding-left: 10px;
+  text-align: right;
+}
+
+.bp .bp-card__price {
+  display: block;
+  font-family: var(--font-heading--family, inherit);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bp .bp-card__compare {
+  display: block;
+  margin-top: 2px;
+  color: #9a8b82;
+  font-size: 14px;
+  line-height: 1.2;
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+/* ---------- Panneau d'options (carte sélectionnée) ----------------------- */
+
+.bp .bp-card__options {
+  display: none !important;
+  padding: 0 var(--bp-pad) 14px;
+}
+
+.bp .bp-card.is-selected .bp-card__options { display: block !important; }
+
+.bp .bp-card__options-label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--bp-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.bp .bp-unit {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.bp .bp-unit:first-of-type { margin-top: 0; }
+
+.bp .bp-unit__n {
+  flex: 0 0 auto;
+  min-width: 18px;
+  color: var(--bp-muted);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.bp .bp-select {
+  position: relative;
+  display: inline-block !important;
+  flex: 0 1 auto;
+}
+
+/* 16 px minimum sur le texte : empêche le zoom automatique de Safari iOS. */
+.bp .bp-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: auto;
+  min-width: 0;
+  height: 36px;
+  margin: 0;
+  padding: 0 30px 0 14px;
+  border: 1px solid var(--bp-line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--bp-ink);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.bp .bp-select select:focus-visible {
+  outline: 2px solid var(--bp-ink);
+  outline-offset: 1px;
+}
+
+.bp .bp-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  margin-top: -4px;
+  border-right: 1.4px solid var(--bp-muted);
+  border-bottom: 1.4px solid var(--bp-muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ---------- Bandeau avantage bas de carte -------------------------------- */
+
+.bp .bp-card__perk {
+  display: none !important;
+  align-items: center;
+  height: 28px;
+  padding: 0 var(--bp-pad);
+  border-radius: 0 0 10px 10px;
+  background: var(--bp-chip);
+  color: var(--bp-chip-ink);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.bp .bp-card.is-selected .bp-card__perk { display: flex !important; }
+
+/* ---------- Bouton d'ajout ----------------------------------------------- */
+
+.bp .bp__atc {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  height: 48px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bp-cta);
+  color: var(--bp-cta-ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-align: center;
+  text-transform: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.06s ease;
+}
+
+.bp .bp__atc:hover { filter: brightness(0.96); }
+.bp .bp__atc:active { transform: translateY(1px); }
+
+.bp .bp__atc[disabled] {
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(1.15);
+}
+
+.bp .bp__atc.is-loading { position: relative; color: transparent; }
+
+.bp .bp__atc.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: bp-spin 0.7s linear infinite;
+}
+
+@keyframes bp-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bp .bp-card,
+  .bp .bp__atc,
+  .bp .bp-card__radio-ui { transition: none; }
+  .bp .bp__atc.is-loading::after { animation-duration: 2s; }
+}
+
+/* ---------- Réassurance --------------------------------------------------- */
+
+.bp .bp__stock {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  color: #c0261d;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bp .bp__stock-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e8352b;
+  box-shadow: 0 0 0 4px rgba(232, 53, 43, 0.16);
+}
+
+.bp .bp__error {
+  display: none;
+  margin: 10px 0 0;
+  color: #c0261d;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.bp .bp__error.is-visible { display: block; }
+
+.bp .bp__pay {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.bp .bp__pay svg,
+.bp .bp__pay img {
+  display: block;
+  flex: 0 0 auto;
+  height: 24px;
+  width: auto;
+}
+
+/* ---------- Écrans très étroits (<= 360 px) ------------------------------ */
+
+@media (max-width: 360px) {
+  .bp { --bp-pad: 12px; --bp-thumb: 48px; }
+  .bp .bp-card__radio-ui { margin-right: 10px; }
+  .bp .bp-card__media { width: 64px; margin-right: 10px; }
+  .bp .bp-card__media img + img { margin-left: -28px; }
+  .bp .bp-card__title { font-size: 18px; }
+  .bp .bp-card__price { font-size: 17px; }
+  .bp .bp-card__desc { font-size: 13px; }
+  .bp .bp-card__compare { font-size: 13px; }
+}

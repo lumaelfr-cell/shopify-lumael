@@ -1,0 +1,629 @@
+{%- doc -%}
+  Sélecteur d'édition Ulvéo — réplique du bloc « Pick Your Bundle & Save More ».
+
+  Une carte par valeur de l'option Édition. La carte sélectionnée révèle une
+  ligne par exemplaire (« #1 », « #2 »…) et, sur chaque ligne, les menus listés
+  dans le réglage « Options par exemplaire ».
+
+  Ce réglage est une liste ordonnée. Un nom qui correspond à une option produit
+  rend un vrai menu de variante ; le nom du réglage « Menu Modèle » rend un menu
+  dont les valeurs sont celles de l'option de palier vendues à l'unité.
+
+  Ce menu Modèle se comporte différemment selon la carte :
+
+  - carte à un exemplaire — il pilote l'option de palier, donc la variante. Le
+    prix et la photo de la carte suivent le choix ;
+  - carte à plusieurs exemplaires (un pack) — le pack se vend à son prix, le
+    modèle de chaque appareil part en propriété de ligne. C'est ainsi que le Duo
+    Pack propose deux couleurs et deux modèles en restant une seule variante.
+
+  Un pack se vend de deux façons, selon « Vendre chaque exemplaire séparément » :
+
+  - coché (par défaut) — chaque ligne résout sa propre variante et devient sa
+    propre ligne de panier. Le modèle et la gravure sont choisis appareil par
+    appareil et facturés appareil par appareil ; le prix de la carte est la
+    somme des exemplaires. La variante du palier n'est alors pas vendue ;
+  - décoché — le pack se vend à travers la variante du palier, à son prix. Les
+    choix des exemplaires suivants ne sont plus que des propriétés de ligne, et
+    le réglage « Options communes au pack » sort une option des lignes #1, #2…
+    pour la poser une seule fois au-dessus, facturée une fois.
+
+  Prix, prix barré et photo de chaque carte sont repeints par le script dès
+  qu'un menu change, sauf si un prix a été forcé dans les réglages de la carte.
+
+  Photos — chaque variante porte déjà sa propre image native Shopify
+  (`variant.image`, assignée dans l'admin). Le script l'utilise automatiquement
+  pour repeindre la vignette de la carte ET la grande photo de la page produit
+  dès qu'un menu Couleur ou Modèle change — sans bloc à ajouter, et sans rien à
+  refaire quand une nouvelle variante est créée : il suffit de lui assigner une
+  image dans l'admin Shopify.
+
+  Les blocs « Image de variante » ci-dessous restent disponibles pour les cas
+  où l'image native ne convient pas (typiquement une carte à plusieurs
+  exemplaires comme le Duo Pack, où la couleur/le modèle choisis pour un
+  appareil ne correspondent à aucune variante unique) : une association
+  Couleur/Modèle → image posée ici est toujours prioritaire sur l'image native
+  de la variante. Priorité, sur l'exemplaire #1, #2… qui porte un de ces menus :
+  1. bloc « Image de variante » associé à la combinaison exacte Couleur + Modèle ;
+  2. sinon, bloc associé au Modèle seul ;
+  3. sinon, bloc associé à la Couleur seule ;
+  4. sinon, l'image native de la variante résolue (`variant.image`) ;
+  5. sinon, la photo d'origine — image de la variante native pour la vignette,
+     photo rendue au chargement pour la galerie.
+
+  Le bloc est autonome : il ajoute au panier par la Cart AJAX API et masque, au
+  besoin, le sélecteur de variantes et les boutons d'achat natifs.
+{%- enddoc -%}
+
+{{ 'bundle-picker.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'bundle-picker.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign product = closest.product
+  assign lock_name = block.settings.lock_option | strip
+  assign unit_option_names = block.settings.unit_options | split: ','
+  assign shared_option_names = block.settings.shared_options | split: ','
+  assign model_label = block.settings.model_label | strip
+  assign model_values = block.settings.model_values | split: ','
+
+  assign lock_option = null
+  assign lock_position = 0
+  for option in product.options_with_values
+    if option.name == lock_name
+      assign lock_option = option
+      assign lock_position = forloop.index0
+    endif
+  endfor
+-%}
+
+{%- if product == blank or lock_option == null -%}
+  {%- if request.design_mode -%}
+    <div class="bp">
+      <p class="bp__error is-visible">
+        Option « {{ lock_name }} » introuvable sur ce produit. Corrigez le réglage
+        « Option de palier » du bloc.
+      </p>
+    </div>
+  {%- endif -%}
+{%- else -%}
+
+<div class="bp" data-bundle-picker id="bp-{{ block.id }}" {{ block.shopify_attributes }}>
+  <script type="application/json" data-bundle-picker-config>
+    {
+      "optionNames": {{ product.options_with_values | map: 'name' | json }},
+      "behaviour": {{ block.settings.after_add | json }},
+      "routes": {
+        "cartAdd": {{ routes.cart_add_url | json }},
+        "cart": {{ routes.cart_url | json }}
+      },
+      "strings": { "unavailable": {{ block.settings.unavailable_label | json }} },
+      "moneyFormat": {{ shop.money_format | json }},
+      "fallbackImage": {%- if product.featured_image != blank -%}{{ product.featured_image | image_url: width: 180 | json }}{%- else -%}null{%- endif -%},
+      "colorOption": {{ block.settings.color_label | strip | json }},
+      "modelOption": {{ model_label | json }},
+      "variants": [
+        {%- for variant in product.variants -%}
+          {
+            "id": {{ variant.id }},
+            "options": {{ variant.options | json }},
+            "available": {{ variant.available }},
+            "price": {{ variant.price }},
+            "priceLabel": {{ variant.price | money | json }},
+            "compareLabel": {%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money | json }}{%- else -%}null{%- endif -%},
+            "compareAt": {%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price }}{%- else -%}null{%- endif -%},
+            "image": {%- if variant.image != blank -%}{{ variant.image | image_url: width: 180 | json }}{%- else -%}null{%- endif -%},
+            "imageLarge": {%- if variant.image != blank -%}{{ variant.image | image_url: width: 1600 | json }}{%- else -%}null{%- endif -%}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  {% content_for 'blocks' %}
+
+  {%- if block.settings.heading != blank -%}
+    <div class="bp__header">
+      <span class="bp__header-text">{{ block.settings.heading | escape }}</span>
+    </div>
+  {%- endif -%}
+
+  <div class="bp__cards">
+    {%- for value in lock_option.values -%}
+      {%- liquid
+        case forloop.index
+          when 1
+            assign chips = block.settings.chips_1
+            assign desc = block.settings.desc_1
+            assign badge = block.settings.badge_1
+            assign perk = block.settings.perk_1
+            assign units = block.settings.units_1
+            assign price_override = block.settings.price_1
+            assign compare_override = block.settings.compare_1
+            assign discount_code = block.settings.discount_1
+          when 2
+            assign chips = block.settings.chips_2
+            assign desc = block.settings.desc_2
+            assign badge = block.settings.badge_2
+            assign perk = block.settings.perk_2
+            assign units = block.settings.units_2
+            assign price_override = block.settings.price_2
+            assign compare_override = block.settings.compare_2
+            assign discount_code = block.settings.discount_2
+          else
+            assign chips = block.settings.chips_3
+            assign desc = block.settings.desc_3
+            assign badge = block.settings.badge_3
+            assign perk = block.settings.perk_3
+            assign units = block.settings.units_3
+            assign price_override = block.settings.price_3
+            assign compare_override = block.settings.compare_3
+            assign discount_code = block.settings.discount_3
+        endcase
+
+        assign units = units | at_least: 1
+
+        assign is_pack = false
+        if units > 1
+          assign is_pack = true
+        endif
+
+        assign split_pack = false
+        if is_pack and block.settings.split_units
+          assign split_pack = true
+        endif
+
+        assign tier_variant = null
+        for variant in product.variants
+          if tier_variant == null and variant.options[lock_position] == value.name and variant.available
+            assign tier_variant = variant
+          endif
+        endfor
+        if tier_variant == null
+          for variant in product.variants
+            if tier_variant == null and variant.options[lock_position] == value.name
+              assign tier_variant = variant
+            endif
+          endfor
+        endif
+
+        assign tier_price = price_override
+        if tier_price == blank
+          assign tier_price = tier_variant.price | money
+        endif
+
+        assign tier_compare = compare_override
+        if tier_compare == blank and tier_variant.compare_at_price > tier_variant.price
+          assign tier_compare = tier_variant.compare_at_price | money
+        endif
+
+        assign tier_image = tier_variant.image
+        if tier_image == blank
+          assign tier_image = product.featured_image
+        endif
+
+        comment
+          Un pack vendu à l'exemplaire n'a pas de prix propre : il vaut ce que
+          valent ses appareils. On rend la somme des choix par défaut — le
+          premier modèle de la liste — pour que le script n'ait rien à corriger
+          au chargement.
+        endcomment
+        if split_pack
+          assign first_model = model_values.first | strip
+          assign split_variant = null
+          for variant in product.variants
+            if split_variant == null and variant.options[lock_position] == first_model and variant.available
+              assign split_variant = variant
+            endif
+          endfor
+
+          if split_variant != null
+            if price_override == blank
+              assign tier_price = split_variant.price | times: units | money
+            endif
+            if compare_override == blank
+              assign tier_compare = ''
+              if split_variant.compare_at_price > split_variant.price
+                assign tier_compare = split_variant.compare_at_price | times: units | money
+              endif
+            endif
+          endif
+        endif
+
+        assign is_selected = false
+        if forloop.index == block.settings.preselected
+          assign is_selected = true
+        endif
+      -%}
+
+      <label
+        class="bp-card{% if is_selected %} is-selected{% endif %}"
+        data-bp-card
+        data-bp-name="{{ value.name | escape }}"
+        data-bp-locked='{"{{ lock_name }}":"{{ value.name }}"}'
+        data-bp-tier-image="{{ tier_image | image_url: width: 180 }}"
+        data-bp-tier-image-large="{{ tier_image | image_url: width: 1600 }}"
+        {% if discount_code != blank %}data-bp-discount="{{ discount_code | escape }}"{% endif %}
+      >
+        {%- if badge != blank -%}
+          <span class="bp-card__badge">{{ badge | escape }}</span>
+        {%- endif -%}
+
+        <div class="bp-card__main">
+          <input
+            class="bp-card__radio"
+            type="radio"
+            name="bp-tier-{{ block.id }}"
+            value="{{ value.name | escape }}"
+            data-bp-radio
+            {% if is_selected %}checked{% endif %}
+          >
+          <span class="bp-card__radio-ui" aria-hidden="true"></span>
+
+          <div class="bp-card__media">
+            {%- comment -%}
+              Une vignette par exemplaire (trois au maximum), légèrement
+              superposées : la quantité se lit d'un coup d'œil, comme sur la
+              référence. Toutes portent `data-bp-image` afin que le script les
+              repeigne au changement de Couleur ou de Modèle.
+            {%- endcomment -%}
+            {%- if tier_image != blank -%}
+              {%- assign thumb_count = units | at_most: 3 -%}
+              {%- for thumb_i in (1..thumb_count) -%}
+                <img
+                  data-bp-image
+                  src="{{ tier_image | image_url: width: 180 }}"
+                  width="112"
+                  height="112"
+                  loading="lazy"
+                  alt="{{ value.name | escape }}"
+                >
+              {%- endfor -%}
+            {%- endif -%}
+            {%- if units > 1 -%}
+              <span class="bp-card__qty">x{{ units }}</span>
+            {%- endif -%}
+          </div>
+
+          <div class="bp-card__info">
+            <div class="bp-card__title">{{ value.name }}</div>
+
+            {%- if chips != blank -%}
+              <ul class="bp-card__features">
+                {%- assign chip_list = chips | split: ',' -%}
+                {%- for chip in chip_list -%}
+                  <li>{{ chip | strip }}</li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            {%- if desc != blank -%}
+              <p class="bp-card__desc">{{ desc | escape }}</p>
+            {%- endif -%}
+          </div>
+
+          <div class="bp-card__prices">
+            <div
+              class="bp-card__price"
+              data-bp-price
+              {% if price_override != blank %}data-bp-static{% endif %}
+            >{{ tier_price }}</div>
+            <div
+              class="bp-card__compare"
+              data-bp-compare
+              {% if compare_override != blank %}data-bp-static{% endif %}
+              {% if tier_compare == blank %}style="display: none"{% endif %}
+            >{{ tier_compare }}</div>
+          </div>
+        </div>
+
+        {%- comment -%}
+          Intitulé du panneau : les menus réellement rendus sur cette carte, dans
+          l'ordre du réglage.
+
+          Le menu Modèle pilote l'option de palier — donc la variante, son prix et
+          sa photo — sur une carte qui vend un seul exemplaire et dont la valeur
+          fait partie des modèles vendus à l'unité. Sur un pack, le palier est le
+          pack lui-même : le modèle de chaque appareil part en propriété de ligne.
+        {%- endcomment -%}
+        {%- liquid
+          assign show_model = false
+          if model_label != blank and model_values.size > 0
+            assign show_model = true
+          endif
+
+          assign shared_label = ''
+          if is_pack and split_pack == false
+            for raw_name in shared_option_names
+              assign shared_name = raw_name | strip
+              if shared_name == blank
+                continue
+              endif
+              for option in product.options_with_values
+                if option.name == shared_name and option.name != lock_name
+                  assign shared_label = shared_label | append: shared_name | append: ', '
+                endif
+              endfor
+            endfor
+            assign shared_label = shared_label | remove_last: ', '
+          endif
+
+          assign model_drives = false
+          if show_model and split_pack
+            assign model_drives = true
+          elsif show_model and units == 1
+            for raw_value in model_values
+              assign model_value = raw_value | strip
+              if model_value == value.name
+                assign model_drives = true
+              endif
+            endfor
+          endif
+
+          assign options_label = ''
+          for raw_name in unit_option_names
+            assign unit_name = raw_name | strip
+            if unit_name == blank
+              continue
+            endif
+
+            assign is_shared = false
+            if is_pack and split_pack == false
+              for raw_shared in shared_option_names
+                assign shared_name = raw_shared | strip
+                if shared_name == unit_name
+                  assign is_shared = true
+                endif
+              endfor
+            endif
+            if is_shared
+              continue
+            endif
+
+            if unit_name == model_label
+              if show_model
+                assign options_label = options_label | append: unit_name | append: ', '
+              endif
+            else
+              for option in product.options_with_values
+                if option.name == unit_name and option.name != lock_name
+                  assign options_label = options_label | append: unit_name | append: ', '
+                endif
+              endfor
+            endif
+          endfor
+          assign options_label = options_label | remove_last: ', '
+        -%}
+
+        {%- if options_label != blank or shared_label != blank -%}
+          <div class="bp-card__options">
+            {%- if shared_label != blank -%}
+              <div class="bp-card__options-label">{{ shared_label }}</div>
+              <div class="bp-unit" data-bp-shared>
+                {%- for raw_name in shared_option_names -%}
+                  {%- assign shared_name = raw_name | strip -%}
+                  {%- for option in product.options_with_values -%}
+                    {%- if option.name == shared_name and option.name != lock_name -%}
+                      <span class="bp-select">
+                        <select
+                          data-bp-option="{{ option.name | escape }}"
+                          aria-label="{{ option.name | escape }} — {{ value.name | escape }}"
+                        >
+                          {%- for option_value in option.values -%}
+                            <option value="{{ option_value.name | escape }}">{{ option_value.name }}</option>
+                          {%- endfor -%}
+                        </select>
+                      </span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {%- if options_label != blank -%}
+              <div
+                class="bp-card__options-label"
+                {% if shared_label != blank %}style="margin-top: 16px"{% endif %}
+              >{{ options_label }}</div>
+            {%- endif -%}
+
+            {%- for i in (1..units) -%}
+              <div
+                class="bp-unit"
+                data-bp-unit
+                data-bp-index="{{ i }}"
+                {% if i > 1 and split_pack == false %}data-bp-property-only{% endif %}
+              >
+                {%- if units > 1 -%}<span class="bp-unit__n">#{{ i }}</span>{%- endif -%}
+
+                {%- for raw_name in unit_option_names -%}
+                  {%- assign unit_name = raw_name | strip -%}
+                  {%- if unit_name == blank -%}
+                    {%- continue -%}
+                  {%- endif -%}
+
+                  {%- assign is_shared = false -%}
+                  {%- if is_pack and split_pack == false -%}
+                    {%- for raw_shared in shared_option_names -%}
+                      {%- assign shared_name = raw_shared | strip -%}
+                      {%- if shared_name == unit_name -%}
+                        {%- assign is_shared = true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                  {%- if is_shared -%}
+                    {%- continue -%}
+                  {%- endif -%}
+
+                  {%- if unit_name == model_label -%}
+                    {%- if show_model -%}
+                      {%- liquid
+                        assign model_maps = false
+                        if model_drives
+                          if split_pack or i == 1
+                            assign model_maps = true
+                          endif
+                        endif
+                      -%}
+                      <span class="bp-select">
+                        <select
+                          data-bp-option="{{ unit_name | escape }}"
+                          {% if model_maps %}data-bp-maps-to="{{ lock_name | escape }}"{% else %}data-bp-property{% endif %}
+                          aria-label="{{ unit_name | escape }} — #{{ i }}"
+                        >
+                          {%- for raw_value in model_values -%}
+                            {%- assign model_value = raw_value | strip -%}
+                            <option value="{{ model_value | escape }}"{% if model_value == value.name %} selected{% endif %}>{{ model_value }}</option>
+                          {%- endfor -%}
+                        </select>
+                      </span>
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- for option in product.options_with_values -%}
+                      {%- if option.name == unit_name and option.name != lock_name -%}
+                        <span class="bp-select">
+                          <select
+                            data-bp-option="{{ option.name | escape }}"
+                            aria-label="{{ option.name | escape }} — #{{ i }}"
+                          >
+                            {%- for option_value in option.values -%}
+                              <option value="{{ option_value.name | escape }}">{{ option_value.name }}</option>
+                            {%- endfor -%}
+                          </select>
+                        </span>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if perk != blank -%}
+          <div class="bp-card__perk">{{ perk | escape }}</div>
+        {%- endif -%}
+      </label>
+    {%- endfor -%}
+  </div>
+
+  <button
+    type="button"
+    class="bp__atc"
+    data-bp-atc
+    data-label-default="{{ block.settings.cta_label | escape }}"
+    data-label-sold-out="{{ block.settings.sold_out_label | escape }}"
+    data-label-unavailable="{{ block.settings.unavailable_label | escape }}"
+  >{{ block.settings.cta_label }}</button>
+
+  <p class="bp__error" data-bp-error role="alert"></p>
+
+  {%- if block.settings.stock_text != blank -%}
+    <div class="bp__stock">
+      <span class="bp__stock-dot" aria-hidden="true"></span>{{ block.settings.stock_text }}
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.show_payment_icons -%}
+    {%- render 'bundle-picker-payment-icons' -%}
+  {%- endif -%}
+</div>
+
+{%- if block.settings.hide_native -%}
+  {%- comment -%}
+    Ce bloc porte son propre bouton d'achat : on retire le sélecteur de
+    variantes et les boutons natifs du thème pour éviter deux parcours d'ajout
+    concurrents sur la même page. Décochez le réglage pour les rétablir.
+  {%- endcomment -%}
+  <script>
+    (function () {
+      var hide = function (node) { if (node) node.style.display = 'none'; };
+      var run = function () {
+        document.querySelectorAll('variant-picker').forEach(hide);
+        document
+          .querySelectorAll('[class*="buy-buttons"], product-form-buttons')
+          .forEach(function (node) {
+            if (!node.closest('[data-bundle-picker]')) hide(node);
+          });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+      } else {
+        run();
+      }
+      document.addEventListener('shopify:section:load', run);
+    })();
+  </script>
+{%- endif -%}
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Sélecteur d'édition Ulvéo",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_bundle-variant-image"
+    }
+  ],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Choisissez votre édition" },
+    { "type": "text", "id": "lock_option", "label": "Option de palier", "default": "Édition", "info": "Une carte par valeur de cette option." },
+    { "type": "text", "id": "unit_options", "label": "Options par exemplaire", "default": "Couleur, Modèle, Gravure", "info": "Liste ordonnée des menus affichés sur chaque ligne « #1 », « #2 »… Un nom d'option produit rend un vrai menu de variante ; le nom du menu Modèle ci-dessous rend le menu décrit plus bas." },
+    { "type": "checkbox", "id": "split_units", "label": "Vendre chaque exemplaire séparément", "default": true, "info": "Sur une carte à plusieurs exemplaires : chaque ligne « #1 », « #2 »… résout sa propre variante et devient sa propre ligne de panier, et le prix de la carte est la somme des exemplaires. Décochez pour vendre le pack à travers la variante du palier, à son prix." },
+    { "type": "text", "id": "shared_options", "label": "Options communes au pack", "default": "Gravure", "info": "Sur une carte à plusieurs exemplaires, ces options sortent des lignes « #1 », « #2 »… et sont proposées une seule fois pour tout le pack. Sans effet sur une carte à un exemplaire, ni quand chaque exemplaire est vendu séparément." },
+    { "type": "text", "id": "model_label", "label": "Menu Modèle — intitulé", "default": "Modèle", "info": "Sur une carte à un exemplaire, ce menu pilote l'option de palier : le prix et la photo de la carte suivent le choix. Sur un pack, il part en propriété de ligne. Laissez vide pour le désactiver." },
+    { "type": "text", "id": "model_values", "label": "Menu Modèle — valeurs", "default": "Standard, Pro", "info": "Séparées par des virgules. Les valeurs de l'option de palier vendues à l'unité, packs exclus." },
+    { "type": "range", "id": "preselected", "label": "Carte sélectionnée au chargement", "min": 1, "max": 3, "step": 1, "default": 1 },
+    { "type": "header", "content": "Carte 1" },
+    { "type": "text", "id": "chips_1", "label": "Arguments (séparés par des virgules)", "default": "3 modes de soudure" },
+    { "type": "text", "id": "desc_1", "label": "Description", "default": "L'essentiel, pour un usage quotidien" },
+    { "type": "text", "id": "badge_1", "label": "Bandeau" },
+    { "type": "text", "id": "perk_1", "label": "Bandeau bas de carte" },
+    { "type": "range", "id": "units_1", "label": "Exemplaires", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "text", "id": "price_1", "label": "Prix affiché" },
+    { "type": "text", "id": "compare_1", "label": "Prix barré" },
+    { "type": "text", "id": "discount_1", "label": "Code de réduction" },
+    { "type": "header", "content": "Carte 2" },
+    { "type": "text", "id": "chips_2", "label": "Arguments (séparés par des virgules)", "default": "6 modes de soudure, Coupe intégrée" },
+    { "type": "text", "id": "desc_2", "label": "Description", "default": "Du sachet de chips au sac de congélation" },
+    { "type": "text", "id": "badge_2", "label": "Bandeau", "default": "Le plus choisi" },
+    { "type": "text", "id": "perk_2", "label": "Bandeau bas de carte" },
+    { "type": "range", "id": "units_2", "label": "Exemplaires", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "text", "id": "price_2", "label": "Prix affiché" },
+    { "type": "text", "id": "compare_2", "label": "Prix barré" },
+    { "type": "text", "id": "discount_2", "label": "Code de réduction" },
+    { "type": "header", "content": "Carte 3" },
+    { "type": "text", "id": "chips_3", "label": "Arguments (séparés par des virgules)" },
+    { "type": "text", "id": "desc_3", "label": "Description", "default": "Un pour la maison, un pour partout ailleurs" },
+    { "type": "text", "id": "badge_3", "label": "Bandeau", "default": "Meilleure offre" },
+    { "type": "text", "id": "perk_3", "label": "Bandeau bas de carte", "default": "+ Livraison offerte" },
+    { "type": "range", "id": "units_3", "label": "Exemplaires", "min": 1, "max": 4, "step": 1, "default": 2 },
+    { "type": "text", "id": "price_3", "label": "Prix affiché" },
+    { "type": "text", "id": "compare_3", "label": "Prix barré" },
+    { "type": "text", "id": "discount_3", "label": "Code de réduction" },
+    { "type": "header", "content": "Images liées aux variantes" },
+    { "type": "paragraph", "content": "Chaque variante utilise déjà sa propre image Shopify (admin → Variantes). N'ajoutez un bloc « Image de variante » que pour forcer une photo sur une combinaison sans variante unique (ex. Duo Pack) — toujours prioritaire sur l'image native." },
+    { "type": "text", "id": "color_label", "label": "Nom de l'option Couleur", "default": "Couleur", "info": "Doit correspondre exactement au nom de l'option produit Couleur." },
+    { "type": "header", "content": "Bouton et réassurance" },
+    { "type": "text", "id": "cta_label", "label": "Bouton", "default": "Je l'ajoute à mon panier" },
+    { "type": "text", "id": "sold_out_label", "label": "Bouton — rupture", "default": "Momentanément épuisé" },
+    { "type": "text", "id": "unavailable_label", "label": "Bouton — indisponible", "default": "Indisponible" },
+    { "type": "text", "id": "stock_text", "label": "Message de stock" },
+    { "type": "checkbox", "id": "show_payment_icons", "label": "Afficher les moyens de paiement", "default": true },
+    { "type": "checkbox", "id": "hide_native", "label": "Masquer le sélecteur et les boutons natifs", "default": true, "info": "Évite deux boutons d'ajout au panier sur la page." },
+    {
+      "type": "select",
+      "id": "after_add",
+      "label": "Après l'ajout au panier",
+      "options": [
+        { "value": "drawer", "label": "Ouvrir le tiroir du panier" },
+        { "value": "cart", "label": "Aller au panier" },
+        { "value": "checkout", "label": "Aller au paiement" }
+      ],
+      "default": "drawer"
+    }
+  ],
+  "presets": [{ "name": "Sélecteur d'édition Ulvéo", "category": "t:categories.product" }]
+}
+{% endschema %}

@@ -1,0 +1,17 @@
+{%- comment -%}
+  Moyens de paiement réellement activés sur la boutique.
+
+  `shop.enabled_payment_types` est alimenté par Shopify à partir des passerelles
+  effectivement configurées dans l'admin : la liste se met à jour toute seule et
+  ne peut pas afficher le logo d'un moyen de paiement indisponible.
+{%- endcomment -%}
+
+{%- if shop.enabled_payment_types.size > 0 -%}
+  <div class="bp__pay" role="list" aria-label="Moyens de paiement acceptés">
+    {%- for type in shop.enabled_payment_types -%}
+      <span role="listitem">
+        {{ type | payment_type_svg_tag: class: 'bp__pay-icon' }}
+      </span>
+    {%- endfor -%}
+  </div>
+{%- endif -%}

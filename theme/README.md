@@ -29,3 +29,38 @@ aucune incidence sur la mise en page.
 - Centrage horizontal et vertical exacts, aucun débordement horizontal,
   contenu entier visible jusqu'à 320 x 480 px.
 - Sommes MD5 des fichiers déposés sur le thème identiques aux fichiers locaux.
+
+---
+
+## Page produit — sélecteur de lot (2e lot de modifications)
+
+Référence : capture de pullandgo.fr. Cotes relevées dans `MESURES-BUNDLE.md`.
+
+| Fichier | Modification |
+|---|---|
+| `assets/bundle-picker.css` | Réécriture complète du style des cartes aux cotes de la référence. |
+| `blocks/ulveo-bundle-picker.liquid` | Une vignette par exemplaire (3 max), superposées ; le badge `x1` ne s'affiche plus sur les cartes à un seul exemplaire. Seul le bloc `.bp-card__media` change. |
+| `snippets/bundle-picker-payment-icons.liquid` | Logos codés en dur remplacés par `shop.enabled_payment_types`. Google Pay était affiché alors qu'il n'est pas activé sur la boutique. |
+| `templates/product.json` | 4 corrections de texte, vérifiées une à une (voir plus bas). |
+
+### Corrections de texte appliquées
+
+| Champ | Avant | Après |
+|---|---|---|
+| Accordéon | « Desription » | « Description » |
+| Bouton d'achat | « Ajouter au panier » | « Je l'ajoute à mon panier » |
+| Bouton rupture | « Rupture de stock » | « Momentanément épuisé » |
+| Expédition | placeholder Shopify, « votre emplacement » | texte naturel, sans délai chiffré inventé |
+
+Diff vérifié après mise en ligne : **exactement 4 différences**, aucune autre.
+Prix, variantes, avis et ordre des sections strictement inchangés.
+
+### Signalé, non modifié (information non déterminable)
+
+- **Texte « Fabrication »** : « fabriqués localement **et** dans le monde entier »
+  est contradictoire, mais le lieu réel de fabrication est inconnu — le corriger
+  reviendrait à inventer une information.
+- **Avis** : `avis_1` (Amélie N., Lyon) et `avis_3` (Jade E., Troyes) portent un
+  texte strictement identique. Leur contenu (« 20 % plus rapide », « zéro casse »,
+  « choix pro ») ne correspond pas à une scelleuse de sachets.
+- **Note affichée** : 4,8 / 329 avis, saisie manuellement (`manual_summary`).
