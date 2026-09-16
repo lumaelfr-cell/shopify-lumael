@@ -1,0 +1,362 @@
+{%- comment -%}
+  Ulvéo — finition et animations des sections sous le produit.
+
+  Couche additive : aucune de ces règles ne modifie le balisage ni les
+  réglages des sections. Elles se greffent sur les classes existantes
+  (.ulveo-steps, .ulveo-cmp, .ulveo-avis, .ulveo-guarantee, .ulveo-faq)
+  et peuvent être retirées en supprimant ce seul fichier.
+
+  Intention : donner au bas de page un rythme de lecture — chaque bloc
+  apparaît au défilement, les étapes se lisent comme un parcours, les
+  barres d'avis se remplissent, la FAQ répond en douceur. L'objectif est
+  de retenir l'attention sans artifice : pas de compte à rebours, pas de
+  fausse urgence, rien qui promette ce que la boutique ne tient pas.
+
+  Les jeux de couleurs restent ceux de l'éditeur : on n'impose aucun fond.
+  L'accent reprend celui du sélecteur de lot (#E8622C).
+
+  Accessibilité : toute l'animation est neutralisée sous
+  `prefers-reduced-motion`, et le contenu reste visible sans JavaScript.
+{%- endcomment -%}
+
+<style>
+  .ulveo-steps,
+  .ulveo-cmp,
+  .ulveo-avis,
+  .ulveo-guarantee,
+  .ulveo-faq {
+    --ulveo-accent: #E8622C;
+    --ulveo-ink: #140a05;
+    --ulveo-radius: 16px;
+    --ulveo-shadow: 0 4px 16px rgb(20 10 5 / 0.06);
+    --ulveo-shadow-hover: 0 10px 28px rgb(20 10 5 / 0.10);
+    --ulveo-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  /* ---------- Apparition au défilement --------------------------------- */
+
+  /* Sans JavaScript, sans IntersectionObserver ou avec les animations
+     réduites, rien ne se cache : la classe n'est posée que par le script. */
+  .ulveo-reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s var(--ulveo-ease), transform 0.5s var(--ulveo-ease);
+    transition-delay: var(--ulveo-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .ulveo-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Dans l'éditeur de thème, tout reste visible : sans cela les sections
+     paraissent vides pendant qu'on les règle. */
+  .shopify-design-mode .ulveo-reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- Étapes : un parcours numéroté ---------------------------- */
+
+  .ulveo-steps__list {
+    position: relative;
+    gap: 32px;
+  }
+
+  .ulveo-steps__number {
+    width: 38px;
+    height: 38px;
+    margin-block-end: 14px;
+    background: var(--ulveo-accent);
+    color: #fff;
+    font-size: 1rem;
+    box-shadow: 0 0 0 5px rgb(232 98 44 / 0.12);
+  }
+
+  .ulveo-steps__title {
+    margin-block-end: 8px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .ulveo-steps__media {
+    border-radius: var(--ulveo-radius);
+  }
+
+  /* Le trait relie les pastilles d'une étape à l'autre : les trois gestes
+     se lisent comme une suite, pas comme trois encarts isolés. */
+  @media screen and (min-width: 750px) {
+    .ulveo-steps__item {
+      position: relative;
+    }
+
+    .ulveo-steps__item:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 19px;
+      left: calc(38px + 14px);
+      right: -32px;
+      height: 2px;
+      background: repeating-linear-gradient(
+        to right,
+        rgb(232 98 44 / 0.35) 0 6px,
+        transparent 6px 12px
+      );
+    }
+
+    .ulveo-steps__item:has(.ulveo-steps__media)::after {
+      display: none;
+    }
+  }
+
+  /* ---------- Comparatif ------------------------------------------------ */
+
+  .ulveo-cmp__media {
+    border-radius: var(--ulveo-radius);
+    box-shadow: var(--ulveo-shadow);
+    transition: transform 0.35s var(--ulveo-ease), box-shadow 0.35s var(--ulveo-ease);
+  }
+
+  .ulveo-cmp__col:hover .ulveo-cmp__media {
+    transform: translateY(-4px);
+    box-shadow: var(--ulveo-shadow-hover);
+  }
+
+  .ulveo-cmp__label {
+    backdrop-filter: blur(6px);
+  }
+
+  /* Sur téléphone, les deux colonnes sont empilées : il faut faire défiler
+     entre l'avant et l'après, ce qui annule l'intérêt d'un comparatif. On les
+     met côte à côte pour que le contraste se lise d'un seul regard. */
+  @media screen and (max-width: 749px) {
+    .ulveo-cmp__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ulveo-cmp__label {
+      top: 8px;
+      left: 8px;
+      padding: 5px 9px;
+      font-size: 0.625rem;
+      letter-spacing: 0.02em;
+    }
+
+    .ulveo-cmp__verdict {
+      align-items: flex-start;
+      gap: 6px;
+      padding: 7px 11px 7px 8px;
+      font-size: 0.8125rem;
+      line-height: 1.25;
+    }
+
+    .ulveo-cmp__verdict::before {
+      margin-block-start: 1px;
+    }
+  }
+
+  /* Le verdict devient une pastille : la lecture « ce qui ne va pas /
+     ce qui va » se fait d'un coup d'œil. */
+  .ulveo-cmp__verdict {
+    width: fit-content;
+    padding: 7px 14px 7px 9px;
+    border-radius: 100px;
+    background: rgb(179 38 30 / 0.08);
+    color: #8f1f19;
+    font-size: 0.9375rem;
+  }
+
+  .ulveo-cmp__verdict--positive {
+    background: rgb(23 128 61 / 0.10);
+    color: #10642f;
+  }
+
+  /* ---------- Avis ------------------------------------------------------ */
+
+  .ulveo-avis__score-number {
+    font-size: 2.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .ulveo-avis__score-star {
+    font-size: 2rem;
+  }
+
+  /* Les barres se remplissent quand la section arrive à l'écran. La largeur
+     posée en ligne par Liquid reste la cible : on ne fait que l'échelonner. */
+  .ulveo-avis__bar-fill {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.9s var(--ulveo-ease);
+    transition-delay: 0.15s;
+  }
+
+  .ulveo-avis.is-visible .ulveo-avis__bar-fill,
+  .shopify-design-mode .ulveo-avis__bar-fill {
+    transform: scaleX(1);
+  }
+
+  .ulveo-avis__card {
+    border-radius: var(--ulveo-radius);
+    box-shadow: var(--ulveo-shadow);
+    transition: transform 0.3s var(--ulveo-ease), box-shadow 0.3s var(--ulveo-ease);
+  }
+
+  .ulveo-avis__card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--ulveo-shadow-hover);
+  }
+
+  /* ---------- Garantie -------------------------------------------------- */
+
+  .ulveo-guarantee__inner {
+    padding-block: 28px;
+    padding-inline: 24px;
+    border: 1px solid rgb(20 10 5 / 0.10);
+    border-radius: var(--ulveo-radius);
+  }
+
+  .ulveo-guarantee__eyebrow {
+    color: var(--ulveo-accent);
+    opacity: 1;
+  }
+
+  .ulveo-guarantee__heading {
+    letter-spacing: -0.01em;
+  }
+
+  /* ---------- FAQ ------------------------------------------------------- */
+
+  .ulveo-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ulveo-faq__item {
+    border-block-end: 0;
+    border: 1px solid rgb(20 10 5 / 0.10);
+    border-radius: 12px;
+    padding-inline: 18px;
+    transition: border-color 0.25s var(--ulveo-ease), background-color 0.25s var(--ulveo-ease);
+  }
+
+  .ulveo-faq__item:hover {
+    border-color: rgb(20 10 5 / 0.22);
+  }
+
+  .ulveo-faq__item[open] {
+    border-color: rgb(232 98 44 / 0.45);
+  }
+
+  .ulveo-faq__question {
+    padding-block: 16px;
+  }
+
+  .ulveo-faq__item[open] .ulveo-faq__chevron {
+    color: var(--ulveo-accent);
+  }
+
+  /* La réponse n'existe dans le DOM que déplié : l'animation se déclenche
+     donc naturellement à l'ouverture. */
+  .ulveo-faq__item[open] .ulveo-faq__answer {
+    animation: ulveo-answer 0.28s var(--ulveo-ease) both;
+  }
+
+  @keyframes ulveo-answer {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  /* ---------- Mouvement réduit ------------------------------------------ */
+
+  @media (prefers-reduced-motion: reduce) {
+    .ulveo-reveal,
+    .ulveo-reveal.is-visible {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .ulveo-avis__bar-fill {
+      transform: scaleX(1);
+      transition: none;
+    }
+
+    .ulveo-cmp__media,
+    .ulveo-avis__card,
+    .ulveo-faq__item {
+      transition: none;
+    }
+
+    .ulveo-cmp__col:hover .ulveo-cmp__media,
+    .ulveo-avis__card:hover {
+      transform: none;
+    }
+
+    .ulveo-faq__item[open] .ulveo-faq__answer {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    /* Le contenu est visible par défaut : on ne masque que si le navigateur
+       sait révéler, et si le visiteur n'a pas demandé moins d'animation. */
+    if (!('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var GROUPS = [
+      ['.ulveo-steps', '.ulveo-steps__heading, .ulveo-steps__intro, .ulveo-steps__item'],
+      ['.ulveo-cmp', '.ulveo-cmp__heading, .ulveo-cmp__intro, .ulveo-cmp__col'],
+      ['.ulveo-avis', '.ulveo-avis__heading, .ulveo-avis__summary, .ulveo-avis__list'],
+      ['.ulveo-guarantee', '.ulveo-guarantee__inner'],
+      ['.ulveo-faq', '.ulveo-faq__heading, .ulveo-faq__intro, .ulveo-faq__item']
+    ];
+
+    function setup() {
+      if (document.documentElement.classList.contains('shopify-design-mode')) return;
+
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        },
+        { rootMargin: '0px 0px -40px 0px', threshold: 0 }
+      );
+
+      GROUPS.forEach(function (pair) {
+        document.querySelectorAll(pair[0]).forEach(function (section) {
+          /* La section elle-même porte is-visible : c'est ce qui déclenche
+             le remplissage des barres d'avis. */
+          observer.observe(section);
+
+          var items = section.querySelectorAll(pair[1]);
+          Array.prototype.forEach.call(items, function (el, i) {
+            if (el.dataset.ulveoRevealed) return;
+            el.dataset.ulveoRevealed = '1';
+            el.classList.add('ulveo-reveal');
+            el.style.setProperty('--ulveo-delay', Math.min(i, 5) * 70 + 'ms');
+            observer.observe(el);
+          });
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+    document.addEventListener('shopify:section:load', setup);
+  })();
+</script>

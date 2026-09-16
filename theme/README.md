@@ -87,3 +87,40 @@ sur 7**, écart 5, rayon 8, aucun débordement horizontal — pour une cible de
 Les images sont celles du produit Ulvéo : aucune n'a été remplacée ni
 supprimée. Le rayon (8 px) et le contour de la vignette active restent ceux
 du thème.
+
+---
+
+## Bas de page produit — finition et animations (4e lot)
+
+Objectif : retenir l'attention de « Étapes Ulvéo » jusqu'au bas de page.
+
+| Fichier | Modification |
+|---|---|
+| `snippets/ulveo-page-style.liquid` | Nouveau. Couche additive sur les 5 sections Ulvéo : apparition au défilement, parcours numéroté, pastilles de verdict, barres d'avis animées, FAQ en cartes. |
+| `layout/theme.liquid` | Une ligne de rendu du snippet. |
+
+Aucun balisage de section n'est modifié, aucun jeu de couleurs n'est imposé :
+tout se greffe sur les classes existantes et se retire en supprimant ce seul
+fichier.
+
+### Vérifié au navigateur (393 px et 1280 px)
+
+- 18 éléments animés, **0 resté invisible** dans les deux largeurs.
+- `prefers-reduced-motion` : 0 élément caché, aucune animation.
+- Sans JavaScript : 0 élément masqué — le contenu reste intégralement lisible.
+- Aucun débordement horizontal.
+- Page mobile ramenée de **2910 à 2350 px** (−19 %).
+
+### Deux bugs attrapés à la mesure
+
+- Les cartes d'avis 3 et 4 sont hors écran horizontalement dans le carrousel :
+  elles n'entraient jamais en intersection et seraient restées invisibles.
+  C'est désormais la bande entière qui est révélée, pas chaque carte.
+- La marge basse de 10 % de l'observateur empêchait le tout dernier élément
+  de la page d'atteindre le seuil. Remplacée par 40 px et un seuil à zéro.
+
+### Comparatif sur téléphone
+
+Les deux colonnes étaient empilées : il fallait faire défiler entre l'avant et
+l'après, ce qui annulait l'intérêt d'un comparatif. Elles sont désormais côte
+à côte (étiquette 130 px dans une image de 172 px, aucun débordement).
