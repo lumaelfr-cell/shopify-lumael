@@ -124,3 +124,34 @@ fichier.
 Les deux colonnes étaient empilées : il fallait faire défiler entre l'avant et
 l'après, ce qui annulait l'intérêt d'un comparatif. Elles sont désormais côte
 à côte (étiquette 130 px dans une image de 172 px, aucun débordement).
+
+---
+
+## Note à côté du prix (5e lot)
+
+| Fichier | Modification |
+|---|---|
+| `blocks/ulveo-rating.liquid` | Nouveau. Étoiles + note + nombre d'avis, cliquable vers la section Avis. |
+| `templates/product.json` | Le prix est déplacé dans un groupe horizontal « Prix et note ». Aucun autre bloc touché. |
+
+### Source de la note
+
+1. Métachamps produit `reviews.rating` / `reviews.rating_count` s'ils existent.
+   **Aucune application d'avis n'est installée aujourd'hui** : ces métachamps
+   sont absents du produit (vérifié via l'API).
+2. À défaut, les champs du bloc, saisis à la main.
+3. Si aucune source n'est renseignée, **le bloc ne rend rien**.
+
+La valeur posée (4,8 / 329) est celle déjà publiée par la section « Avis
+clients Ulvéo » : aucun chiffre nouveau n'a été inventé. Elle reste toutefois
+**déclarative** tant qu'aucune application d'avis ne l'alimente, et elle existe
+désormais à deux endroits — à garder cohérents.
+
+### Vérifié au navigateur
+
+- Note à droite du prix, même ligne, écart 12 px, en 393 px comme en 1280 px.
+- `vertical_on_mobile: false` : la note reste à droite du prix sur téléphone.
+- Remplissage partiel exact : 4,8 → 96 % (dernière étoile aux 4/5).
+  Contrôlé aussi à 5,0 / 4,5 / 3,5 / 1,0.
+- Aucun débordement horizontal.
+- `theme-check` : aucune anomalie.

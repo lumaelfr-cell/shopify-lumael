@@ -1,0 +1,178 @@
+{% comment %}
+  Ulvéo — note synthétique, à poser à côté du prix.
+
+  Source de la note, par ordre de priorité :
+
+  1. les métachamps produit standards `reviews.rating` et `reviews.rating_count`,
+     alimentés par une application d'avis. Dès qu'une application est installée,
+     le bloc bascule tout seul sur les vraies données ;
+  2. à défaut, les deux champs de ce bloc, saisis à la main.
+
+  Si aucune des deux sources n'est renseignée, le bloc ne rend rien : il ne
+  fabrique jamais de note ni de nombre d'avis.
+
+  ⚠ Tant qu'aucune application d'avis n'est installée, la note saisie ici est
+  déclarative. Pensez à la garder cohérente avec la section « Avis clients
+  Ulvéo » du bas de page, qui a ses propres champs.
+{% endcomment %}
+
+{%- liquid
+  assign mf_rating = closest.product.metafields.reviews.rating
+  assign mf_count = closest.product.metafields.reviews.rating_count
+
+  assign rating = 0
+  assign scale = 5
+  assign count = ''
+
+  if mf_rating != blank and mf_rating.value.rating != blank
+    assign rating = mf_rating.value.rating | times: 1.0
+    assign scale = mf_rating.value.scale_max | default: 5 | times: 1.0
+    assign count = mf_count.value
+  elsif block.settings.rating != blank
+    assign rating = block.settings.rating | replace: ',', '.' | times: 1.0
+    assign scale = 5.0
+    assign count = block.settings.rating_count
+  endif
+
+  assign fill = 0
+  if rating > 0 and scale > 0
+    assign fill = rating | divided_by: scale | times: 100
+  endif
+
+  assign label = rating | round: 1 | replace: '.', ','
+-%}
+
+{%- if rating > 0 -%}
+  {%- capture inner -%}
+    <span class="ulveo-rating__stars" style="--ulveo-rating-fill: {{ fill }}%;" aria-hidden="true">
+      <span class="ulveo-rating__stars-empty">★★★★★</span>
+      <span class="ulveo-rating__stars-full">★★★★★</span>
+    </span>
+    <span class="ulveo-rating__score">{{ label }}</span>
+    {%- if count != blank and block.settings.show_count -%}
+      <span class="ulveo-rating__count">({{ count }} avis)</span>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture a11y -%}
+    Note de {{ label }} sur {{ scale | round }}
+    {%- if count != blank %}, {{ count }} avis{% endif -%}
+  {%- endcapture -%}
+
+  <div class="ulveo-rating-block" {{ block.shopify_attributes }}>
+    {%- if block.settings.anchor != blank -%}
+      <a class="ulveo-rating ulveo-rating--link" href="{{ block.settings.anchor | escape }}">
+        <span class="visually-hidden">{{ a11y | strip }}</span>
+        {{ inner }}
+      </a>
+    {%- else -%}
+      <span class="ulveo-rating">
+        <span class="visually-hidden">{{ a11y | strip }}</span>
+        {{ inner }}
+      </span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .ulveo-rating-block {
+    display: inline-flex;
+  }
+
+  .ulveo-rating {
+    --ulveo-rating-star: #f0b400;
+    --ulveo-rating-star-empty: rgb(20 10 5 / 0.20);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    font-family: var(--font-body--family, inherit);
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .ulveo-rating--link:hover .ulveo-rating__count {
+    text-decoration: underline;
+  }
+
+  /* Les étoiles pleines recouvrent les vides, rognées à la fraction exacte
+     de la note : une note de 4,8 affiche bien une dernière étoile partielle. */
+  .ulveo-rating__stars {
+    position: relative;
+    display: inline-block;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .ulveo-rating__stars-empty {
+    color: var(--ulveo-rating-star-empty);
+  }
+
+  .ulveo-rating__stars-full {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: var(--ulveo-rating-fill, 0%);
+    overflow: hidden;
+    color: var(--ulveo-rating-star);
+    white-space: nowrap;
+  }
+
+  .ulveo-rating__score {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .ulveo-rating__count {
+    font-size: 13px;
+    opacity: 0.65;
+  }
+
+  @media screen and (max-width: 420px) {
+    .ulveo-rating__stars { font-size: 13px; }
+    .ulveo-rating__score { font-size: 13px; }
+    .ulveo-rating__count { font-size: 12px; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Note Ulvéo",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Si une application d'avis renseigne les métachamps « reviews.rating » et « reviews.rating_count » du produit, ils sont utilisés en priorité et les deux champs ci-dessous sont ignorés."
+    },
+    {
+      "type": "text",
+      "id": "rating",
+      "label": "Note sur 5",
+      "info": "Ex. 4.8. Laissez vide pour ne rien afficher. Gardez cette valeur cohérente avec la section « Avis clients Ulvéo »."
+    },
+    {
+      "type": "text",
+      "id": "rating_count",
+      "label": "Nombre d'avis"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Afficher le nombre d'avis",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "Lien vers la section Avis",
+      "info": "Ancre cliquable, ex. #shopify-section-avis_produit. Laissez vide pour un simple texte.",
+      "default": "#shopify-section-avis_produit"
+    }
+  ],
+  "presets": [
+    { "name": "Note Ulvéo" }
+  ]
+}
+{% endschema %}
