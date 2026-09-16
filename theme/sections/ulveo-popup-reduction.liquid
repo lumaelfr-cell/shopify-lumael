@@ -1,0 +1,752 @@
+{% comment %}
+  Ulvéo — Pop-up d'inscription à la newsletter.
+
+  Reproduction de la composition du pop-up de référence (capture mobile) :
+  carte centrée, titre, sous-titre, champ prénom, champ e-mail, bouton pleine
+  largeur, croix de fermeture en haut à droite.
+
+  Cotes relevées sur la référence puis converties en px CSS (facteur 2,34) :
+    carte 386 x 353 · padding 40 / 28 / 34 · titre 26px/700 · sous-titre 16px/1.35
+    champs et bouton 48px de haut · rayon 8px · croix 16px à 29/26px des bords
+
+  Le formulaire réutilise le système client natif de Shopify,
+  le même que celui déjà en place dans le pied de page. Aucune application tierce.
+
+  Rendu globalement depuis layout/theme.liquid (section statique) : le pop-up est
+  en position: fixed, son emplacement dans le DOM n'a donc aucune incidence.
+  Ses réglages restent modifiables dans l'éditeur de thème.
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+
+{%- if s.enabled -%}
+  <div
+    class="ulveo-popup"
+    id="ulveo-popup-{{ section.id }}"
+    data-ulveo-popup
+    data-delay="{{ s.delay_seconds }}"
+    data-frequency="{{ s.frequency_days }}"
+    data-storage-key="ulveo-popup:{{ s.reset_token | default: 'v1' | escape }}"
+    {%- if request.design_mode %} data-design-mode="true"{% endif %}
+    style="
+      --ulveo-popup-overlay-opacity: {{ s.overlay_opacity | times: 0.01 }};
+      --ulveo-popup-background: {{ s.background_color }};
+      --ulveo-popup-text: {{ s.text_color }};
+      --ulveo-popup-button-background: {{ s.button_background }};
+      --ulveo-popup-button-text: {{ s.button_text_color }};
+      --ulveo-popup-radius: {{ s.corner_radius }}px;
+    "
+    hidden
+  >
+    <div class="ulveo-popup__overlay" data-ulveo-popup-overlay></div>
+
+    <div
+      class="ulveo-popup__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ulveo-popup-title-{{ section.id }}"
+    >
+      <button
+        class="ulveo-popup__close"
+        type="button"
+        data-ulveo-popup-close
+        aria-label="Fermer"
+      >
+        <svg class="ulveo-popup__close-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M1.5 1.5 L14.5 14.5 M14.5 1.5 L1.5 14.5" />
+        </svg>
+      </button>
+
+      {%- if s.show_logo and settings.logo != blank -%}
+        <img
+          class="ulveo-popup__logo"
+          src="{{ settings.logo | image_url: width: 480 }}"
+          alt="{{ shop.name | escape }}"
+          width="480"
+          height="144"
+          loading="lazy"
+        >
+      {%- endif -%}
+
+      {%- form 'customer', class: 'ulveo-popup__form' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+
+        {%- if form.posted_successfully? -%}
+          {%- assign start_hidden = false -%}
+        {%- else -%}
+          {%- assign start_hidden = true -%}
+        {%- endif -%}
+
+        <div class="ulveo-popup__panel" data-ulveo-popup-fields {% if start_hidden == false %}hidden{% endif %}>
+          {%- if s.heading != blank -%}
+            <h2 class="ulveo-popup__title" id="ulveo-popup-title-{{ section.id }}">
+              {{- s.heading | escape -}}
+            </h2>
+          {%- endif -%}
+
+          {%- if s.subheading != blank -%}
+            <p class="ulveo-popup__subtitle">{{ s.subheading | escape }}</p>
+          {%- endif -%}
+
+          <div class="ulveo-popup__fields">
+            <label class="ulveo-popup__label" for="ulveo-popup-first-name-{{ section.id }}">
+              {{ s.first_name_placeholder | escape }}
+            </label>
+            <input
+              class="ulveo-popup__input"
+              id="ulveo-popup-first-name-{{ section.id }}"
+              type="text"
+              name="contact[first_name]"
+              placeholder="{{ s.first_name_placeholder | escape }}"
+              autocomplete="given-name"
+              autocapitalize="words"
+            >
+
+            <label class="ulveo-popup__label" for="ulveo-popup-email-{{ section.id }}">
+              {{ s.email_placeholder | escape }}
+            </label>
+            <input
+              class="ulveo-popup__input"
+              id="ulveo-popup-email-{{ section.id }}"
+              type="email"
+              name="contact[email]"
+              placeholder="{{ s.email_placeholder | escape }}"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              required
+            >
+
+            <button class="ulveo-popup__button" type="submit" data-ulveo-popup-submit>
+              {{- s.button_label | escape -}}
+            </button>
+          </div>
+
+          <p class="ulveo-popup__error" data-ulveo-popup-error hidden></p>
+
+          {%- if s.legal_text != blank -%}
+            <div class="ulveo-popup__legal">{{ s.legal_text }}</div>
+          {%- endif -%}
+        </div>
+
+        <div class="ulveo-popup__panel ulveo-popup__panel--success" data-ulveo-popup-success {% if start_hidden %}hidden{% endif %}>
+          <h2 class="ulveo-popup__title">{{ s.success_heading | escape }}</h2>
+          <p class="ulveo-popup__subtitle">{{ s.success_text | escape }}</p>
+
+          {%- if s.discount_code != blank -%}
+            <p class="ulveo-popup__code">{{ s.discount_code | escape }}</p>
+          {%- endif -%}
+
+          <button class="ulveo-popup__button" type="button" data-ulveo-popup-close>
+            {{- s.success_button_label | escape -}}
+          </button>
+        </div>
+      {%- endform -%}
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('ulveo-popup-{{ section.id }}');
+      if (!root || root.dataset.ulveoPopupReady === '1') return;
+      root.dataset.ulveoPopupReady = '1';
+
+      var dialog = root.querySelector('.ulveo-popup__dialog');
+      var form = root.querySelector('.ulveo-popup__form');
+      var fields = root.querySelector('[data-ulveo-popup-fields]');
+      var success = root.querySelector('[data-ulveo-popup-success]');
+      var errorEl = root.querySelector('[data-ulveo-popup-error]');
+      var submit = root.querySelector('[data-ulveo-popup-submit]');
+      var emailInput = root.querySelector('input[type="email"]');
+
+      var storageKey = root.dataset.storageKey;
+      var designMode = root.dataset.designMode === 'true';
+      var delay = parseInt(root.dataset.delay, 10);
+      var frequency = parseInt(root.dataset.frequency, 10);
+
+      if (isNaN(delay)) delay = 5;
+      if (isNaN(frequency)) frequency = 14;
+
+      var isOpen = false;
+      var lastFocused = null;
+      var timer = null;
+
+      function readDismissed() {
+        try {
+          var raw = window.localStorage.getItem(storageKey);
+          if (!raw) return false;
+          if (frequency === 0) return true;
+          var stamp = parseInt(raw, 10);
+          if (isNaN(stamp)) return false;
+          return Date.now() - stamp < frequency * 86400000;
+        } catch (e) {
+          /* Navigation privée ou stockage bloqué : on n'insiste pas. */
+          return false;
+        }
+      }
+
+      function writeDismissed() {
+        try {
+          window.localStorage.setItem(storageKey, String(Date.now()));
+        } catch (e) {}
+      }
+
+      /* Piège de focus : la tabulation reste dans la fenêtre modale. */
+      function focusable() {
+        return Array.prototype.filter.call(
+          dialog.querySelectorAll('button, input, a[href], [tabindex]:not([tabindex="-1"])'),
+          function (el) {
+            return !el.disabled && el.offsetParent !== null;
+          }
+        );
+      }
+
+      function onKeydown(event) {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          close();
+          return;
+        }
+
+        if (event.key !== 'Tab') return;
+
+        var items = focusable();
+        if (!items.length) return;
+
+        var first = items[0];
+        var last = items[items.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      function open() {
+        if (isOpen) return;
+        isOpen = true;
+
+        lastFocused = document.activeElement;
+        root.hidden = false;
+
+        /* Force un reflow pour que la transition d'ouverture se joue. */
+        void root.offsetWidth;
+        root.classList.add('is-open');
+
+        document.documentElement.style.setProperty('overflow', 'hidden');
+        document.addEventListener('keydown', onKeydown, true);
+
+        var target = success && !success.hidden ? root.querySelector('[data-ulveo-popup-close]') : emailInput;
+        if (target) {
+          try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+        }
+      }
+
+      function close() {
+        if (!isOpen) return;
+        isOpen = false;
+
+        root.classList.remove('is-open');
+        document.documentElement.style.removeProperty('overflow');
+        document.removeEventListener('keydown', onKeydown, true);
+        writeDismissed();
+
+        window.setTimeout(function () {
+          if (!isOpen) root.hidden = true;
+        }, 240);
+
+        if (lastFocused && typeof lastFocused.focus === 'function') {
+          try { lastFocused.focus({ preventScroll: true }); } catch (e) {}
+        }
+      }
+
+      Array.prototype.forEach.call(root.querySelectorAll('[data-ulveo-popup-close]'), function (el) {
+        el.addEventListener('click', close);
+      });
+
+      var overlay = root.querySelector('[data-ulveo-popup-overlay]');
+      if (overlay) overlay.addEventListener('click', close);
+
+      /* Envoi en arrière-plan vers le formulaire client natif de Shopify,
+         pour éviter le rechargement de page et garder le pop-up affiché. */
+      if (form) {
+        form.addEventListener('submit', function (event) {
+          if (!window.fetch || !window.FormData) return; /* repli : envoi classique */
+
+          event.preventDefault();
+
+          if (errorEl) errorEl.hidden = true;
+          if (submit) submit.disabled = true;
+
+          fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'text/html' }
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('http');
+              if (response.url.indexOf('customer_posted=true') === -1) throw new Error('rejected');
+
+              if (fields) fields.hidden = true;
+              if (success) success.hidden = false;
+              writeDismissed();
+
+              var button = root.querySelector('[data-ulveo-popup-close]');
+              if (button) {
+                try { button.focus({ preventScroll: true }); } catch (e) {}
+              }
+            })
+            .catch(function () {
+              if (submit) submit.disabled = false;
+              if (errorEl) {
+                errorEl.textContent = "L'inscription n'a pas abouti. Vérifiez votre adresse e-mail et réessayez.";
+                errorEl.hidden = false;
+              }
+            });
+        });
+      }
+
+      /* Dans l'éditeur de thème, on affiche toujours le pop-up pour pouvoir le régler. */
+      if (designMode) {
+        open();
+        return;
+      }
+
+      if (readDismissed()) return;
+
+      timer = window.setTimeout(open, delay * 1000);
+
+      /* Si le visiteur quitte la page avant l'ouverture, on n'ouvre pas. */
+      window.addEventListener('pagehide', function () {
+        window.clearTimeout(timer);
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .ulveo-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .ulveo-popup[hidden] {
+    display: none;
+  }
+
+  .ulveo-popup__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / var(--ulveo-popup-overlay-opacity, 0.35));
+    opacity: 0;
+    transition: opacity 220ms ease-out;
+  }
+
+  .ulveo-popup.is-open .ulveo-popup__overlay {
+    opacity: 1;
+  }
+
+  /* Carte : 386 x ~353 px sur la référence. */
+  .ulveo-popup__dialog {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 386px;
+    padding: 40px 28px 34px;
+    border-radius: var(--ulveo-popup-radius, 16px);
+    background: var(--ulveo-popup-background, #f6f1ef);
+    color: var(--ulveo-popup-text, #140a05);
+    box-shadow: 0 18px 50px rgb(20 10 5 / 0.18);
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 220ms ease-out, transform 220ms ease-out;
+    max-height: calc(100dvh - 8px);
+    overflow-y: auto;
+  }
+
+  .ulveo-popup.is-open .ulveo-popup__dialog {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ulveo-popup__overlay,
+    .ulveo-popup__dialog {
+      transition: none;
+    }
+  }
+
+  /* Croix : glyphe de 16 px, à 29 px du haut et 26 px de la droite sur la
+     référence ; la zone cliquable de 44 px est centrée sur ce glyphe. */
+  .ulveo-popup__close {
+    position: absolute;
+    top: 16px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .ulveo-popup__close-icon {
+    width: 16px;
+    height: 16px;
+    stroke: currentcolor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    fill: none;
+  }
+
+  .ulveo-popup__logo {
+    display: block;
+    width: auto;
+    height: 34px;
+    margin: 0 auto 16px;
+    object-fit: contain;
+  }
+
+  .ulveo-popup__form {
+    margin: 0;
+  }
+
+  .ulveo-popup__title {
+    margin: 0;
+    font-family: var(--font-heading--family, inherit);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: inherit;
+  }
+
+  .ulveo-popup__subtitle {
+    margin: 6px 0 0;
+    font-family: var(--font-body--family, inherit);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: inherit;
+  }
+
+  /* 34 px entre le sous-titre et le premier champ, 12 px entre les champs. */
+  .ulveo-popup__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-block-start: 34px;
+  }
+
+  .ulveo-popup__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* 16 px minimum : empêche le zoom automatique de Safari iOS à la saisie. */
+  .ulveo-popup__input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border: 1px solid rgb(20 10 5 / 0.18);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #140a05;
+    font-family: var(--font-body--family, inherit);
+    font-size: 16px;
+    line-height: normal;
+    appearance: none;
+  }
+
+  .ulveo-popup__input::placeholder {
+    color: rgb(20 10 5 / 0.45);
+    opacity: 1;
+  }
+
+  .ulveo-popup__input:focus {
+    outline: none;
+    border-color: #140a05;
+    box-shadow: inset 0 0 0 1px #140a05;
+  }
+
+  .ulveo-popup__button {
+    box-sizing: border-box;
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--ulveo-popup-button-background, #7a462e);
+    color: var(--ulveo-popup-button-text, #f6f1ef);
+    font-family: var(--font-body--family, inherit);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity 150ms ease-out;
+  }
+
+  .ulveo-popup__button:hover {
+    opacity: 0.88;
+  }
+
+  .ulveo-popup__button[disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .ulveo-popup__error {
+    margin: 12px 0 0;
+    font-family: var(--font-body--family, inherit);
+    font-size: 13px;
+    line-height: 1.35;
+    color: #b3261e;
+  }
+
+  .ulveo-popup__legal {
+    margin: 14px 0 0;
+    font-family: var(--font-body--family, inherit);
+    font-size: 11px;
+    line-height: 1.4;
+    color: inherit;
+    opacity: 0.65;
+  }
+
+  .ulveo-popup__legal > :first-child {
+    margin-block-start: 0;
+  }
+
+  .ulveo-popup__legal > :last-child {
+    margin-block-end: 0;
+  }
+
+  .ulveo-popup__legal p {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .ulveo-popup__legal a {
+    color: inherit;
+  }
+
+  .ulveo-popup__panel--success .ulveo-popup__button {
+    margin-block-start: 24px;
+  }
+
+  .ulveo-popup__code {
+    margin: 18px 0 0;
+    padding: 12px 16px;
+    border: 1px dashed rgb(20 10 5 / 0.35);
+    border-radius: 8px;
+    font-family: var(--font-body--family, inherit);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  /* Écrans très courts : la carte défile au lieu d'être rognée. */
+  @media screen and (max-height: 460px) {
+    .ulveo-popup__dialog {
+      padding-block: 28px 24px;
+    }
+
+    .ulveo-popup__fields {
+      margin-block-start: 22px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Pop-up réduction",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Activer le pop-up",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Contenu"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Abonnez-vous"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Sous-titre",
+      "info": "N'annoncez une réduction que si un code de réduction actif existe réellement dans votre admin.",
+      "default": "Nos nouveautés et nos offres, en avant-première."
+    },
+    {
+      "type": "text",
+      "id": "first_name_placeholder",
+      "label": "Champ prénom",
+      "default": "Prénom"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Champ e-mail",
+      "default": "E-mail"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Bouton",
+      "default": "Je m'inscris"
+    },
+    {
+      "type": "richtext",
+      "id": "legal_text",
+      "label": "Mention légale",
+      "info": "Videz ce champ pour retrouver exactement la hauteur du pop-up de référence.",
+      "default": "<p>Désinscription en un clic.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Après l'inscription"
+    },
+    {
+      "type": "text",
+      "id": "success_heading",
+      "label": "Titre",
+      "default": "Merci !"
+    },
+    {
+      "type": "text",
+      "id": "success_text",
+      "label": "Texte",
+      "default": "Votre inscription est confirmée."
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Code de réduction à afficher",
+      "info": "Laissez vide si aucun code actif. Le code doit exister dans Réductions, sinon il ne fonctionnera pas au panier."
+    },
+    {
+      "type": "text",
+      "id": "success_button_label",
+      "label": "Bouton",
+      "default": "Continuer mes achats"
+    },
+    {
+      "type": "header",
+      "content": "Affichage"
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "Délai avant affichage",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "frequency_days",
+      "label": "Ne plus afficher pendant",
+      "min": 0,
+      "max": 90,
+      "step": 1,
+      "unit": "j",
+      "default": 14
+    },
+    {
+      "type": "text",
+      "id": "reset_token",
+      "label": "Jeton de réinitialisation",
+      "info": "Changez cette valeur (v1, v2, …) pour réafficher le pop-up à tous les visiteurs qui l'avaient déjà fermé.",
+      "default": "v1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_logo",
+      "label": "Afficher le logo Ulvéo",
+      "info": "Absent du pop-up de référence. Activez-le pour renforcer l'identité Ulvéo.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Apparence"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Intensité du voile",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Rayon des coins",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Fond du pop-up",
+      "default": "#f6f1ef"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texte",
+      "default": "#140a05"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fond du bouton",
+      "default": "#7a462e"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texte du bouton",
+      "default": "#f6f1ef"
+    }
+  ],
+  "presets": [
+    { "name": "Pop-up réduction" }
+  ]
+}
+{% endschema %}
