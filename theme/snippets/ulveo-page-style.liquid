@@ -13,7 +13,7 @@
   fausse urgence, rien qui promette ce que la boutique ne tient pas.
 
   Les jeux de couleurs restent ceux de l'éditeur : on n'impose aucun fond.
-  L'accent reprend celui du sélecteur de lot (#E8622C).
+  L'accent reprend celui du sélecteur de lot (#CB4A16).
 
   Accessibilité : toute l'animation est neutralisée sous
   `prefers-reduced-motion`, et le contenu reste visible sans JavaScript.
@@ -25,7 +25,10 @@
   .ulveo-avis,
   .ulveo-guarantee,
   .ulveo-faq {
-    --ulveo-accent: #E8622C;
+    --ulveo-accent: #CB4A16;
+    /* Variante plus sombre, réservée aux petits textes posés sur un fond
+       clair : l'accent seul n'y atteint pas 4,5:1. */
+    --ulveo-accent-strong: #A8441A;
     --ulveo-ink: #140a05;
     --ulveo-radius: 16px;
     --ulveo-shadow: 0 4px 16px rgb(20 10 5 / 0.06);
@@ -71,7 +74,7 @@
     background: var(--ulveo-accent);
     color: #fff;
     font-size: 1rem;
-    box-shadow: 0 0 0 5px rgb(232 98 44 / 0.12);
+    box-shadow: 0 0 0 5px rgb(203 74 22 / 0.12);
   }
 
   .ulveo-steps__title {
@@ -101,7 +104,7 @@
       height: 2px;
       background: repeating-linear-gradient(
         to right,
-        rgb(232 98 44 / 0.35) 0 6px,
+        rgb(203 74 22 / 0.35) 0 6px,
         transparent 6px 12px
       );
     }
@@ -220,7 +223,7 @@
   }
 
   .ulveo-guarantee__eyebrow {
-    color: var(--ulveo-accent);
+    color: var(--ulveo-accent-strong);
     opacity: 1;
   }
 
@@ -248,8 +251,10 @@
     border-color: rgb(20 10 5 / 0.22);
   }
 
+  /* 0,75 d'opacité : 3,15:1 sur blanc, au-dessus du seuil de 3:1 exigé pour
+     une limite d'élément d'interface. */
   .ulveo-faq__item[open] {
-    border-color: rgb(232 98 44 / 0.45);
+    border-color: rgb(203 74 22 / 0.75);
   }
 
   .ulveo-faq__question {

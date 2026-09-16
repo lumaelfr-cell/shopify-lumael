@@ -24,8 +24,11 @@
   --bp-chip-ink: #6f6159;
 
   /* Accent repris de la boutique : il colore la carte sélectionnée, le
-     bandeau et le bouton, comme l'accent unique de la référence. */
-  --bp-cta: #E8622C;
+     bandeau et le bouton, comme l'accent unique de la référence.
+     Teinte inchangée, luminosité abaissée de 10 % par rapport au #E8622C
+     d'origine : le blanc du bouton passe ainsi de 3,38:1 à 4,64:1, au-dessus
+     du seuil AA de 4,5:1 exigé pour un texte courant. */
+  --bp-cta: #CB4A16;
   --bp-cta-ink: #ffffff;
   --bp-accent-surface: #fdf3ed;
 
@@ -325,10 +328,12 @@
   white-space: nowrap;
 }
 
+/* 4,96:1 sur blanc : le prix barré reste lisible, la rature suffit à le
+   démarquer du prix en vigueur. */
 .bp .bp-card__compare {
   display: block;
   margin-top: 2px;
-  color: #9a8b82;
+  color: #7d6d61;
   font-size: 14px;
   line-height: 1.2;
   text-decoration: line-through;

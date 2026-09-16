@@ -155,3 +155,43 @@ désormais à deux endroits — à garder cohérents.
   Contrôlé aussi à 5,0 / 4,5 / 3,5 / 1,0.
 - Aucun débordement horizontal.
 - `theme-check` : aucune anomalie.
+
+---
+
+## Passe de finition (6e lot) — contrastes
+
+Audit systématique des couleurs introduites, ratio WCAG calculé pour chaque
+paire texte/fond. **6 contrastes insuffisants trouvés, 4 corrigés.**
+
+| Élément | Avant | Après | Seuil |
+|---|---|---|---|
+| Bouton « Je l'ajoute à mon panier » | 3,38:1 | **4,64:1** | 4,5 |
+| Badge « Meilleure offre » | 3,38:1 | **4,64:1** | 4,5 |
+| Prix barré | 3,29:1 | **4,96:1** | 4,5 |
+| Sur-titre de la garantie | 2,87:1 | **5,08:1** | 4,5 |
+| Bordure FAQ ouverte | 1,92:1 | **3,15:1** | 3,0 |
+
+L'accent passe de `#E8622C` à `#CB4A16` : **même teinte**, luminosité abaissée
+de 10 %. C'est le premier palier qui fait passer le blanc du bouton au-dessus
+de 4,5:1. Un sur-titre en petites capitales sur fond crème ne suffisait pas
+même ainsi : il utilise `--ulveo-accent-strong` (`#A8441A`, 5,08:1).
+
+### Non corrigé, et pourquoi
+
+- **Étoiles dorées `#f0b400` sur blanc : 1,87:1.** C'est la couleur d'origine
+  de votre section Avis. Les étoiles portent `aria-hidden`, la note chiffrée
+  est juste à côté en texte, et un libellé lisible par lecteur d'écran double
+  l'information : elles sont décoratives, pas porteuses de sens.
+- **Bouton du pop-up en brun `#7a462e` (7,66:1).** Contraste excellent, mais
+  c'est une couleur d'action différente de l'orange du reste. Cohérence ou
+  hiérarchie : c'est un choix de marque, pas un défaut.
+
+### Autres contrôles
+
+- Intégrité : les 8 fichiers en ligne correspondent au dépôt (somme MD5).
+- `theme-check` : aucune anomalie réelle. Les 4 avertissements
+  « OrphanedSnippet » sont des faux positifs — vérification faite, les 4
+  snippets sont bien référencés depuis `layout/theme.liquid` et
+  `blocks/ulveo-bundle-picker.liquid`.
+- Rendu revérifié après les changements de couleur : sélecteur de lot et
+  sections du bas inchangés en géométrie, aucun débordement.
