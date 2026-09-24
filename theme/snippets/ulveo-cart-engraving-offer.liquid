@@ -1,0 +1,277 @@
+{%- doc -%}
+  Proposition de gravure au panier.
+
+  Si le panier contient la scelleuse SANS gravure, propose de l'ajouter pour 5 €.
+  À la validation, la ligne est remplacée par la variante gravée correspondante
+  (même édition, même couleur), avec le texte saisi en propriété de ligne.
+
+  Rendu depuis layout/theme.liquid : couvre le tiroir panier et la page panier.
+{%- enddoc -%}
+
+{%- assign engraving_product = all_products['scelleuse-de-sachets-magnetique-ulveo'] -%}
+
+{%- if engraving_product != blank and engraving_product.available -%}
+  <script type="application/json" id="ulveo-engraving-upgrades">
+    {
+      {%- assign first = true -%}
+      {%- for v in engraving_product.variants -%}
+        {%- if v.option3 contains 'Sans gravure' -%}
+          {%- for w in engraving_product.variants -%}
+            {%- if w.option1 == v.option1 and w.option2 == v.option2 and w.option3 contains 'Avec gravure' -%}
+              {%- unless first %},{% endunless -%}
+              "{{ v.id }}": { "to": {{ w.id }}, "delta": {{ w.price | minus: v.price }} }
+              {%- assign first = false -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+    }
+  </script>
+
+  <template id="ulveo-engraving-offer-template">
+    <div class="ulveo-offer" data-ulveo-offer>
+      <p class="ulveo-offer__title">Ajoutez une gravure</p>
+      <p class="ulveo-offer__text">
+        Faites-en un cadeau : un prénom gravé sur le capot, pour
+        <strong data-ulveo-price></strong>.
+      </p>
+      <div class="ulveo-offer__row">
+        <input
+          class="ulveo-offer__input"
+          type="text"
+          maxlength="20"
+          placeholder="Ex. Raph"
+          autocomplete="off"
+          data-ulveo-input
+          aria-label="Texte à graver"
+        >
+        <button class="ulveo-offer__button" type="button" data-ulveo-add>Ajouter</button>
+      </div>
+      <p class="ulveo-offer__error" data-ulveo-error hidden></p>
+      <button class="ulveo-offer__decline" type="button" data-ulveo-decline>Non merci</button>
+    </div>
+  </template>
+
+  <style>
+    .ulveo-offer {
+      margin-block: 16px;
+      padding: 16px;
+      border: 1px solid var(--color-border, #e6e6e6);
+      border-radius: 12px;
+      background: var(--color-background, #fff);
+    }
+
+    .ulveo-offer__title {
+      margin: 0 0 4px;
+      font-weight: 600;
+      font-size: var(--font-size--md, 1rem);
+    }
+
+    .ulveo-offer__text {
+      margin: 0 0 12px;
+      font-size: var(--font-size--sm, 0.875rem);
+      color: var(--color-foreground-secondary, #666);
+    }
+
+    .ulveo-offer__row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ulveo-offer__input {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--color-input-border, #c9c9c9);
+      border-radius: var(--style-border-radius-inputs, 8px);
+      background: var(--color-input-background, #fff);
+      color: var(--color-input-text, #111);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .ulveo-offer__button {
+      flex: 0 0 auto;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 100px;
+      background: var(--color-primary-button-background, #111);
+      color: var(--color-primary-button-text, #fff);
+      font-family: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .ulveo-offer__button[disabled] {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .ulveo-offer__error {
+      margin: 8px 0 0;
+      font-size: var(--font-size--xs, 0.75rem);
+      color: #b3261e;
+    }
+
+    .ulveo-offer__decline {
+      margin-block-start: 10px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--color-foreground-secondary, #666);
+      font-family: inherit;
+      font-size: var(--font-size--xs, 0.75rem);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    (function () {
+      var upgrades = {};
+      try {
+        upgrades = JSON.parse(document.getElementById('ulveo-engraving-upgrades').textContent);
+      } catch (e) {
+        return;
+      }
+
+      var template = document.getElementById('ulveo-engraving-offer-template');
+      if (!template) return;
+
+      var DECLINED = 'ulveo-engraving-declined';
+      var busy = false;
+
+      function declined() {
+        try {
+          return sessionStorage.getItem(DECLINED) === '1';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function money(cents) {
+        return (cents / 100).toFixed(2).replace('.', ',') + ' €';
+      }
+
+      /* Ancre : le bouton de commande, présent dans le tiroir comme sur la page panier. */
+      function anchors() {
+        return Array.prototype.slice.call(
+          document.querySelectorAll('[name="checkout"]')
+        ).filter(function (el) {
+          return el.offsetParent !== null;
+        });
+      }
+
+      function buildCard(line) {
+        var card = template.content.firstElementChild.cloneNode(true);
+        var input = card.querySelector('[data-ulveo-input]');
+        var button = card.querySelector('[data-ulveo-add]');
+        var error = card.querySelector('[data-ulveo-error]');
+
+        card.querySelector('[data-ulveo-price]').textContent = money(line.delta);
+
+        card.querySelector('[data-ulveo-decline]').addEventListener('click', function () {
+          try { sessionStorage.setItem(DECLINED, '1'); } catch (e) {}
+          card.remove();
+        });
+
+        button.addEventListener('click', function () {
+          var value = input.value.trim();
+
+          if (!value) {
+            error.textContent = 'Indiquez le texte à graver.';
+            error.hidden = false;
+            input.focus();
+            return;
+          }
+
+          if (busy) return;
+          busy = true;
+          error.hidden = true;
+          button.disabled = true;
+          button.textContent = 'Ajout…';
+
+          fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: line.to,
+              quantity: line.quantity,
+              properties: { Gravure: value }
+            })
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error('add');
+              return fetch('/cart/change.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: line.key, quantity: 0 })
+              });
+            })
+            .then(function (response) {
+              if (!response.ok) throw new Error('remove');
+              window.location.reload();
+            })
+            .catch(function () {
+              busy = false;
+              button.disabled = false;
+              button.textContent = 'Ajouter';
+              error.textContent = "L'ajout a échoué. Réessayez.";
+              error.hidden = false;
+            });
+        });
+
+        return card;
+      }
+
+      function refresh() {
+        if (declined()) return;
+
+        var targets = anchors();
+        if (!targets.length) return;
+
+        fetch('/cart.js', { headers: { Accept: 'application/json' } })
+          .then(function (response) { return response.json(); })
+          .then(function (cart) {
+            var line = null;
+
+            for (var i = 0; i < cart.items.length; i++) {
+              var item = cart.items[i];
+              var upgrade = upgrades[String(item.variant_id)];
+              if (upgrade) {
+                line = {
+                  key: item.key,
+                  quantity: item.quantity,
+                  to: upgrade.to,
+                  delta: upgrade.delta
+                };
+                break;
+              }
+            }
+
+            targets.forEach(function (target) {
+              var container = target.closest('form') || target.parentElement;
+              if (!container) return;
+
+              var existing = container.parentElement
+                ? container.parentElement.querySelector('[data-ulveo-offer]')
+                : null;
+
+              if (!line) {
+                if (existing) existing.remove();
+                return;
+              }
+
+              if (existing) return;
+              container.parentElement.insertBefore(buildCard(line), container);
+            });
+          })
+          .catch(function () {});
+      }
+
+      document.addEventListener('DOMContentLoaded', refresh);
+      refresh();
+      setInterval(refresh, 1200);
+    })();
+  </script>
+{%- endif -%}

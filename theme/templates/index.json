@@ -1,0 +1,555 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "home_redirect_to_product": {
+      "type": "custom-liquid",
+      "name": "Redirection vers la fiche produit",
+      "settings": {
+        "custom_liquid": "<script>window.location.replace('/products/scelleuse-de-sachets-magnetique-ulveo');</script>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "hero_p9CmMG": {
+      "type": "hero",
+      "blocks": {
+        "group_hero_cta": {
+          "type": "group",
+          "name": "t:names.group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "center",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "center",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 0,
+            "width": "fit-content",
+            "custom_width": 70,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "custom",
+            "custom_height": 0,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "padding-block-start": 0,
+            "padding-block-end": 21,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "button_hero": {
+              "type": "button",
+              "name": "t:names.button",
+              "settings": {
+                "label": "Découvrir la scelleuse",
+                "link": "shopify://products/scelleuse-de-sachets-magnetique-ulveo",
+                "open_in_new_tab": false,
+                "style_class": "button-secondary",
+                "width": "custom",
+                "custom_width": 100,
+                "width_mobile": "custom",
+                "custom_width_mobile": 54
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "button_hero"
+          ]
+        }
+      },
+      "block_order": [
+        "group_hero_cta"
+      ],
+      "name": "t:names.hero",
+      "settings": {
+        "media_type_1": "image",
+        "image_1": "shopify://shop_images/ChatGPT_Image_2_sept._2026_16_58_18.png",
+        "media_type_2": "image",
+        "stack_media_on_mobile": false,
+        "custom_mobile_media": false,
+        "media_type_1_mobile": "image",
+        "media_type_2_mobile": "image",
+        "link": "",
+        "open_in_new_tab": false,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "flex-end",
+        "gap": 0,
+        "section_width": "full-width",
+        "section_height": "large",
+        "section_height_custom": 5,
+        "color_scheme": "scheme-5",
+        "toggle_overlay": true,
+        "overlay_color": "rgba(0,0,0,0)",
+        "overlay_style": "gradient",
+        "gradient_direction": "to bottom",
+        "blurred_reflection": true,
+        "reflection_opacity": 0,
+        "padding-block-start": 50,
+        "padding-block-end": 49
+      }
+    },
+    "divider_aama4g": {
+      "type": "divider",
+      "name": "t:names.divider_section",
+      "settings": {
+        "color_scheme": "",
+        "section_width": "full-width",
+        "thickness": 1,
+        "corner_radius": "square",
+        "width_percent": 100,
+        "alignment_horizontal": "center",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "marquee_avis": {
+      "type": "marquee",
+      "blocks": {
+        "text_marquee_avis": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Garantie légale 2 ans · Livraison rapide · Satisfait ou remboursé sous 14 jours</p>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "tight",
+            "letter_spacing": "tight",
+            "case": "none",
+            "wrap": "nowrap",
+            "color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_marquee_avis"
+      ],
+      "name": "t:names.marquee_section",
+      "settings": {
+        "movement_direction": "reverse",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 14,
+        "padding-block-end": 16,
+        "gap_between_elements": 33
+      }
+    },
+    "divider_cP7Ptx": {
+      "type": "divider",
+      "name": "t:names.divider_section",
+      "settings": {
+        "color_scheme": "",
+        "section_width": "full-width",
+        "thickness": 1,
+        "corner_radius": "square",
+        "width_percent": 100,
+        "alignment_horizontal": "center",
+        "padding-block-start": 0,
+        "padding-block-end": 17
+      }
+    },
+    "avis_ulveo": {
+      "type": "ulveo-avis",
+      "blocks": {
+        "avis_0": {
+          "type": "avis",
+          "settings": {
+            "name": "Thomas M.",
+            "city": "Toulouse",
+            "rating": 4,
+            "verified": true,
+            "text": "<p>Très pratique et facile à utiliser, je recommande à 100 % !</p>",
+            "image": "shopify://shop_images/IMG_4777.jpg"
+          }
+        },
+        "avis_1": {
+          "type": "avis",
+          "settings": {
+            "name": "Amélie N.",
+            "city": "Lyon",
+            "rating": 5,
+            "verified": true,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>",
+            "image": "shopify://shop_images/IMG_4697.jpg"
+          }
+        },
+        "avis_2": {
+          "type": "avis",
+          "settings": {
+            "name": "Léo M.",
+            "city": "Bordeaux",
+            "rating": 5,
+            "verified": true,
+            "text": "<p>Parfaite pour nous ! Rapide, efficace, et sans prise de tête. Le meilleur investissement récent.</p>",
+            "image": "shopify://shop_images/IMG_4696.jpg"
+          }
+        },
+        "avis_3": {
+          "type": "avis",
+          "settings": {
+            "name": "Jade E.",
+            "city": "Troyes",
+            "rating": 5,
+            "verified": true,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>",
+            "image": "shopify://shop_images/IMG_4695.jpg"
+          }
+        }
+      },
+      "block_order": [
+        "avis_0",
+        "avis_1",
+        "avis_2",
+        "avis_3"
+      ],
+      "name": "Avis clients Ulvéo",
+      "settings": {
+        "heading": "<p>✨ <strong>Ils l’ont adopté !</strong><br/>Découvrez pourquoi nos clients ne peuvent plus s’en passer : pratique, rapide et efficace au quotidien. 💯</p>",
+        "heading_font_size": 21,
+        "name_font_size": 16,
+        "text_font_size": 15,
+        "manual_summary": true,
+        "manual_rating": "4.8",
+        "manual_review_count": "329",
+        "manual_stars_5": "246",
+        "manual_stars_4": "70",
+        "manual_stars_3": "09",
+        "manual_stars_2": "03",
+        "manual_stars_1": "01",
+        "show_breakdown": true,
+        "show_verified_label": true,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 60,
+        "padding-block-end": 36
+      }
+    },
+    "video_ulveo": {
+      "type": "section",
+      "blocks": {
+        "text_video_title": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>3 secondes, et c'est scellé</h2>",
+            "width": "100%",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "video_demo": {
+          "type": "video",
+          "name": "t:names.video",
+          "settings": {
+            "source": "uploaded",
+            "video": "shopify://files/videos/ulveo-demo.mov",
+            "video_url": "",
+            "video_autoplay": true,
+            "video_loop": true,
+            "alt": "Démonstration de la scelleuse de sachets magnétique Ulvéo",
+            "custom_width": 30,
+            "custom_width_mobile": 85,
+            "aspect_ratio": "auto",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 12,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_video_title",
+        "video_demo"
+      ],
+      "name": "t:names.pull_quote",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 32,
+        "section_width": "page-width",
+        "section_height": "fit",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 64,
+        "padding-block-end": 64
+      }
+    },
+    "faq_ulveo": {
+      "type": "ulveo-faq",
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "Mes chips resteront-elles vraiment croquantes ?",
+            "answer": "<p>Oui. Ce qui ramollit les chips, c'est l'humidité de l'air qui entre dans le paquet. La scelleuse soude le plastique sur toute la largeur : l'échange avec l'air extérieur est coupé, là où une pince laisse toujours un passage.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "C'est compliqué à utiliser ?",
+            "answer": "<p>Non. Vous placez le bord du sachet dans l'appareil, vous appuyez, vous attendez trois secondes. Il n'y a rien d'autre à apprendre.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "Ça fonctionne sur tous les sachets ?",
+            "answer": "<p>Sur tous les sachets en plastique alimentaire courant : chips, biscuits, surgelés, café, pâtes, riz, croquettes. Pas sur le papier, l'aluminium épais ni les emballages rigides.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "Pourquoi pas simplement une pince ou un élastique ?",
+            "answer": "<p>Parce qu'ils referment sans fermer : le sachet reste ouvert à l'air, il est juste plié. Et une pince finit toujours par disparaître au fond d'un tiroir. La scelleuse, elle, reste aimantée sur la porte du réfrigérateur.</p>"
+          }
+        },
+        "q5": {
+          "type": "question",
+          "settings": {
+            "question": "Comment se recharge-t-elle ?",
+            "answer": "<p>Par un port USB-C, avec le même câble que votre téléphone. Le câble est fourni.</p>"
+          }
+        },
+        "q6": {
+          "type": "question",
+          "settings": {
+            "question": "Et si le produit ne me convient pas ?",
+            "answer": "<p>Vous disposez de 14 jours à compter de la réception pour changer d'avis, sans avoir à vous justifier. Les articles gravés, personnalisés, ne sont pas repris.</p>"
+          }
+        },
+        "q7": {
+          "type": "question",
+          "settings": {
+            "question": "Et s'il tombe en panne ?",
+            "answer": "<p>Tous nos produits bénéficient de la garantie légale de conformité pendant 2 ans à compter de la livraison. Le remplacement ou le remboursement se fait sans frais pour vous.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7"
+      ],
+      "name": "FAQ Ulvéo",
+      "settings": {
+        "heading": "Questions fréquentes",
+        "intro": "<p>Vous ne trouvez pas votre réponse ? Écrivez-nous, nous répondons à tous les messages.</p>",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 64,
+        "padding-block-end": 64
+      }
+    },
+    "section_x8mrnx": {
+      "type": "section",
+      "blocks": {
+        "text_eFMntb": {
+          "type": "text",
+          "settings": {
+            "text": "<h2>Passez à la vitesse supérieure</h2>",
+            "width": "100%",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "button_TmU98M": {
+          "type": "button",
+          "settings": {
+            "label": "Je la veux",
+            "link": "shopify://products/scelleuse-de-sachets-magnetique-ulveo",
+            "open_in_new_tab": false,
+            "style_class": "button-secondary",
+            "width": "fit-content",
+            "custom_width": 100,
+            "width_mobile": "fit-content",
+            "custom_width_mobile": 100
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_eFMntb",
+        "button_TmU98M"
+      ],
+      "name": "t:names.pull_quote",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 32,
+        "section_width": "page-width",
+        "section_height": "small",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-5",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 72,
+        "padding-block-end": 72
+      }
+    },
+    "marquee_KN4PYb": {
+      "type": "marquee",
+      "blocks": {
+        "text_kFiJUi": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Soudure en 3 secondes · Rechargeable USB-C · Aimantée sur le frigo · Coupe intégrée · Garantie légale 2 ans</p>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "tight",
+            "letter_spacing": "tight",
+            "case": "none",
+            "wrap": "nowrap",
+            "color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_kFiJUi"
+      ],
+      "name": "t:names.marquee_section",
+      "settings": {
+        "movement_direction": "reverse",
+        "color_scheme": "scheme-2",
+        "padding-block-start": 24,
+        "padding-block-end": 24,
+        "gap_between_elements": 24
+      }
+    }
+  },
+  "order": [
+    "home_redirect_to_product",
+    "hero_p9CmMG",
+    "divider_aama4g",
+    "marquee_avis",
+    "divider_cP7Ptx",
+    "avis_ulveo",
+    "video_ulveo",
+    "faq_ulveo",
+    "section_x8mrnx",
+    "marquee_KN4PYb"
+  ]
+}
