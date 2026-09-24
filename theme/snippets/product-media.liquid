@@ -18,6 +18,13 @@
 
 {% liquid
   assign widths = widths | default: '240, 352, 832, 1200, 1600, 1920, 2560, 3840'
+
+  # Ulvéo : sans texte alternatif, la photo était annoncée comme décorative.
+  # On retombe sur le nom du produit tant que le texte n'est pas saisi dans l'admin.
+  assign media_alt = media.alt
+  if media_alt == blank
+    assign media_alt = selected_product.title | default: product.title
+  endif
   assign ref_image_to_transition = ''
   if settings.transition_to_main_product
     assign ref_image_to_transition = 'imagesToTransition[]'
@@ -42,7 +49,7 @@
     | image_url: width: 3840
     | image_tag:
       widths: widths,
-      alt: media.alt,
+      alt: media_alt,
       sizes: sizes,
       loading: loading,
       class: 'product-media__image',
@@ -69,7 +76,7 @@
               | image_url: width: 3840
               | image_tag:
                 widths: widths,
-                alt: media.alt,
+                alt: media_alt,
                 sizes: sizes,
                 loading: loading,
                 class: 'deferred-media__poster-image'

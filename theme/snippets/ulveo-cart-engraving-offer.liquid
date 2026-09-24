@@ -179,7 +179,7 @@
           var value = input.value.trim();
 
           if (!value) {
-            error.textContent = 'Indiquez le texte à graver.';
+            error.textContent = 'Indiquez le prénom ou le mot à graver.';
             error.hidden = false;
             input.focus();
             return;
@@ -216,7 +216,7 @@
               busy = false;
               button.disabled = false;
               button.textContent = 'Ajouter';
-              error.textContent = "L'ajout a échoué. Réessayez.";
+              error.textContent = "Oups, la gravure n'a pas pu être ajoutée. Pouvez-vous réessayer ?";
               error.hidden = false;
             });
         });
@@ -224,11 +224,59 @@
         return card;
       }
 
+      /* Empreinte du panier affiché : clés des lignes et nombre d'articles.
+         Tant qu'elle ne change pas, inutile d'interroger /cart.js à chaque
+         tour : on réutilise la dernière réponse. */
+      var cache = { sig: null, line: null };
+
+      function cartSignature() {
+        var rows = document.querySelectorAll('.cart-items__table-row[data-key]');
+        var count = document.querySelector('[ref="cartItemCount"]');
+        return Array.prototype.map.call(rows, function (row) {
+          return row.getAttribute('data-key');
+        }).join('|') + '#' + (count ? count.textContent.trim() : '');
+      }
+
+      function render(targets, line, sig) {
+        targets.forEach(function (target) {
+          var container = target.closest('form') || target.parentElement;
+          if (!container || !container.parentElement) return;
+
+          var existing = container.parentElement.querySelector('[data-ulveo-offer]');
+
+          if (!line) {
+            if (existing) existing.remove();
+            return;
+          }
+
+          /* La carte garde la quantité de la ligne : si le panier a changé,
+             on la reconstruit, en conservant le texte déjà saisi. */
+          if (existing && existing.getAttribute('data-ulveo-sig') === sig) return;
+
+          var card = buildCard(line);
+          card.setAttribute('data-ulveo-sig', sig);
+
+          if (existing) {
+            var typed = existing.querySelector('[data-ulveo-input]');
+            if (typed && typed.value) card.querySelector('[data-ulveo-input]').value = typed.value;
+            existing.replaceWith(card);
+          } else {
+            container.parentElement.insertBefore(card, container);
+          }
+        });
+      }
+
       function refresh() {
         if (declined()) return;
 
         var targets = anchors();
         if (!targets.length) return;
+
+        var sig = cartSignature();
+        if (sig === cache.sig) {
+          render(targets, cache.line, sig);
+          return;
+        }
 
         fetch('/cart.js', { headers: { Accept: 'application/json' } })
           .then(function (response) { return response.json(); })
@@ -249,22 +297,9 @@
               }
             }
 
-            targets.forEach(function (target) {
-              var container = target.closest('form') || target.parentElement;
-              if (!container) return;
-
-              var existing = container.parentElement
-                ? container.parentElement.querySelector('[data-ulveo-offer]')
-                : null;
-
-              if (!line) {
-                if (existing) existing.remove();
-                return;
-              }
-
-              if (existing) return;
-              container.parentElement.insertBefore(buildCard(line), container);
-            });
+            cache.sig = sig;
+            cache.line = line;
+            render(anchors(), line, sig);
           })
           .catch(function () {});
       }

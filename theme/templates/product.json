@@ -203,7 +203,7 @@
                         "rating": "4.8",
                         "rating_count": "329",
                         "show_count": true,
-                        "anchor": "#shopify-section-avis_produit"
+                        "anchor": ""
                       },
                       "blocks": {}
                     }
@@ -270,7 +270,7 @@
                 "color_label": "Couleur",
                 "cta_label": "Je l'ajoute à mon panier",
                 "sold_out_label": "Momentanément épuisé",
-                "unavailable_label": "Indisponible",
+                "unavailable_label": "Indisponible pour le moment",
                 "stock_text": "",
                 "show_payment_icons": true,
                 "hide_native": true,
@@ -682,7 +682,7 @@
       ],
       "name": "Comparatif Ulvéo",
       "settings": {
-        "heading": "Arrêtez de jeter ce que vous venez d'acheter",
+        "heading": "Gardez frais ce que vous venez d’acheter",
         "intro": "<p>Un paquet ouvert n'est jamais vraiment refermé. L'air passe, le contenu ramollit, et la moitié finit à la poubelle.</p>",
         "color_scheme": "scheme-1",
         "padding-block-start": 32,
@@ -808,7 +808,7 @@
       "name": "FAQ Ulvéo",
       "settings": {
         "heading": "Questions fréquentes",
-        "intro": "<p>Vous ne trouvez pas votre réponse ? Écrivez-nous, nous répondons à tous les messages.</p>",
+        "intro": "<p>Vous ne trouvez pas votre réponse ? <a href=\"/pages/contact\" title=\"Contact\">Écrivez-nous</a>, nous répondons à tous les messages.</p>",
         "color_scheme": "scheme-1",
         "padding-block-start": 36,
         "padding-block-end": 52

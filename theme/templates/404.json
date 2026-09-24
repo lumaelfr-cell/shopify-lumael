@@ -15,7 +15,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<h1>Page not found</h1>",
+            "text": "<h1>Oups, cette page s’est égarée</h1>",
             "width": "100%",
             "max_width": "normal",
             "alignment": "center",
@@ -41,7 +41,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<p>The link may be incorrect, or the page has been removed. </p>",
+            "text": "<p>Le lien est peut-être incorrect, ou la page a été déplacée. Pas d’inquiétude, tout le reste est bien là.</p>",
             "width": "100%",
             "max_width": "normal",
             "alignment": "center",
@@ -67,7 +67,7 @@
           "type": "button",
           "name": "t:names.button",
           "settings": {
-            "label": "Continue shopping",
+            "label": "Retour à la boutique",
             "link": "shopify://collections/all",
             "open_in_new_tab": false,
             "style_class": "button",
@@ -136,7 +136,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>Discover something new</p>",
+                "text": "<p>Et si vous jetiez un œil à ceci ?</p>",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
@@ -253,7 +253,7 @@
           ]
         }
       },
-      "name": "Featured collection",
+      "name": "Produits suggérés",
       "settings": {
         "collection": "all",
         "layout_type": "grid",

@@ -13,7 +13,7 @@
       "type": "custom-liquid",
       "name": "Redirection vers la fiche produit",
       "settings": {
-        "custom_liquid": "<script>window.location.replace('/products/scelleuse-de-sachets-magnetique-ulveo');</script>",
+        "custom_liquid": "{%- unless request.design_mode -%}<script>window.location.replace('/products/scelleuse-de-sachets-magnetique-ulveo' + window.location.search + window.location.hash);</script>{%- endunless -%}",
         "color_scheme": "",
         "section_width": "page-width",
         "padding-block-start": 0,
@@ -140,7 +140,7 @@
         "text_marquee_avis": {
           "type": "text",
           "settings": {
-            "text": "<p>Garantie légale 2 ans · Livraison rapide · Satisfait ou remboursé sous 14 jours</p>",
+            "text": "<p>Garantie légale 2 ans · Livraison rapide · 14 jours pour changer d’avis</p>",
             "width": "fit-content",
             "max_width": "normal",
             "alignment": "left",
@@ -234,7 +234,8 @@
             "verified": true,
             "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>",
             "image": "shopify://shop_images/IMG_4695.jpg"
-          }
+          },
+          "disabled": true
         }
       },
       "block_order": [
@@ -416,7 +417,7 @@
       "name": "FAQ Ulvéo",
       "settings": {
         "heading": "Questions fréquentes",
-        "intro": "<p>Vous ne trouvez pas votre réponse ? Écrivez-nous, nous répondons à tous les messages.</p>",
+        "intro": "<p>Vous ne trouvez pas votre réponse ? <a href=\"/pages/contact\" title=\"Contact\">Écrivez-nous</a>, nous répondons à tous les messages.</p>",
         "color_scheme": "scheme-1",
         "padding-block-start": 64,
         "padding-block-end": 64

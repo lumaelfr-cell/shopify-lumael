@@ -302,7 +302,7 @@
             .catch(function () {
               if (submit) submit.disabled = false;
               if (errorEl) {
-                errorEl.textContent = "L'inscription n'a pas abouti. Vérifiez votre adresse e-mail et réessayez.";
+                errorEl.textContent = "Oups, l'inscription n'a pas fonctionné. Pouvez-vous vérifier votre adresse e-mail ?";
                 errorEl.hidden = false;
               }
             });
@@ -317,7 +317,20 @@
 
       if (readDismissed()) return;
 
-      timer = window.setTimeout(open, delay * 1000);
+      /* On ne dérange pas un visiteur qui regarde son panier : pas de pop-up
+         sur la page panier, et on patiente tant qu'une autre fenêtre (tiroir
+         panier, recherche, ajout rapide) est ouverte. */
+      if (document.querySelector('main[data-template^="cart"]')) return;
+
+      function openWhenFree() {
+        if (document.querySelector('dialog[open]')) {
+          timer = window.setTimeout(openWhenFree, 4000);
+          return;
+        }
+        open();
+      }
+
+      timer = window.setTimeout(openWhenFree, delay * 1000);
 
       /* Si le visiteur quitte la page avant l'ouverture, on n'ouvre pas. */
       window.addEventListener('pagehide', function () {

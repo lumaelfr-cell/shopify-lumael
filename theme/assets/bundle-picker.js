@@ -493,10 +493,10 @@
       return unit.variant && unit.variant.available;
     });
 
-    var label = this.atc.getAttribute("data-label-default") || "ADD TO CART";
-    var soldOut = this.atc.getAttribute("data-label-sold-out") || "SOLD OUT";
+    var label = this.atc.getAttribute("data-label-default") || "Ajouter à mon panier";
+    var soldOut = this.atc.getAttribute("data-label-sold-out") || "Momentanément épuisé";
     var unavailable =
-      this.atc.getAttribute("data-label-unavailable") || "UNAVAILABLE";
+      this.atc.getAttribute("data-label-unavailable") || "Indisponible pour le moment";
 
     if (!resolved) {
       this.atc.textContent = unavailable;
@@ -576,7 +576,7 @@
       this.showError(
         this.config.strings && this.config.strings.unavailable
           ? this.config.strings.unavailable
-          : "Cette combinaison n'est pas disponible."
+          : "Cette combinaison n'est pas disponible pour le moment."
       );
       return;
     }
@@ -612,7 +612,7 @@
       })
       .catch(function (error) {
         self.setLoading(false);
-        self.showError(error.message || "Ajout au panier impossible.");
+        self.showError(error.message || "Oups, l’ajout au panier n’a pas fonctionné. Pouvez-vous réessayer ?");
       });
   };
 
