@@ -6,8 +6,8 @@
   rythme : « En entrepôt », « Expédié », « Reçu ».
 
   Rendu depuis layout/theme.liquid : couvre le tiroir panier et la page panier.
-  Le bloc est inséré au-dessus des totaux, dans chaque résumé de panier qui
-  contient un bouton de commande. Le panier du thème se redessine après chaque
+  Le bloc est inséré au-dessus de la liste des produits, dans chaque panier qui
+  contient au moins un article. Le panier du thème se redessine après chaque
   modification : un MutationObserver réinsère le bloc quand il disparaît.
 
   Aucune promesse de délai : l'animation illustre le parcours du colis, sans
@@ -141,6 +141,7 @@
     display: block;
     width: 100%;
     box-sizing: border-box;
+    margin-block-end: 20px;
     padding: 12px 14px 10px;
     border: 1px solid rgb(20 10 5 / 0.08);
     border-radius: 12px;
@@ -423,29 +424,25 @@
 
     var scheduled = false;
 
-    /* Un bloc par résumé de panier, placé au-dessus des totaux. Le bouton de
-       commande sert d'ancre : il est présent dans le tiroir comme sur la page
-       panier, et désactivé quand le panier est vide. */
+    /* Un bloc par liste de produits, placé juste au-dessus des articles. La
+       liste est la même dans le tiroir et sur la page panier : son formulaire
+       n'existe que si le panier contient au moins un article. */
     function ensure() {
       scheduled = false;
 
-      var buttons = document.querySelectorAll('button[name="checkout"]');
-      Array.prototype.forEach.call(buttons, function (button) {
-        var ctas = button.closest('.cart__ctas') || button.parentElement;
-        var summary = ctas && ctas.parentElement;
-        if (!summary) return;
+      var wrappers = document.querySelectorAll('.cart-items__wrapper');
+      Array.prototype.forEach.call(wrappers, function (wrapper) {
+        var form = wrapper.querySelector(':scope > .cart-form');
+        var existing = wrapper.querySelector(':scope > [data-ulveo-livraison]');
 
-        var existing = summary.querySelector(':scope > [data-ulveo-livraison]');
-
-        if (button.disabled) {
+        if (!form) {
           if (existing) existing.remove();
           return;
         }
 
         if (existing) return;
 
-        var anchor = summary.querySelector(':scope > .cart-totals') || ctas;
-        summary.insertBefore(template.content.firstElementChild.cloneNode(true), anchor);
+        wrapper.insertBefore(template.content.firstElementChild.cloneNode(true), form);
       });
     }
 
@@ -463,12 +460,7 @@
 
     /* Le panier est redessiné à chaque ajout ou changement de quantité. */
     if ('MutationObserver' in window) {
-      new MutationObserver(schedule).observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['disabled']
-      });
+      new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
     } else {
       setInterval(ensure, 1200);
     }
