@@ -1,0 +1,617 @@
+{%- doc -%}
+  Ulvéo — encart « Besoin d'aide ? » et questions fréquentes, côte à côte.
+
+  Ordinateur : l'encart d'aide à gauche, les questions à droite.
+  Mobile : une seule colonne ; l'encart se place avant ou après les
+  questions selon le réglage « Encart d'aide sur mobile ».
+
+  Chaque question est un bloc « question » (mêmes réglages que la section
+  « FAQ Ulvéo » : les questions existantes se reprennent telles quelles).
+  Accordéon natif (details/summary), sans JavaScript.
+{%- enddoc -%}
+
+{%- liquid
+  assign uid = section.id | handle
+
+  assign primary_url = section.settings.primary_link
+  if primary_url == blank
+    assign primary_url = pages['contact'].url
+  endif
+
+  assign secondary_url = section.settings.secondary_link
+  if secondary_url == blank
+    assign secondary_url = pages['faq'].url
+  endif
+
+  assign mobile_order = 'after'
+  if section.settings.mobile_help_position == 'before'
+    assign mobile_order = 'before'
+  endif
+-%}
+
+<div
+  class="ulveo-help color-{{ section.settings.color_scheme }}"
+  style="--uhf-pt: {{ section.settings.padding-block-start }}px; --uhf-pb: {{ section.settings.padding-block-end }}px; --uhf-card-bg: {{ section.settings.card_background }};"
+>
+  <div class="ulveo-help__grid ulveo-help__grid--help-{{ mobile_order }}">
+    <div class="ulveo-help__faq">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="ulveo-help__heading" id="UlveoHelpFaq-{{ uid }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.intro != blank -%}
+        <div class="ulveo-help__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="ulveo-help__list">
+          {%- for block in section.blocks -%}
+            <details class="ulveo-help__item" {{ block.shopify_attributes }}>
+              <summary class="ulveo-help__question">
+                <span class="ulveo-help__question-text">{{ block.settings.question | escape }}</span>
+                <span class="ulveo-help__icon" aria-hidden="true"></span>
+              </summary>
+              <div class="ulveo-help__answer">{{ block.settings.answer }}</div>
+            </details>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <aside class="ulveo-help__card" aria-labelledby="UlveoHelpTitle-{{ uid }}">
+      <span class="ulveo-help__badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false"><path d="M20 12.2c0 3.9-3.6 7-8 7-1.1 0-2.2-.2-3.1-.6L4.5 20l1.2-3.6C4.6 15.2 4 13.8 4 12.2c0-3.9 3.6-7 8-7s8 3.1 8 7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.6 12.3h.01M12 12.3h.01M15.4 12.3h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </span>
+
+      <h2 class="ulveo-help__card-title" id="UlveoHelpTitle-{{ uid }}">{{ section.settings.help_heading | escape }}</h2>
+
+      {%- if section.settings.help_text != blank -%}
+        <div class="ulveo-help__card-text">{{ section.settings.help_text }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.primary_label != blank or section.settings.secondary_label != blank -%}
+        <div class="ulveo-help__actions">
+          {%- if section.settings.primary_label != blank and primary_url != blank -%}
+            <a class="ulveo-help__btn ulveo-help__btn--primary" href="{{ primary_url }}">
+              {{- section.settings.primary_label | escape -}}
+            </a>
+          {%- endif -%}
+          {%- if section.settings.secondary_label != blank and secondary_url != blank -%}
+            <a class="ulveo-help__btn ulveo-help__btn--secondary" href="{{ secondary_url }}">
+              {{- section.settings.secondary_label | escape -}}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </aside>
+  </div>
+</div>
+
+{%- if section.settings.faq_schema and section.blocks.size > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for block in section.blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.question | strip_html | json }},
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": {{ block.settings.answer | strip_html | json }}
+            }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .ulveo-help {
+    --uhf-ink: #140a05;
+    --uhf-brown: #512815;
+    --uhf-brown-hover: #a05513;
+    --uhf-accent: #a8441a;
+    --uhf-line: rgb(20 10 5 / 0.1);
+    --uhf-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    padding-block: var(--uhf-pt, 56px) var(--uhf-pb, 64px);
+    background: var(--color-background);
+    color: var(--color-foreground, var(--uhf-ink));
+  }
+
+  .ulveo-help__grid {
+    display: grid;
+    gap: 40px;
+    max-width: 1120px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  /* Mobile : l'encart passe avant les questions si le réglage le demande. */
+  .ulveo-help__grid--help-before .ulveo-help__card {
+    order: -1;
+  }
+
+  /* ---- Questions ------------------------------------------------------ */
+
+  .ulveo-help__faq {
+    min-width: 0;
+  }
+
+  .ulveo-help__heading {
+    margin: 0 0 12px;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 500);
+    font-size: clamp(2rem, 1.55rem + 1.9vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  .ulveo-help__intro {
+    margin-block-end: 8px;
+    color: rgb(20 10 5 / 0.68);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .ulveo-help__intro > * {
+    margin: 0;
+  }
+
+  .ulveo-help__intro a,
+  .ulveo-help__answer a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ulveo-help__list {
+    margin-block-start: 16px;
+    border-block-start: 1px solid var(--uhf-line);
+  }
+
+  .ulveo-help__item {
+    border-block-end: 1px solid var(--uhf-line);
+  }
+
+  .ulveo-help__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 64px;
+    padding-block: 18px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.25s ease;
+  }
+
+  .ulveo-help__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .ulveo-help__question:hover {
+    color: var(--uhf-brown);
+  }
+
+  .ulveo-help__question:focus-visible {
+    outline: 2px solid var(--uhf-ink);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  /* Plus qui devient moins à l'ouverture. */
+  .ulveo-help__icon {
+    position: relative;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--uhf-line);
+    border-radius: 50%;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+
+  .ulveo-help__icon::before,
+  .ulveo-help__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 1.6px;
+    margin: -0.8px 0 0 -6px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.3s var(--uhf-ease);
+  }
+
+  .ulveo-help__icon::after {
+    transform: rotate(90deg);
+  }
+
+  .ulveo-help__item[open] .ulveo-help__icon {
+    border-color: var(--uhf-brown);
+    background: var(--uhf-brown);
+    color: #fff;
+  }
+
+  .ulveo-help__item[open] .ulveo-help__icon::after {
+    transform: rotate(0deg);
+  }
+
+  .ulveo-help__answer {
+    padding: 0 0 22px;
+    color: rgb(20 10 5 / 0.72);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .ulveo-help__answer > :first-child {
+    margin-block-start: 0;
+  }
+
+  .ulveo-help__answer > :last-child {
+    margin-block-end: 0;
+  }
+
+  .ulveo-help__item[open] .ulveo-help__answer {
+    animation: ulveo-help-answer 0.3s var(--uhf-ease) both;
+  }
+
+  @keyframes ulveo-help-answer {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Ouverture en douceur là où le navigateur sait animer la hauteur. */
+  @supports (interpolate-size: allow-keywords) {
+    .ulveo-help__item {
+      interpolate-size: allow-keywords;
+    }
+
+    .ulveo-help__item::details-content {
+      block-size: 0;
+      overflow: hidden;
+      transition: block-size 0.3s var(--uhf-ease), content-visibility 0.3s allow-discrete;
+    }
+
+    .ulveo-help__item[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  /* ---- Encart d'aide -------------------------------------------------- */
+
+  .ulveo-help__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 24px 28px;
+    border-radius: 24px;
+    background: var(--uhf-card-bg, #f1ebeb);
+    color: var(--uhf-ink);
+    text-align: center;
+  }
+
+  .ulveo-help__badge {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-block-end: 18px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--uhf-brown);
+    box-shadow: 0 1px 2px rgb(20 10 5 / 0.04), 0 8px 24px rgb(20 10 5 / 0.05);
+  }
+
+  .ulveo-help__badge svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .ulveo-help__card-title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 500);
+    font-size: clamp(1.625rem, 1.4rem + 0.9vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  .ulveo-help__card-text {
+    max-width: 30ch;
+    margin-block-start: 12px;
+    color: rgb(20 10 5 / 0.72);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .ulveo-help__card-text > * {
+    margin: 0;
+  }
+
+  .ulveo-help__actions {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    margin-block-start: 26px;
+  }
+
+  .ulveo-help__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 14px 24px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s var(--uhf-ease);
+  }
+
+  .ulveo-help__btn--primary {
+    background: var(--uhf-brown);
+    color: #fff;
+  }
+
+  .ulveo-help__btn--primary:hover {
+    background: var(--uhf-brown-hover);
+  }
+
+  .ulveo-help__btn--secondary {
+    border-color: rgb(20 10 5 / 0.12);
+    background: #fff;
+    color: var(--uhf-ink);
+  }
+
+  .ulveo-help__btn--secondary:hover {
+    border-color: var(--uhf-ink);
+  }
+
+  .ulveo-help__btn:active {
+    transform: scale(0.98);
+  }
+
+  .ulveo-help__btn:focus-visible {
+    outline: 2px solid var(--uhf-ink);
+    outline-offset: 3px;
+  }
+
+  /* ---- Ordinateur : encart à gauche, questions à droite ---------------- */
+
+  @media screen and (min-width: 990px) {
+    .ulveo-help__grid {
+      grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+      align-items: start;
+      gap: 72px;
+      padding-inline: 32px;
+    }
+
+    .ulveo-help__card {
+      grid-column: 1;
+      grid-row: 1;
+      order: 0;
+      padding: 44px 36px 36px;
+    }
+
+    .ulveo-help__faq {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .ulveo-help__heading {
+      margin-block-end: 16px;
+    }
+
+    .ulveo-help__question {
+      font-size: 1.125rem;
+    }
+
+    .ulveo-help__answer {
+      padding-inline-end: 52px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ulveo-help__icon,
+    .ulveo-help__icon::before,
+    .ulveo-help__icon::after,
+    .ulveo-help__btn,
+    .ulveo-help__item::details-content {
+      transition: none;
+    }
+
+    .ulveo-help__item[open] .ulveo-help__answer {
+      animation: none;
+    }
+
+    .ulveo-help__btn:active {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aide et FAQ Ulvéo",
+  "tag": "section",
+  "class": "ulveo-help-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Questions fréquentes"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Questions fréquentes"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Texte d'introduction",
+      "info": "Facultatif. Laisser vide pour aller droit aux questions."
+    },
+    {
+      "type": "checkbox",
+      "id": "faq_schema",
+      "label": "Données structurées FAQ (SEO)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Encart « Besoin d'aide ? »"
+    },
+    {
+      "type": "text",
+      "id": "help_heading",
+      "label": "Titre",
+      "default": "Besoin d'aide ?"
+    },
+    {
+      "type": "richtext",
+      "id": "help_text",
+      "label": "Texte",
+      "default": "<p>Notre équipe vous répond du lundi au vendredi, de 9 h à 18 h.</p>"
+    },
+    {
+      "type": "text",
+      "id": "primary_label",
+      "label": "Bouton principal : texte",
+      "default": "Contactez notre support"
+    },
+    {
+      "type": "url",
+      "id": "primary_link",
+      "label": "Bouton principal : lien",
+      "info": "Vide : page Contact."
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Bouton secondaire : texte",
+      "default": "Consultez notre aide"
+    },
+    {
+      "type": "url",
+      "id": "secondary_link",
+      "label": "Bouton secondaire : lien",
+      "info": "Vide : page FAQ."
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fond de l'encart",
+      "default": "#f1ebeb"
+    },
+    {
+      "type": "select",
+      "id": "mobile_help_position",
+      "label": "Encart d'aide sur mobile",
+      "options": [
+        { "value": "after", "label": "Après les questions" },
+        { "value": "before", "label": "Avant les questions" }
+      ],
+      "default": "after"
+    },
+    {
+      "type": "header",
+      "content": "Mise en page"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Jeu de couleurs",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Marge haute",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Marge basse",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Votre question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Réponse",
+          "default": "<p>Votre réponse.</p>"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "Aide et FAQ Ulvéo",
+      "blocks": [
+        {
+          "type": "question",
+          "settings": {
+            "question": "C'est compliqué à utiliser ?",
+            "answer": "<p>Non. Vous placez le bord du sachet dans l'appareil, vous appuyez, vous attendez trois secondes. Il n'y a rien d'autre à apprendre.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Comment se recharge-t-elle ?",
+            "answer": "<p>Par un port USB-C, avec le même câble que votre téléphone. Le câble est fourni.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Et s'il tombe en panne ?",
+            "answer": "<p>Tous nos produits bénéficient de la garantie légale de conformité pendant 2 ans à compter de la livraison. Le remplacement ou le remboursement se fait sans frais pour vous.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
