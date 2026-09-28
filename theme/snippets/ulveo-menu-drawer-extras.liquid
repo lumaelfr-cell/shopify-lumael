@@ -64,7 +64,7 @@
 
   {%- liquid
     # Liens secondaires : seules les pages publiées sont affichées.
-    assign ulveo_pages = 'avis-clients:Avis clients,faq:Questions fréquentes,livraison:Livraison,retours-et-remboursements:Retours et remboursements' | split: ','
+    assign ulveo_pages = 'avis-clients:Avis clients,faq:Questions fréquentes,livraison:Livraison' | split: ','
   -%}
   <ul class="ulveo-drawer__links" role="list" aria-label="Informations">
     {%- for entry in ulveo_pages -%}
