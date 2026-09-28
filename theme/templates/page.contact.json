@@ -1,0 +1,182 @@
+{
+  "sections": {
+    "contact": {
+      "type": "ulveo-contact",
+      "blocks": {
+        "topic_produit": {
+          "type": "topic",
+          "settings": {
+            "icon": "chat",
+            "title": "Une question sur la scelleuse",
+            "text": "Utilisation, sachets compatibles, choix de l’édition : nous vous aidons avant votre commande.",
+            "subject": "Question sur la scelleuse",
+            "cta_label": "Écrire à ce sujet",
+            "link_label": "Consulter la FAQ",
+            "link": "shopify://pages/faq"
+          }
+        },
+        "topic_commande": {
+          "type": "topic",
+          "settings": {
+            "icon": "box",
+            "title": "Ma commande, ma livraison",
+            "text": "Suivi du colis, délai, adresse de livraison : dites-nous ce qui se passe, nous vérifions pour vous.",
+            "subject": "Ma commande ou ma livraison",
+            "cta_label": "Écrire à ce sujet",
+            "link_label": "Suivre mon colis",
+            "link": "/apps/parcelpanel"
+          }
+        },
+        "topic_sav": {
+          "type": "topic",
+          "settings": {
+            "icon": "tool",
+            "title": "Un souci avec votre scelleuse",
+            "text": "Panne, retour ou échange : décrivez-nous la situation, nous cherchons la solution avec vous.",
+            "subject": "Retour, échange ou garantie",
+            "cta_label": "Écrire à ce sujet",
+            "link_label": "Retours et remboursements",
+            "link": "shopify://pages/retours-et-remboursements"
+          }
+        }
+      },
+      "block_order": [
+        "topic_produit",
+        "topic_commande",
+        "topic_sav"
+      ],
+      "settings": {
+        "eyebrow": "Service client",
+        "title": "Une question ?",
+        "title_accent": "Nous sommes là pour vous.",
+        "intro": "<p>La scelleuse, une commande, une gravure personnalisée : écrivez-nous, une personne de l’équipe vous répond.</p>",
+        "hours": "Du lundi au vendredi, de 9 h à 18 h",
+        "topics_heading": "Comment pouvons-nous vous aider ?",
+        "form_heading": "Écrivez-nous",
+        "form_text": "Tous les champs sont obligatoires, sauf mention contraire.",
+        "subjects": "Question sur la scelleuse\nMa commande ou ma livraison\nRetour, échange ou garantie\nGravure personnalisée\nAutre demande",
+        "submit_label": "Envoyer mon message",
+        "privacy_link": "shopify://pages/politique-de-confidentialite",
+        "success_title": "Merci, votre message est bien parti.",
+        "success_text": "<p>Nous vous répondons à l’adresse e-mail indiquée, du lundi au vendredi, de 9 h à 18 h. Pensez à vérifier vos courriers indésirables si vous ne voyez rien arriver.</p>",
+        "aside_heading": "Besoin de nous joindre ?",
+        "email": "",
+        "response_time": "",
+        "tracking_link": "/apps/parcelpanel",
+        "tracking_label": "Suivre mon colis",
+        "aside_note": "<p>Pour une question sur une commande, indiquez son numéro : il figure dans votre e-mail de confirmation.</p>",
+        "brand_name": "Ulvéo",
+        "color_scheme": "scheme-1",
+        "padding_top": 64,
+        "padding_bottom": 88
+      }
+    },
+    "faq": {
+      "type": "ulveo-faq",
+      "blocks": {
+        "q_delai": {
+          "type": "question",
+          "settings": {
+            "question": "Quel est le délai de livraison ?",
+            "answer": "<p>Votre commande est préparée et expédiée sous 24 à 48 h, puis livrée en 10 à 14 jours ouvrés en France métropolitaine. La livraison est offerte dès 39 € d’achat. Tous les détails sont sur la page <a href=\"/pages/livraison\" title=\"Livraison\">Livraison</a>.</p>"
+          }
+        },
+        "q_suivi": {
+          "type": "question",
+          "settings": {
+            "question": "Comment suivre ma commande ?",
+            "answer": "<p>Dès l’expédition, vous recevez un e-mail avec votre numéro de suivi. Vous pouvez aussi suivre votre colis à tout moment depuis la page <a href=\"/apps/parcelpanel\" title=\"Suivre votre commande\">Suivre votre commande</a>.</p>"
+          }
+        },
+        "q_fonctionnement": {
+          "type": "question",
+          "settings": {
+            "question": "Comment fonctionne la scelleuse Ulvéo ?",
+            "answer": "<p>Vous placez le bord du sachet dans l’appareil, vous appuyez, vous attendez trois secondes : le plastique est soudé sur toute sa largeur. Elle se recharge par USB-C, avec le câble fourni.</p>"
+          }
+        },
+        "q_retour": {
+          "type": "question",
+          "settings": {
+            "question": "Et si le produit ne me convient pas ?",
+            "answer": "<p>Vous disposez de 14 jours à compter de la réception pour changer d’avis, sans avoir à vous justifier. La procédure est décrite sur la page <a href=\"/pages/retours-et-remboursements\" title=\"Retours et remboursements\">Retours et remboursements</a>.</p>"
+          }
+        },
+        "q_contact": {
+          "type": "question",
+          "settings": {
+            "question": "Comment contacter le service client ?",
+            "answer": "<p>Par le formulaire de cette page ou par e-mail à <a href=\"mailto:contact.ulveo@gmail.com\" title=\"Écrire à Ulvéo\">contact.ulveo@gmail.com</a>. Nous répondons personnellement à chaque message, du lundi au vendredi, de 9 h à 18 h.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q_delai",
+        "q_suivi",
+        "q_fonctionnement",
+        "q_retour",
+        "q_contact"
+      ],
+      "settings": {
+        "heading": "Les questions les plus fréquentes",
+        "intro": "<p>Les autres réponses se trouvent sur notre page <a href=\"/pages/faq\" title=\"FAQ\">FAQ</a>.</p>",
+        "color_scheme": "scheme-1",
+        "padding-block-start": 64,
+        "padding-block-end": 64
+      }
+    },
+    "assurance": {
+      "type": "ulveo-contact-assurance",
+      "blocks": {
+        "a_service": {
+          "type": "item",
+          "settings": {
+            "icon": "chat",
+            "title": "Un vrai service client",
+            "text": "Une personne de l’équipe lit et répond à chaque message.",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "a_paiement": {
+          "type": "item",
+          "settings": {
+            "icon": "lock",
+            "title": "Paiement sécurisé",
+            "text": "Transactions sécurisées : nous n’avons jamais accès à vos données bancaires.",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "a_suivi": {
+          "type": "item",
+          "settings": {
+            "icon": "truck",
+            "title": "Suivi de commande",
+            "text": "Un numéro de suivi vous est envoyé par e-mail dès l’expédition.",
+            "link_label": "Suivre mon colis",
+            "link": "/apps/parcelpanel"
+          }
+        }
+      },
+      "block_order": [
+        "a_service",
+        "a_paiement",
+        "a_suivi"
+      ],
+      "settings": {
+        "eyebrow": "Après votre achat aussi",
+        "heading": "Une équipe à votre écoute",
+        "text": "<p>Chez Ulvéo, nous accordons autant d’importance à votre expérience après votre commande qu’avant votre achat.</p>",
+        "color_scheme": "scheme-1",
+        "padding_top": 72,
+        "padding_bottom": 88
+      }
+    }
+  },
+  "order": [
+    "contact",
+    "faq",
+    "assurance"
+  ]
+}

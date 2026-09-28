@@ -1,0 +1,554 @@
+{%- comment -%}
+  Ulvéo — page Contact : en-tête, sujets d'aide, formulaire et coordonnées.
+
+  - Formulaire : formulaire de contact natif de Shopify ({% form 'contact' %}).
+    Les messages arrivent à l'adresse de la boutique ; le numéro de commande
+    et l'objet sont transmis comme champs supplémentaires.
+  - Chaque carte « sujet » est un bloc : un clic préremplit l'objet du
+    formulaire et y amène le visiteur.
+  - Styles et script chargés uniquement sur cette page
+    (assets/ulveo-contact.css, assets/ulveo-contact.js), sans bibliothèque.
+    Sans JavaScript, tout fonctionne : validation native du navigateur,
+    liens d'ancre classiques.
+{%- endcomment -%}
+
+{{ 'ulveo-contact.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ulveo-contact.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign uid = section.id | handle
+  assign form_id = 'UlveoContactForm-' | append: uid
+  assign form_el_id = 'UlveoContactFormEl-' | append: uid
+  assign contact_email = section.settings.email | default: shop.email | strip
+  assign brand = section.settings.brand_name | default: shop.name
+
+  assign subjects = section.settings.subjects | newline_to_br | split: '<br />'
+
+-%}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": {{ page.title | default: 'Contact' | json }},
+    "url": {{ shop.url | append: request.path | json }},
+    "mainEntity": {
+      "@type": "Organization",
+      "name": {{ brand | json }},
+      "url": {{ shop.url | json }},
+      "email": {{ contact_email | json }},
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": {{ contact_email | json }},
+        "availableLanguage": "French"
+      }
+    }
+  }
+</script>
+
+<ulveo-contact
+  class="ulveo-contact color-{{ section.settings.color_scheme }}"
+  style="--uct-pt: {{ section.settings.padding_top }}px; --uct-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="ulveo-contact__container">
+    {%- comment -%} ---------- En-tête ---------- {%- endcomment -%}
+    <header class="ulveo-contact__hero">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="ulveo-contact__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="ulveo-contact__title">
+        {{ section.settings.title | escape }}
+        {%- if section.settings.title_accent != blank -%}
+          <span class="ulveo-contact__title-accent">{{ section.settings.title_accent | escape }}</span>
+        {%- endif -%}
+      </h1>
+      {%- if section.settings.intro != blank -%}
+        <div class="ulveo-contact__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+      {%- if section.settings.hours != blank -%}
+        <p class="ulveo-contact__status">
+          <span class="ulveo-contact__status-dot" aria-hidden="true"></span>
+          {{ section.settings.hours | escape }}
+        </p>
+      {%- endif -%}
+    </header>
+
+    {%- comment -%} ---------- Sujets d'aide ---------- {%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <section class="ulveo-contact__topics" aria-labelledby="UlveoTopics-{{ uid }}">
+        <h2 class="ulveo-contact__h2" id="UlveoTopics-{{ uid }}">
+          {{- section.settings.topics_heading | default: 'Comment pouvons-nous vous aider ?' | escape -}}
+        </h2>
+        <ul class="ulveo-contact__topic-list" role="list">
+          {%- for block in section.blocks -%}
+            <li class="ulveo-contact__topic" data-uct-reveal style="--uct-i: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+              <span class="ulveo-contact__topic-icon">{% render 'ulveo-contact-icon', name: block.settings.icon %}</span>
+              <div class="ulveo-contact__topic-body">
+                <h3 class="ulveo-contact__topic-title">{{ block.settings.title | escape }}</h3>
+                {%- if block.settings.text != blank -%}
+                  <p class="ulveo-contact__topic-text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+                <p class="ulveo-contact__topic-actions">
+                  <a
+                    class="ulveo-contact__topic-cta"
+                    href="#{{ form_id }}"
+                    data-contact-subject="{{ block.settings.subject | escape }}"
+                  >
+                    {{- block.settings.cta_label | default: 'Écrire à ce sujet' | escape -}}
+                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </a>
+                  {%- if block.settings.link_label != blank and block.settings.link != blank -%}
+                    <a class="ulveo-contact__topic-link" href="{{ block.settings.link }}">{{ block.settings.link_label | escape }}</a>
+                  {%- endif -%}
+                </p>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </section>
+    {%- endif -%}
+
+    {%- comment -%} ---------- Formulaire + coordonnées ---------- {%- endcomment -%}
+    <div class="ulveo-contact__main">
+      <section class="ulveo-contact__form-card" id="{{ form_id }}" aria-labelledby="UlveoFormTitle-{{ uid }}" tabindex="-1">
+        {%- form 'contact', id: form_el_id, class: 'ulveo-contact-form' -%}
+          <input type="hidden" name="contact[id]" value="{{ form_id }}">
+
+          {%- if form.posted_successfully? -%}
+            <div class="ulveo-contact-form__success" role="status" tabindex="-1" data-contact-success>
+              <span class="ulveo-contact-form__success-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <h2 class="ulveo-contact__h2" id="UlveoFormTitle-{{ uid }}">{{ section.settings.success_title | escape }}</h2>
+              {%- if section.settings.success_text != blank -%}
+                <div class="ulveo-contact-form__success-text">{{ section.settings.success_text }}</div>
+              {%- endif -%}
+              <p class="ulveo-contact-form__success-actions">
+                <a class="button" href="{{ routes.root_url }}">Revenir à la boutique</a>
+                <a class="ulveo-contact__text-link" href="{{ request.path }}">Envoyer un autre message</a>
+              </p>
+            </div>
+          {%- else -%}
+            <div class="ulveo-contact-form__head">
+              <h2 class="ulveo-contact__h2" id="UlveoFormTitle-{{ uid }}">{{ section.settings.form_heading | escape }}</h2>
+              {%- if section.settings.form_text != blank -%}
+                <p class="ulveo-contact-form__lede">{{ section.settings.form_text | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            {%- if form.errors -%}
+              <div class="ulveo-contact-form__alert" role="alert" tabindex="-1" data-contact-alert>
+                <strong>Votre message n’a pas pu être envoyé.</strong>
+                {% if form.errors contains 'email' -%}
+                  Vérifiez l’adresse e-mail indiquée.
+                {%- else -%}
+                  Vérifiez les champs du formulaire puis réessayez.
+                {%- endif %}
+              </div>
+            {%- endif -%}
+
+            <div class="ulveo-contact-form__grid">
+              <div class="ulveo-field">
+                <label class="ulveo-field__label" for="UlveoName-{{ uid }}">Votre nom</label>
+                <input
+                  class="ulveo-field__control"
+                  type="text"
+                  id="UlveoName-{{ uid }}"
+                  name="contact[name]"
+                  autocomplete="name"
+                  required
+                  aria-describedby="UlveoName-{{ uid }}-error"
+                  placeholder="Camille Martin"
+                  value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+                  data-error="Indiquez votre nom."
+                >
+                <p class="ulveo-field__error" id="UlveoName-{{ uid }}-error" data-field-error></p>
+              </div>
+
+              <div class="ulveo-field">
+                <label class="ulveo-field__label" for="UlveoEmail-{{ uid }}">Votre adresse e-mail</label>
+                <input
+                  class="ulveo-field__control"
+                  type="email"
+                  id="UlveoEmail-{{ uid }}"
+                  name="contact[email]"
+                  autocomplete="email"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  inputmode="email"
+                  required
+                  aria-describedby="UlveoEmail-{{ uid }}-error"
+                  {% if form.errors contains 'email' %}aria-invalid="true"{% endif %}
+                  placeholder="vous@exemple.fr"
+                  value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                  data-error="Indiquez une adresse e-mail valide, par exemple vous@exemple.fr."
+                >
+                <p class="ulveo-field__error" id="UlveoEmail-{{ uid }}-error" data-field-error>
+                  {%- if form.errors contains 'email' -%}Indiquez une adresse e-mail valide, par exemple vous@exemple.fr.{%- endif -%}
+                </p>
+              </div>
+
+              <div class="ulveo-field">
+                <label class="ulveo-field__label" for="UlveoOrder-{{ uid }}">
+                  Numéro de commande <span class="ulveo-field__optional">(facultatif)</span>
+                </label>
+                <input
+                  class="ulveo-field__control"
+                  type="text"
+                  id="UlveoOrder-{{ uid }}"
+                  name="contact[Numéro de commande]"
+                  autocomplete="off"
+                  placeholder="Ex. #1024"
+                  aria-describedby="UlveoOrder-{{ uid }}-hint"
+                >
+                <p class="ulveo-field__hint" id="UlveoOrder-{{ uid }}-hint">Il figure dans votre e-mail de confirmation.</p>
+              </div>
+
+              <div class="ulveo-field">
+                <label class="ulveo-field__label" for="UlveoSubject-{{ uid }}">Objet de votre demande</label>
+                <span class="ulveo-field__select">
+                  <select
+                    class="ulveo-field__control"
+                    id="UlveoSubject-{{ uid }}"
+                    name="contact[Objet]"
+                    required
+                    aria-describedby="UlveoSubject-{{ uid }}-error"
+                    data-contact-subject-select
+                    data-error="Choisissez l’objet de votre demande."
+                  >
+                    <option value="" disabled selected>Choisissez un objet</option>
+                    {%- for subject in subjects -%}
+                      {%- assign subject_text = subject | strip -%}
+                      {%- if subject_text != blank -%}
+                        <option value="{{ subject_text | escape }}">{{ subject_text | escape }}</option>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </select>
+                  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <p class="ulveo-field__error" id="UlveoSubject-{{ uid }}-error" data-field-error></p>
+              </div>
+
+              <div class="ulveo-field ulveo-field--full">
+                <label class="ulveo-field__label" for="UlveoMessage-{{ uid }}">Votre message</label>
+                <textarea
+                  class="ulveo-field__control ulveo-field__control--textarea"
+                  id="UlveoMessage-{{ uid }}"
+                  name="contact[body]"
+                  rows="6"
+                  required
+                  aria-describedby="UlveoMessage-{{ uid }}-error"
+                  placeholder="Dites-nous tout : plus vous êtes précis, plus notre réponse le sera."
+                  data-error="Écrivez votre message."
+                >{{ form.body }}</textarea>
+                <p class="ulveo-field__error" id="UlveoMessage-{{ uid }}-error" data-field-error></p>
+              </div>
+            </div>
+
+            <div class="ulveo-contact-form__footer">
+              <button type="submit" class="button ulveo-contact-form__submit" data-contact-submit>
+                <span data-submit-label>{{ section.settings.submit_label | default: 'Envoyer mon message' | escape }}</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <p class="ulveo-contact-form__privacy">
+                Vos informations servent uniquement à vous répondre.
+                {%- if section.settings.privacy_link != blank %}
+                  <a href="{{ section.settings.privacy_link }}">Politique de confidentialité</a>
+                {%- endif %}
+              </p>
+            </div>
+          {%- endif -%}
+        {%- endform -%}
+      </section>
+
+      <aside class="ulveo-contact__aside" aria-labelledby="UlveoAside-{{ uid }}">
+        <div class="ulveo-contact__aside-card">
+          <h2 class="ulveo-contact__aside-title" id="UlveoAside-{{ uid }}">
+            {{- section.settings.aside_heading | default: 'Besoin de nous joindre ?' | escape -}}
+          </h2>
+
+          <dl class="ulveo-contact__facts">
+            {%- if contact_email != blank -%}
+              <div class="ulveo-contact__fact">
+                <dt><span class="ulveo-contact__fact-icon">{% render 'ulveo-contact-icon', name: 'mail' %}</span>E-mail</dt>
+                <dd>
+                  <a class="ulveo-contact__email" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                  <button type="button" class="ulveo-contact__copy" data-copy="{{ contact_email }}" hidden>
+                    <span data-copy-label>Copier</span>
+                  </button>
+                  <span class="visually-hidden" aria-live="polite" data-copy-status></span>
+                </dd>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.hours != blank -%}
+              <div class="ulveo-contact__fact">
+                <dt><span class="ulveo-contact__fact-icon">{% render 'ulveo-contact-icon', name: 'clock' %}</span>Horaires</dt>
+                <dd>{{ section.settings.hours | escape }}</dd>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.response_time != blank -%}
+              <div class="ulveo-contact__fact">
+                <dt><span class="ulveo-contact__fact-icon">{% render 'ulveo-contact-icon', name: 'hourglass' %}</span>Délai de réponse</dt>
+                <dd>{{ section.settings.response_time | escape }}</dd>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.tracking_link != blank -%}
+              <div class="ulveo-contact__fact">
+                <dt><span class="ulveo-contact__fact-icon">{% render 'ulveo-contact-icon', name: 'truck' %}</span>Suivi de commande</dt>
+                <dd><a class="ulveo-contact__text-link" href="{{ section.settings.tracking_link }}">{{ section.settings.tracking_label | default: 'Suivre mon colis' | escape }}</a></dd>
+              </div>
+            {%- endif -%}
+          </dl>
+
+          {%- if section.settings.aside_note != blank -%}
+            <div class="ulveo-contact__aside-note">{{ section.settings.aside_note }}</div>
+          {%- endif -%}
+        </div>
+      </aside>
+    </div>
+  </div>
+</ulveo-contact>
+
+{% schema %}
+{
+  "name": "Contact Ulvéo",
+  "tag": "div",
+  "class": "ulveo-contact-section",
+  "max_blocks": 4,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "En-tête"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Service client"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titre (H1), première ligne",
+      "default": "Une question ?"
+    },
+    {
+      "type": "text",
+      "id": "title_accent",
+      "label": "Titre (H1), seconde ligne",
+      "default": "Nous sommes là pour vous."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "<p>La scelleuse, une commande, une gravure personnalisée : écrivez-nous, une personne de l’équipe vous répond.</p>"
+    },
+    {
+      "type": "text",
+      "id": "hours",
+      "label": "Horaires du service client",
+      "info": "Affichés sous l’introduction et dans les coordonnées. Laissez vide pour les masquer.",
+      "default": "Du lundi au vendredi, de 9 h à 18 h"
+    },
+    {
+      "type": "header",
+      "content": "Sujets d’aide"
+    },
+    {
+      "type": "text",
+      "id": "topics_heading",
+      "label": "Titre",
+      "default": "Comment pouvons-nous vous aider ?"
+    },
+    {
+      "type": "header",
+      "content": "Formulaire"
+    },
+    {
+      "type": "text",
+      "id": "form_heading",
+      "label": "Titre",
+      "default": "Écrivez-nous"
+    },
+    {
+      "type": "text",
+      "id": "form_text",
+      "label": "Sous-titre",
+      "default": "Tous les champs sont obligatoires, sauf mention contraire."
+    },
+    {
+      "type": "textarea",
+      "id": "subjects",
+      "label": "Objets proposés",
+      "info": "Un objet par ligne. Les cartes « sujet » préremplissent l’objet correspondant.",
+      "default": "Question sur la scelleuse\nMa commande ou ma livraison\nRetour, échange ou garantie\nGravure personnalisée\nAutre demande"
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Texte du bouton",
+      "default": "Envoyer mon message"
+    },
+    {
+      "type": "url",
+      "id": "privacy_link",
+      "label": "Lien vers la politique de confidentialité"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Confirmation : titre",
+      "default": "Merci, votre message est bien parti."
+    },
+    {
+      "type": "richtext",
+      "id": "success_text",
+      "label": "Confirmation : texte",
+      "default": "<p>Nous vous répondons à l’adresse e-mail indiquée. Pensez à vérifier vos courriers indésirables si vous ne voyez rien arriver.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Coordonnées"
+    },
+    {
+      "type": "text",
+      "id": "aside_heading",
+      "label": "Titre",
+      "default": "Besoin de nous joindre ?"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Adresse e-mail affichée",
+      "info": "Laissez vide pour utiliser l’adresse de la boutique."
+    },
+    {
+      "type": "text",
+      "id": "response_time",
+      "label": "Délai de réponse",
+      "info": "Ex. « Sous 24 à 48 h ouvrées ». Ne l’indiquez que si vous pouvez le tenir. Vide = masqué."
+    },
+    {
+      "type": "url",
+      "id": "tracking_link",
+      "label": "Lien de suivi de commande"
+    },
+    {
+      "type": "text",
+      "id": "tracking_label",
+      "label": "Texte du lien de suivi",
+      "default": "Suivre mon colis"
+    },
+    {
+      "type": "richtext",
+      "id": "aside_note",
+      "label": "Note",
+      "default": "<p>Pour une question sur une commande, indiquez son numéro : nous vous répondrons plus vite.</p>"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Nom de la marque (référencement)",
+      "default": "Ulvéo"
+    },
+    {
+      "type": "header",
+      "content": "Mise en page"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Jeu de couleurs",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge haute",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge basse",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "topic",
+      "name": "Sujet d’aide",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Pictogramme",
+          "options": [
+            { "value": "chat", "label": "Bulle" },
+            { "value": "box", "label": "Colis" },
+            { "value": "tool", "label": "Outil" },
+            { "value": "return", "label": "Retour" },
+            { "value": "heart", "label": "Cœur" },
+            { "value": "mail", "label": "Enveloppe" }
+          ],
+          "default": "chat"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Une question"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte"
+        },
+        {
+          "type": "text",
+          "id": "subject",
+          "label": "Objet prérempli",
+          "info": "Doit correspondre à l’un des « Objets proposés » du formulaire."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Texte du lien principal",
+          "default": "Écrire à ce sujet"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Lien secondaire : texte"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien secondaire : destination"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact Ulvéo"
+    }
+  ]
+}
+{% endschema %}

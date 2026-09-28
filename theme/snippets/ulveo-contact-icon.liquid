@@ -1,0 +1,33 @@
+{%- doc -%}
+  Ulvéo — pictogrammes au trait des pages Contact (24 × 24, trait 1,5).
+  Décoratifs : toujours accompagnés d'un texte.
+
+  @param {string} name - chat, box, tool, mail, clock, truck, lock, heart, return, hourglass
+{%- enddoc -%}
+
+<svg class="ulveo-contact-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  {%- case name -%}
+    {%- when 'chat' -%}
+      <path d="M20.25 12c0 4.14-3.69 7.5-8.25 7.5-1.13 0-2.2-.2-3.18-.58L4.5 20.25l1.08-3.5C4.43 15.46 3.75 13.8 3.75 12 3.75 7.86 7.44 4.5 12 4.5s8.25 3.36 8.25 7.5z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>
+    {%- when 'box' -%}
+      <path d="M20.25 7.5L12 3.75 3.75 7.5v9L12 20.25l8.25-3.75v-9z"/><path d="M3.75 7.5L12 11.25l8.25-3.75M12 11.25v9"/>
+    {%- when 'tool' -%}
+      <path d="M14.7 6.3a4 4 0 0 0-5.2 5.2l-5.1 5.1a1.5 1.5 0 0 0 2.1 2.1l5.1-5.1a4 4 0 0 0 5.2-5.2l-2.4 2.4-2.1-.6-.6-2.1 2.4-2.4z"/>
+    {%- when 'mail' -%}
+      <rect x="3.75" y="5.25" width="16.5" height="13.5" rx="2"/><path d="M4.5 6.75L12 12.75l7.5-6"/>
+    {%- when 'clock' -%}
+      <circle cx="12" cy="12" r="8.25"/><path d="M12 7.5V12l3 1.75"/>
+    {%- when 'truck' -%}
+      <path d="M3 6.75h10.5v9H3zM13.5 9.75h3.75L21 13.5v2.25h-7.5z"/><circle cx="7" cy="17.25" r="1.5"/><circle cx="17.25" cy="17.25" r="1.5"/>
+    {%- when 'lock' -%}
+      <rect x="5.25" y="10.5" width="13.5" height="9.75" rx="2"/><path d="M8.25 10.5V7.5a3.75 3.75 0 0 1 7.5 0v3M12 14.25v2.25"/>
+    {%- when 'heart' -%}
+      <path d="M12 19.5s-7.5-4.35-7.5-9.4A4.1 4.1 0 0 1 12 7.8a4.1 4.1 0 0 1 7.5 2.3c0 5.05-7.5 9.4-7.5 9.4z"/>
+    {%- when 'return' -%}
+      <path d="M9 14.25L4.5 9.75 9 5.25"/><path d="M4.5 9.75h10.5a4.5 4.5 0 0 1 0 9H12"/>
+    {%- when 'hourglass' -%}
+      <path d="M7.5 3.75h9M7.5 20.25h9M8.25 3.75c0 4.5 7.5 4.5 7.5 8.25s-7.5 3.75-7.5 8.25M15.75 3.75c0 4.5-7.5 4.5-7.5 8.25s7.5 3.75 7.5 8.25"/>
+    {%- else -%}
+      <circle cx="12" cy="12" r="8.25"/><path d="M8.25 12.25l2.5 2.5 5-5.25"/>
+  {%- endcase -%}
+</svg>
