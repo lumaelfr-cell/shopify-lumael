@@ -1,0 +1,625 @@
+{%- comment -%}
+  Ulvéo — page « Avis clients » : en-tête, note globale, filtres, grille
+  d'avis et visionneuse photo.
+
+  - Chaque avis est un bloc « Avis » modifiable dans l'éditeur de thème
+    (prénom, ville, note, date, achat vérifié, texte, photo).
+  - La note globale vient, par ordre de priorité : des métachamps produit
+    `reviews.rating` / `reviews.rating_count` (remplis par une application
+    d'avis) ; sinon de la saisie manuelle ; sinon du calcul sur les avis de
+    la page. Elle n'invente jamais de chiffre.
+  - Styles et script sont chargés uniquement sur cette page
+    (assets/ulveo-reviews.css, assets/ulveo-reviews.js), sans bibliothèque.
+{%- endcomment -%}
+
+{{ 'ulveo-reviews.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ulveo-reviews.js' | asset_url }}" defer></script>
+
+{%- liquid
+  # ---------- Comptage des avis de la page ----------------------------------
+  assign reviews_total = 0
+  assign rating_sum = 0
+  assign photo_total = 0
+  assign count_5 = 0
+  assign count_4 = 0
+  assign count_3 = 0
+  assign count_2 = 0
+  assign count_1 = 0
+
+  for block in section.blocks
+    if block.type != 'review'
+      continue
+    endif
+    assign reviews_total = reviews_total | plus: 1
+    assign block_rating = block.settings.rating | default: 5
+    assign rating_sum = rating_sum | plus: block_rating
+    if block.settings.image != blank
+      assign photo_total = photo_total | plus: 1
+    endif
+    case block_rating
+      when 5
+        assign count_5 = count_5 | plus: 1
+      when 4
+        assign count_4 = count_4 | plus: 1
+      when 3
+        assign count_3 = count_3 | plus: 1
+      when 2
+        assign count_2 = count_2 | plus: 1
+      when 1
+        assign count_1 = count_1 | plus: 1
+    endcase
+  endfor
+
+  # ---------- Note globale : choix de la source -----------------------------
+  assign summary_source = 'none'
+  assign summary_rating = 0
+  assign summary_count = 0
+  assign bar_5 = 0
+  assign bar_4 = 0
+  assign bar_3 = 0
+  assign bar_2 = 0
+  assign bar_1 = 0
+
+  assign mf_rating = section.settings.product.metafields.reviews.rating
+  if mf_rating != blank and mf_rating.value.rating != blank
+    assign summary_source = 'app'
+    assign mf_scale = mf_rating.value.scale_max | default: 5 | times: 1.0
+    assign summary_rating = mf_rating.value.rating | times: 1.0 | divided_by: mf_scale | times: 5
+    assign summary_count = section.settings.product.metafields.reviews.rating_count.value | default: 0 | times: 1
+  elsif section.settings.summary_mode == 'manual' and section.settings.manual_rating != blank
+    assign summary_source = 'manual'
+    assign summary_rating = section.settings.manual_rating | replace: ',', '.' | strip | times: 1.0
+    assign summary_count = section.settings.manual_count | remove: ' ' | remove: ' ' | remove: ' ' | times: 1
+    assign bar_5 = section.settings.manual_stars_5 | remove: ' ' | times: 1
+    assign bar_4 = section.settings.manual_stars_4 | remove: ' ' | times: 1
+    assign bar_3 = section.settings.manual_stars_3 | remove: ' ' | times: 1
+    assign bar_2 = section.settings.manual_stars_2 | remove: ' ' | times: 1
+    assign bar_1 = section.settings.manual_stars_1 | remove: ' ' | times: 1
+  elsif reviews_total > 0
+    assign summary_source = 'auto'
+    assign summary_rating = rating_sum | times: 1.0 | divided_by: reviews_total
+    assign summary_count = reviews_total
+    assign bar_5 = count_5
+    assign bar_4 = count_4
+    assign bar_3 = count_3
+    assign bar_2 = count_2
+    assign bar_1 = count_1
+  endif
+
+  if summary_rating <= 0
+    assign summary_source = 'none'
+  endif
+
+  assign summary_rating = summary_rating | at_most: 5
+  assign rating_label = summary_rating | times: 1.0 | round: 1 | append: '' | replace: '.', ','
+  unless rating_label contains ','
+    assign rating_label = rating_label | append: ',0'
+  endunless
+
+  # 1234 -> « 1 234 » (espace fine insécable, typographie française)
+  assign count_label = summary_count
+  if summary_count >= 1000
+    assign count_thousands = summary_count | divided_by: 1000
+    assign count_rest = summary_count | modulo: 1000 | prepend: '00' | slice: -3, 3
+    assign count_label = count_thousands | append: ' ' | append: count_rest
+  endif
+
+  assign count_word = 'avis clients'
+  if summary_count == 1
+    assign count_word = 'avis client'
+  endif
+
+  assign bars_total = bar_5 | plus: bar_4 | plus: bar_3 | plus: bar_2 | plus: bar_1
+  assign show_bars = false
+  if section.settings.show_breakdown and bars_total > 0 and summary_source != 'app'
+    assign show_bars = true
+  endif
+
+  # ---------- Filtres : on ne propose que ceux qui changent l'affichage -----
+  assign distinct_ratings = 0
+  if count_5 > 0
+    assign distinct_ratings = distinct_ratings | plus: 1
+  endif
+  if count_4 > 0
+    assign distinct_ratings = distinct_ratings | plus: 1
+  endif
+  if count_3 > 0
+    assign distinct_ratings = distinct_ratings | plus: 1
+  endif
+  if count_2 > 0
+    assign distinct_ratings = distinct_ratings | plus: 1
+  endif
+  if count_1 > 0
+    assign distinct_ratings = distinct_ratings | plus: 1
+  endif
+
+  assign show_photo_filter = false
+  if section.settings.show_filters and photo_total > 0 and photo_total < reviews_total
+    assign show_photo_filter = true
+  endif
+
+  assign show_star_filters = false
+  if section.settings.show_filters and distinct_ratings > 1
+    assign show_star_filters = true
+  endif
+
+  assign show_filters = false
+  if show_photo_filter or show_star_filters
+    assign show_filters = true
+  endif
+
+  assign show_sort = false
+  if section.settings.show_sort and reviews_total > 1
+    assign show_sort = true
+  endif
+
+  assign uid = section.id | handle
+-%}
+
+<ulveo-reviews
+  class="ulveo-reviews color-{{ section.settings.color_scheme }}"
+  style="--uvr-pt: {{ section.settings.padding_top }}px; --uvr-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="ulveo-reviews__container">
+    <header class="ulveo-reviews__hero">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="ulveo-reviews__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="ulveo-reviews__title">{{ section.settings.title | default: page.title | escape }}</h1>
+      {%- if section.settings.intro != blank -%}
+        <div class="ulveo-reviews__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+    </header>
+
+    {%- if summary_source != 'none' -%}
+      <section class="ulveo-reviews__summary" aria-labelledby="UlveoSummary-{{ uid }}" data-reveal>
+        <h2 class="visually-hidden" id="UlveoSummary-{{ uid }}">Note globale</h2>
+
+        <div class="ulveo-reviews__score{% unless show_bars %} ulveo-reviews__score--solo{% endunless %}">
+          <p class="ulveo-reviews__score-value" aria-hidden="true">
+            <span class="ulveo-reviews__score-number">{{ rating_label }}</span>
+            <span class="ulveo-reviews__score-scale">/5</span>
+          </p>
+          {% render 'ulveo-stars', rating: summary_rating, class: 'ulveo-stars--lg' %}
+          <p class="ulveo-reviews__score-count">
+            <span class="visually-hidden">Note moyenne de {{ rating_label }} sur 5, </span>
+            {%- if summary_count > 0 -%}
+              Basé sur <strong>{{ count_label }}</strong> {{ count_word }}
+            {%- endif -%}
+          </p>
+        </div>
+
+        {%- if show_bars -%}
+          <div class="ulveo-reviews__rule" aria-hidden="true"></div>
+          <ul class="ulveo-reviews__bars" role="list" aria-label="Répartition des notes">
+            {%- for i in (1..5) -%}
+              {%- liquid
+                assign star_value = 6 | minus: i
+                case star_value
+                  when 5
+                    assign star_count = bar_5
+                  when 4
+                    assign star_count = bar_4
+                  when 3
+                    assign star_count = bar_3
+                  when 2
+                    assign star_count = bar_2
+                  else
+                    assign star_count = bar_1
+                endcase
+                assign star_pct = star_count | times: 100.0 | divided_by: bars_total | round
+                assign star_word = 'étoiles'
+                if star_value == 1
+                  assign star_word = 'étoile'
+                endif
+              -%}
+              <li class="ulveo-reviews__bar">
+                <span class="ulveo-reviews__bar-label" aria-hidden="true">
+                  {{- star_value -}}
+                  <svg viewBox="0 0 24 24" focusable="false"><path d="M12 2.6l2.83 5.98 6.47.8-4.77 4.46 1.23 6.47L12 17.13l-5.76 3.18 1.23-6.47L2.7 9.38l6.47-.8L12 2.6z"/></svg>
+                </span>
+                <span class="ulveo-reviews__bar-track" aria-hidden="true">
+                  <span class="ulveo-reviews__bar-fill" style="--uvr-pct: {{ star_pct }}%;"></span>
+                </span>
+                <span class="ulveo-reviews__bar-value" aria-hidden="true">{{ star_pct }} %</span>
+                <span class="visually-hidden">{{ star_value }} {{ star_word }} : {{ star_pct }} % des avis</span>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </section>
+    {%- endif -%}
+
+    <section class="ulveo-reviews__listing" aria-labelledby="UlveoListing-{{ uid }}">
+      <div class="ulveo-reviews__listing-head">
+        <h2 class="ulveo-reviews__heading" id="UlveoListing-{{ uid }}">
+          {{- section.settings.list_heading | default: 'Ce qu’en disent nos clients' | escape -}}
+        </h2>
+
+        {%- if show_filters or show_sort -%}
+          <div class="ulveo-reviews__toolbar">
+            {%- if show_filters -%}
+              <div class="ulveo-reviews__filters" role="group" aria-label="Filtrer les avis">
+                <button type="button" class="ulveo-reviews__chip" data-reviews-filter="all" aria-pressed="true">
+                  Tous les avis
+                </button>
+                {%- if show_photo_filter -%}
+                  <button type="button" class="ulveo-reviews__chip" data-reviews-filter="photo" aria-pressed="false">
+                    Avec photo
+                  </button>
+                {%- endif -%}
+                {%- if show_star_filters -%}
+                  {%- for i in (1..5) -%}
+                    {%- liquid
+                      assign star_value = 6 | minus: i
+                      case star_value
+                        when 5
+                          assign star_count = count_5
+                        when 4
+                          assign star_count = count_4
+                        when 3
+                          assign star_count = count_3
+                        when 2
+                          assign star_count = count_2
+                        else
+                          assign star_count = count_1
+                      endcase
+                    -%}
+                    {%- if star_count > 0 -%}
+                      <button
+                        type="button"
+                        class="ulveo-reviews__chip"
+                        data-reviews-filter="{{ star_value }}"
+                        aria-pressed="false"
+                      >
+                        {{ star_value }}
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.6l2.83 5.98 6.47.8-4.77 4.46 1.23 6.47L12 17.13l-5.76 3.18 1.23-6.47L2.7 9.38l6.47-.8L12 2.6z"/></svg>
+                        <span class="visually-hidden">{% if star_value == 1 %}étoile{% else %}étoiles{% endif %}</span>
+                      </button>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+
+            {%- if show_sort -%}
+              <div class="ulveo-reviews__sort">
+                <label class="ulveo-reviews__sort-label" for="UlveoSort-{{ uid }}">Trier par</label>
+                <span class="ulveo-reviews__select">
+                  <select id="UlveoSort-{{ uid }}" data-reviews-sort>
+                    <option value="recent" selected>Les plus récents</option>
+                    <option value="rating">Les mieux notés</option>
+                  </select>
+                  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <p class="visually-hidden" aria-live="polite" data-reviews-status></p>
+
+      {%- if reviews_total > 0 -%}
+        <ul class="ulveo-reviews__grid" role="list" data-reviews-list>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'review' -%}
+              {% render 'ulveo-review-card',
+                block: block,
+                index: forloop.index0,
+                verified_label: section.settings.verified_label
+              %}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        <p class="ulveo-reviews__empty" data-reviews-empty hidden>Aucun avis ne correspond à ce filtre pour le moment.</p>
+      {%- elsif request.design_mode -%}
+        <p class="ulveo-reviews__empty">Ajoutez un bloc « Avis » pour afficher le premier avis client.</p>
+      {%- endif -%}
+
+      {%- if section.settings.disclosure_text != blank -%}
+        <details class="ulveo-reviews__disclosure">
+          <summary>
+            <span>{{ section.settings.disclosure_title | default: 'Comment nos avis sont-ils publiés ?' | escape }}</span>
+            <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="ulveo-reviews__disclosure-text">{{ section.settings.disclosure_text }}</div>
+        </details>
+      {%- endif -%}
+    </section>
+  </div>
+
+  <dialog class="ulveo-lightbox" data-lightbox aria-label="Photo d’un avis client">
+    <div class="ulveo-lightbox__inner">
+      <figure class="ulveo-lightbox__figure">
+        <div class="ulveo-lightbox__stage" data-lightbox-stage>
+          <img class="ulveo-lightbox__img" alt="" decoding="async" data-lightbox-img>
+        </div>
+        <figcaption class="ulveo-lightbox__caption">
+          <div data-lightbox-caption></div>
+          {%- if section.settings.product != blank -%}
+            <a class="ulveo-lightbox__product" href="{{ section.settings.product.url }}">
+              {%- if section.settings.product.featured_image != blank -%}
+                {{
+                  section.settings.product.featured_image
+                  | image_url: width: 120
+                  | image_tag: loading: 'lazy', alt: '', class: 'ulveo-lightbox__product-img', widths: '60, 120', sizes: '48px'
+                }}
+              {%- endif -%}
+              <span class="ulveo-lightbox__product-text">
+                <span class="ulveo-lightbox__product-title">{{ section.settings.product.title | escape }}</span>
+                <span class="ulveo-lightbox__product-cta">Découvrir la scelleuse</span>
+              </span>
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          {%- endif -%}
+        </figcaption>
+      </figure>
+
+      <button type="button" class="ulveo-lightbox__control ulveo-lightbox__close" data-lightbox-close aria-label="Fermer la photo" autofocus>
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" class="ulveo-lightbox__control ulveo-lightbox__nav ulveo-lightbox__nav--prev" data-lightbox-prev aria-label="Photo précédente">
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M12.5 4.5L7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="ulveo-lightbox__control ulveo-lightbox__nav ulveo-lightbox__nav--next" data-lightbox-next aria-label="Photo suivante">
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7.5 4.5L13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="ulveo-lightbox__counter" data-lightbox-counter></p>
+    </div>
+  </dialog>
+</ulveo-reviews>
+
+{% schema %}
+{
+  "name": "Avis clients — page",
+  "tag": "div",
+  "class": "ulveo-reviews-section",
+  "max_blocks": 50,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "En-tête"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Avis clients"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titre principal (H1)",
+      "default": "Les avis de nos clients"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Texte d'introduction",
+      "default": "<p>Découvrez l'expérience de nos clients avec la scelleuse de sachets magnétique Ulvéo, racontée avec leurs mots et leurs photos.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Note globale"
+    },
+    {
+      "type": "paragraph",
+      "content": "Si une application d'avis remplit les métachamps « reviews.rating » et « reviews.rating_count » du produit choisi ci-dessous, ses chiffres sont utilisés en priorité. Sinon, c'est la source choisie ici qui s'applique."
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Produit concerné"
+    },
+    {
+      "type": "select",
+      "id": "summary_mode",
+      "label": "Source de la note",
+      "options": [
+        {
+          "value": "manual",
+          "label": "Saisie manuelle"
+        },
+        {
+          "value": "auto",
+          "label": "Calculée à partir des avis de cette page"
+        }
+      ],
+      "default": "manual"
+    },
+    {
+      "type": "text",
+      "id": "manual_rating",
+      "label": "Note moyenne sur 5",
+      "info": "Ex. 4,8. Gardez la même valeur que sur la fiche produit (bloc « Note Ulvéo »).",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_count",
+      "label": "Nombre total d'avis",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_5",
+      "label": "Nombre d'avis 5 étoiles",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_4",
+      "label": "Nombre d'avis 4 étoiles",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_3",
+      "label": "Nombre d'avis 3 étoiles",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_2",
+      "label": "Nombre d'avis 2 étoiles",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "text",
+      "id": "manual_stars_1",
+      "label": "Nombre d'avis 1 étoile",
+      "visible_if": "{{ section.settings.summary_mode == 'manual' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breakdown",
+      "label": "Afficher la répartition par étoiles",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Liste des avis"
+    },
+    {
+      "type": "text",
+      "id": "list_heading",
+      "label": "Titre de la liste",
+      "default": "Ce qu’en disent nos clients"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Afficher les filtres",
+      "info": "« Avec photo » et les filtres par étoiles n'apparaissent que lorsqu'ils changent réellement l'affichage.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Afficher le tri",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "verified_label",
+      "label": "Libellé de l'achat vérifié",
+      "default": "Achat vérifié"
+    },
+    {
+      "type": "header",
+      "content": "Transparence"
+    },
+    {
+      "type": "paragraph",
+      "content": "Le Code de la consommation (art. L111-7-2) impose d'indiquer si les avis font l'objet d'un contrôle et, le cas échéant, comment. Adaptez ce texte à votre fonctionnement réel."
+    },
+    {
+      "type": "text",
+      "id": "disclosure_title",
+      "label": "Titre",
+      "default": "Comment nos avis sont-ils publiés ?"
+    },
+    {
+      "type": "richtext",
+      "id": "disclosure_text",
+      "label": "Texte"
+    },
+    {
+      "type": "header",
+      "content": "Mise en page"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Jeu de couleurs",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge haute",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge basse",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Avis",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Prénom et initiale du nom",
+          "info": "Ex. Thomas M."
+        },
+        {
+          "type": "text",
+          "id": "city",
+          "label": "Ville (facultatif)"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Note",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date de l'avis (facultatif)",
+          "info": "Format JJ/MM/AAAA, ex. 12/09/2026. Sert au tri « Les plus récents ». Sans date, l'ordre de la liste s'applique : placez les avis les plus récents en haut."
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Achat vérifié",
+          "info": "À cocher uniquement si l'auteur a réellement passé commande chez Ulvéo.",
+          "default": false
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Texte de l'avis"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photo du client (facultatif)"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Description de la photo",
+          "info": "Lue par les lecteurs d'écran et par Google. Ex. « Paquet de chips refermé avec la scelleuse Ulvéo »."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Avis clients — page"
+    }
+  ]
+}
+{% endschema %}

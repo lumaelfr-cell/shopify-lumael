@@ -1,0 +1,115 @@
+{
+  "sections": {
+    "reviews": {
+      "type": "ulveo-reviews",
+      "blocks": {
+        "review_thomas": {
+          "type": "review",
+          "settings": {
+            "name": "Thomas M.",
+            "city": "Toulouse",
+            "rating": 4,
+            "date": "",
+            "verified": true,
+            "text": "<p>Très pratique et facile à utiliser, je recommande à 100 % !</p>",
+            "image": "shopify://shop_images/IMG_4777.jpg",
+            "image_alt": ""
+          }
+        },
+        "review_amelie": {
+          "type": "review",
+          "settings": {
+            "name": "Amélie N.",
+            "city": "Lyon",
+            "rating": 5,
+            "date": "",
+            "verified": true,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>",
+            "image": "shopify://shop_images/IMG_4697.jpg",
+            "image_alt": ""
+          }
+        },
+        "review_leo": {
+          "type": "review",
+          "settings": {
+            "name": "Léo M.",
+            "city": "Bordeaux",
+            "rating": 5,
+            "date": "",
+            "verified": true,
+            "text": "<p>Parfaite pour nous ! Rapide, efficace, et sans prise de tête. Le meilleur investissement récent.</p>",
+            "image": "shopify://shop_images/IMG_4696.jpg",
+            "image_alt": ""
+          }
+        },
+        "review_jade": {
+          "type": "review",
+          "settings": {
+            "name": "Jade E.",
+            "city": "Troyes",
+            "rating": 5,
+            "date": "",
+            "verified": true,
+            "text": "<p>Top niveau ! 20% plus rapide, zéro casse, SAV réactif. Le meilleur choix pro. 🔥</p>",
+            "image": "shopify://shop_images/IMG_4695.jpg",
+            "image_alt": ""
+          },
+          "disabled": true
+        }
+      },
+      "block_order": [
+        "review_thomas",
+        "review_amelie",
+        "review_leo",
+        "review_jade"
+      ],
+      "settings": {
+        "eyebrow": "Avis clients",
+        "title": "Les avis de nos clients",
+        "intro": "<p>Découvrez l'expérience de nos clients avec la scelleuse de sachets magnétique Ulvéo, racontée avec leurs mots et leurs photos.</p>",
+        "product": "scelleuse-de-sachets-magnetique-ulveo",
+        "summary_mode": "manual",
+        "manual_rating": "4.8",
+        "manual_count": "329",
+        "manual_stars_5": "246",
+        "manual_stars_4": "70",
+        "manual_stars_3": "9",
+        "manual_stars_2": "3",
+        "manual_stars_1": "1",
+        "show_breakdown": true,
+        "list_heading": "Ce qu’en disent nos clients",
+        "show_filters": true,
+        "show_sort": true,
+        "verified_label": "Achat vérifié",
+        "disclosure_title": "Comment nos avis sont-ils publiés ?",
+        "disclosure_text": "<p>Les avis présentés sur cette page sont publiés par Ulvéo à partir des retours de ses clients. Ils sont affichés par défaut du plus récent au plus ancien. La mention « Achat vérifié » signale un avis dont l'auteur a passé commande sur ulveo.fr. Une question sur un avis ? <a href=\"/pages/contact\" title=\"Contact\">Écrivez-nous</a>.</p>",
+        "color_scheme": "scheme-1",
+        "padding_top": 56,
+        "padding_bottom": 64
+      }
+    },
+    "cta": {
+      "type": "ulveo-reviews-cta",
+      "settings": {
+        "eyebrow": "À votre tour",
+        "heading": "Rejoignez nos clients",
+        "text": "<p>Scellez n'importe quel sachet en 3 secondes et gardez ce que vous venez d'acheter frais plus longtemps.</p>",
+        "button_label": "Découvrir la scelleuse",
+        "button_link": "shopify://products/scelleuse-de-sachets-magnetique-ulveo",
+        "reassurance": "Garantie légale 2 ans · Livraison rapide · 14 jours pour changer d’avis",
+        "share_heading": "Déjà client Ulvéo ?",
+        "share_text": "<p>Racontez-nous comment vous utilisez votre scelleuse : chaque retour nous aide à progresser.</p>",
+        "share_label": "Partager mon avis",
+        "share_link": "shopify://pages/contact",
+        "color_scheme": "scheme-1",
+        "panel_color": "#f1ebeb",
+        "padding_top": 0,
+        "padding_bottom": 80
+      }
+    }
+  },
+  "order": [
+    "reviews",
+    "cta"
+  ]
+}

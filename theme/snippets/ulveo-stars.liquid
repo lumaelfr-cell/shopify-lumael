@@ -1,0 +1,29 @@
+{%- doc -%}
+  Ulvéo — rangée de cinq étoiles, remplie à la fraction exacte de la note
+  (une note de 4,8 affiche une dernière étoile aux quatre cinquièmes).
+
+  Purement décoratif : la note doit être donnée en texte à côté, pour les
+  lecteurs d'écran.
+
+  @param {number} rating - Note sur 5, décimale acceptée (ex. 4.8)
+  @param {string} [class] - Classe supplémentaire (taille, contexte)
+
+  @example
+  {% render 'ulveo-stars', rating: 4.8, class: 'ulveo-stars--lg' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign ulveo_fill = rating | times: 1.0 | divided_by: 5 | times: 100 | at_most: 100 | at_least: 0
+  capture ulveo_star
+    echo '<svg viewBox="0 0 24 24" focusable="false"><path d="M12 2.6l2.83 5.98 6.47.8-4.77 4.46 1.23 6.47L12 17.13l-5.76 3.18 1.23-6.47L2.7 9.38l6.47-.8L12 2.6z"/></svg>'
+  endcapture
+-%}
+
+<span class="ulveo-stars {{ class }}" style="--ulveo-stars-fill: {{ ulveo_fill }}%;" aria-hidden="true">
+  <span class="ulveo-stars__row">
+    {%- for i in (1..5) -%}{{ ulveo_star }}{%- endfor -%}
+  </span>
+  <span class="ulveo-stars__row ulveo-stars__row--full">
+    {%- for i in (1..5) -%}{{ ulveo_star }}{%- endfor -%}
+  </span>
+</span>
