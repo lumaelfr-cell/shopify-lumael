@@ -1,0 +1,333 @@
+{%- doc -%}
+  Ulvéo — finition du menu mobile (tiroir du header Horizon).
+
+  Rendu depuis snippets/header-drawer.liquid, juste après la navigation :
+  - une carte produit horizontale (remplace la petite carte « produits
+    mis en avant » du thème, masquée en CSS quand ce bloc est présent) ;
+  - des liens utiles vers les pages de la boutique qui existent ;
+  - un encart « Besoin d'aide ? » (horaires et e-mail du service client).
+
+  Le style ci-dessous retouche aussi les liens principaux du tiroir
+  (typographie de la marque, séparateurs, page en cours). Pour revenir au
+  menu d'origine : retirer la ligne {% render 'ulveo-menu-drawer-extras' %}
+  de snippets/header-drawer.liquid.
+
+  @param {object} [linklist] - Menu affiché, pour l'ordre d'apparition animée
+{%- enddoc -%}
+
+{%- liquid
+  # Produit mis en avant et informations de service : mêmes valeurs que les
+  # pages Contact et Avis clients.
+  assign ulveo_product = all_products['scelleuse-de-sachets-magnetique-ulveo']
+  assign ulveo_hours = 'Du lundi au vendredi, de 9 h à 18 h'
+  assign ulveo_email = shop.email
+
+  assign ulveo_index = linklist.links.size | default: 5 | plus: 1
+
+  if ulveo_product != blank
+    assign ulveo_variant = ulveo_product.selected_or_first_available_variant
+    assign ulveo_image = ulveo_variant.featured_image | default: ulveo_product.featured_image
+  endif
+-%}
+
+<div
+  class="ulveo-drawer menu-drawer__animated-element"
+  style="--menu-drawer-animation-index: {{ ulveo_index }};"
+>
+  {%- if ulveo_product != blank -%}
+    <a class="ulveo-drawer__product" href="{{ ulveo_product.url }}">
+      <span class="ulveo-drawer__product-media">
+        {%- if ulveo_image != blank -%}
+          {{
+            ulveo_image
+            | image_url: width: 240
+            | image_tag: loading: 'lazy', alt: '', widths: '120, 240', sizes: '80px', class: 'ulveo-drawer__product-img'
+          }}
+        {%- endif -%}
+      </span>
+      <span class="ulveo-drawer__product-info">
+        <span class="ulveo-drawer__eyebrow">Notre scelleuse</span>
+        <span class="ulveo-drawer__product-title">{{ ulveo_product.title | escape }}</span>
+        <span class="ulveo-drawer__price">
+          <span class="ulveo-drawer__price-now">{{ ulveo_variant.price | money }}</span>
+          {%- if ulveo_variant.compare_at_price > ulveo_variant.price -%}
+            <s class="ulveo-drawer__price-was">
+              <span class="visually-hidden">Au lieu de</span>
+              {{ ulveo_variant.compare_at_price | money }}
+            </s>
+          {%- endif -%}
+        </span>
+      </span>
+      <svg class="ulveo-drawer__arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  {%- endif -%}
+
+  {%- liquid
+    # Liens secondaires : seules les pages publiées sont affichées.
+    assign ulveo_pages = 'avis-clients:Avis clients,faq:Questions fréquentes,livraison:Livraison,retours-et-remboursements:Retours et remboursements' | split: ','
+  -%}
+  <ul class="ulveo-drawer__links" role="list" aria-label="Informations">
+    {%- for entry in ulveo_pages -%}
+      {%- liquid
+        assign parts = entry | split: ':'
+        assign ulveo_page = pages[parts[0]]
+      -%}
+      {%- if ulveo_page != blank and ulveo_page.url != blank -%}
+        <li>
+          <a class="ulveo-drawer__link" href="{{ ulveo_page.url }}" {% if request.path == ulveo_page.url %}aria-current="page"{% endif %}>
+            {{- parts[1] -}}
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  <div class="ulveo-drawer__help">
+    <p class="ulveo-drawer__help-title">Besoin d’aide ?</p>
+    <p class="ulveo-drawer__help-text">{{ ulveo_hours }}</p>
+    {%- if ulveo_email != blank -%}
+      <a class="ulveo-drawer__help-mail" href="mailto:{{ ulveo_email }}">{{ ulveo_email }}</a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  /* ---- Liens principaux du tiroir ------------------------------------ */
+
+  .header-drawer .menu-drawer .menu-drawer__menu.has-submenu > .menu-drawer__list-item {
+    min-height: 0;
+    border-bottom: 1px solid rgb(20 10 5 / 0.08);
+  }
+
+  .header-drawer .menu-drawer .menu-drawer__menu-item--mainlist {
+    min-height: 60px;
+    padding-block: 12px;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: 1.625rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-transform: none;
+    color: #140a05;
+    transition: color 0.25s ease;
+  }
+
+  /* Flèche discrète à droite des liens simples (les rubriques avec
+     sous-menu gardent le chevron du thème). */
+  .header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist::after {
+    content: '';
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-inline-start: 16px;
+    background: currentColor;
+    opacity: 0.28;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease;
+  }
+
+  .header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist:hover::after {
+    opacity: 0.7;
+    transform: translateX(3px);
+  }
+
+  /* Page en cours : couleur de la marque et point devant le libellé. */
+  .header-drawer .menu-drawer .menu-drawer__menu-item--mainlist[aria-current='page'] {
+    color: #512815;
+  }
+
+  .header-drawer .menu-drawer .menu-drawer__menu-item--mainlist[aria-current='page'] .menu-drawer__menu-item-text::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-inline-end: 12px;
+    border-radius: 50%;
+    background: currentColor;
+    vertical-align: 0.2em;
+  }
+
+  /* La carte produit du thème est remplacée par celle d'Ulvéo. */
+  .header-drawer .menu-drawer:has(.ulveo-drawer) .menu-drawer__featured-content {
+    display: none;
+  }
+
+  /* ---- Bloc Ulvéo ---------------------------------------------------- */
+
+  .ulveo-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px var(--drawer-padding, 20px) calc(28px + env(safe-area-inset-bottom, 0px));
+    color: #140a05;
+  }
+
+  .ulveo-drawer__product {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px 12px 12px;
+    border: 1px solid rgb(20 10 5 / 0.08);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(20 10 5 / 0.04), 0 8px 24px rgb(20 10 5 / 0.05);
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  .ulveo-drawer__product:hover {
+    border-color: rgb(20 10 5 / 0.16);
+  }
+
+  .ulveo-drawer__product-media {
+    display: block;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f1ebeb;
+  }
+
+  .ulveo-drawer__product-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ulveo-drawer__product-info {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .ulveo-drawer__eyebrow {
+    color: #a8441a;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ulveo-drawer__product-title {
+    overflow: hidden;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .ulveo-drawer__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.9375rem;
+  }
+
+  .ulveo-drawer__price-now {
+    font-weight: 600;
+  }
+
+  .ulveo-drawer__price-was {
+    color: rgb(20 10 5 / 0.55);
+    font-size: 0.8125rem;
+  }
+
+  .ulveo-drawer__arrow {
+    width: 20px;
+    height: 20px;
+    opacity: 0.5;
+    transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease;
+  }
+
+  .ulveo-drawer__product:hover .ulveo-drawer__arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .ulveo-drawer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ulveo-drawer__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    color: rgb(20 10 5 / 0.72);
+    font-size: 0.9375rem;
+    text-decoration: underline;
+    text-decoration-color: rgb(20 10 5 / 0.18);
+    text-underline-offset: 4px;
+    transition: color 0.25s ease, text-decoration-color 0.25s ease;
+  }
+
+  .ulveo-drawer__link:hover,
+  .ulveo-drawer__link[aria-current='page'] {
+    color: #140a05;
+    text-decoration-color: currentColor;
+  }
+
+  .ulveo-drawer__help {
+    display: grid;
+    gap: 4px;
+    padding: 18px 20px;
+    border-radius: 16px;
+    background: #f1ebeb;
+  }
+
+  .ulveo-drawer__help p {
+    margin: 0;
+  }
+
+  .ulveo-drawer__help-title {
+    font-family: var(--font-heading--family);
+    font-size: 1.1875rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .ulveo-drawer__help-text {
+    color: rgb(20 10 5 / 0.72);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .ulveo-drawer__help-mail {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 36px;
+    color: #140a05;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: rgb(20 10 5 / 0.25);
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .ulveo-drawer a:focus-visible,
+  .header-drawer .menu-drawer .menu-drawer__menu-item--mainlist:focus-visible {
+    outline: 2px solid #140a05;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist::after,
+    .ulveo-drawer__arrow {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
