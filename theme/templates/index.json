@@ -816,7 +816,7 @@
         "primary_label": "Contactez notre support",
         "primary_link": "shopify://pages/contact",
         "secondary_label": "Consultez notre aide",
-        "secondary_link": "shopify://pages/faq",
+        "secondary_link": "shopify://pages/aide",
         "card_background": "#f1ebeb",
         "mobile_help_position": "after",
         "color_scheme": "scheme-1",

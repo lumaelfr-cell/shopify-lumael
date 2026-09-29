@@ -20,7 +20,7 @@
 
   assign secondary_url = section.settings.secondary_link
   if secondary_url == blank
-    assign secondary_url = pages['faq'].url
+    assign secondary_url = pages['aide'].url | default: pages['faq'].url
   endif
 
   assign mobile_order = 'after'
@@ -515,7 +515,7 @@
       "type": "url",
       "id": "secondary_link",
       "label": "Bouton secondaire : lien",
-      "info": "Vide : page FAQ."
+      "info": "Vide : page Aide."
     },
     {
       "type": "color",

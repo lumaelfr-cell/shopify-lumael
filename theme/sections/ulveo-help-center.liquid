@@ -1,0 +1,1340 @@
+{%- doc -%}
+  Ulvéo — centre d'aide (page /pages/aide, modèle page.aide.json).
+
+  - En-tête avec recherche instantanée dans les questions (affichée
+    seulement si JavaScript est actif ; sans lui, tout reste lisible).
+  - Accès rapides (blocs « Accès rapide »).
+  - Rubriques (blocs « Rubrique ») suivies de leurs questions (blocs
+    « Question ») : une question appartient à la rubrique placée au-dessus
+    d'elle dans l'éditeur.
+  - Encart de contact en fin de page.
+
+  Chaque rubrique et chaque question a une ancre : /pages/aide#livraison-et-suivi
+  ouvre la rubrique, /pages/aide#<question> ouvre directement la réponse.
+{%- enddoc -%}
+
+{%- liquid
+  assign uid = section.id | handle
+
+  assign contact_url = section.settings.contact_link
+  if contact_url == blank
+    assign contact_url = pages['contact'].url
+  endif
+
+  assign topic_count = 0
+  assign question_count = 0
+  assign shortcut_count = 0
+  for block in section.blocks
+    case block.type
+      when 'topic'
+        assign topic_count = topic_count | plus: 1
+      when 'question'
+        assign question_count = question_count | plus: 1
+      when 'shortcut'
+        assign shortcut_count = shortcut_count | plus: 1
+    endcase
+  endfor
+-%}
+
+<ulveo-help-center
+  class="ulveo-hc color-{{ section.settings.color_scheme }}"
+  style="--uhc-pt: {{ section.settings.padding-block-start }}px; --uhc-pb: {{ section.settings.padding-block-end }}px;"
+>
+  <div class="ulveo-hc__container">
+    {%- comment -%} En-tête {%- endcomment -%}
+    <header class="ulveo-hc__hero">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="ulveo-hc__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="ulveo-hc__title">
+        {%- comment -%} Les mots composés (« pouvons-nous ») ne se coupent pas au trait d'union. {%- endcomment -%}
+        {%- assign title_words = section.settings.heading | escape | split: ' ' -%}
+        {%- for word in title_words -%}
+          {%- if word contains '-' -%}<span class="ulveo-hc__nowrap">{{ word }}</span>{%- else -%}{{ word }}{%- endif -%}
+          {%- unless forloop.last %} {% endunless -%}
+        {%- endfor -%}
+      </h1>
+      {%- if section.settings.intro != blank -%}
+        <div class="ulveo-hc__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+
+      {%- if section.settings.show_search and question_count > 0 -%}
+        <form class="ulveo-hc__search" role="search" action="#" data-hc-search hidden>
+          <label class="visually-hidden" for="UlveoHcSearch-{{ uid }}">Rechercher dans l'aide</label>
+          <svg class="ulveo-hc__search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m16 16 4.25 4.25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input
+            class="ulveo-hc__search-input"
+            id="UlveoHcSearch-{{ uid }}"
+            type="search"
+            autocomplete="off"
+            enterkeyhint="search"
+            placeholder="{{ section.settings.search_placeholder | escape }}"
+            aria-describedby="UlveoHcStatus-{{ uid }}"
+            data-hc-input
+          >
+          <button class="ulveo-hc__search-clear" type="button" data-hc-clear hidden>
+            <span class="visually-hidden">Effacer la recherche</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m6 6 8 8M14 6l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+        </form>
+        <p class="visually-hidden" id="UlveoHcStatus-{{ uid }}" role="status" aria-live="polite" data-hc-status></p>
+      {%- endif -%}
+    </header>
+
+    {%- comment -%} Accès rapides {%- endcomment -%}
+    {%- if shortcut_count > 0 -%}
+      <nav class="ulveo-hc__shortcuts" aria-label="{{ section.settings.shortcuts_label | escape }}">
+        <ul class="ulveo-hc__shortcut-list" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'shortcut' and block.settings.title != blank and block.settings.link != blank -%}
+              <li {{ block.shopify_attributes }}>
+                <a class="ulveo-hc__shortcut" href="{{ block.settings.link }}">
+                  <span class="ulveo-hc__shortcut-icon">{% render 'ulveo-contact-icon', name: block.settings.icon %}</span>
+                  <span class="ulveo-hc__shortcut-body">
+                    <span class="ulveo-hc__shortcut-title">{{ block.settings.title | escape }}</span>
+                    {%- if block.settings.text != blank -%}
+                      <span class="ulveo-hc__shortcut-text">{{ block.settings.text | escape }}</span>
+                    {%- endif -%}
+                  </span>
+                  <svg class="ulveo-hc__arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    {%- comment -%} Rubriques et questions {%- endcomment -%}
+    {%- if question_count > 0 -%}
+      <div class="ulveo-hc__body{% if topic_count > 1 %} ulveo-hc__body--with-nav{% endif %}">
+        {%- if topic_count > 1 -%}
+          <nav class="ulveo-hc__topics" aria-label="{{ section.settings.topics_label | escape }}">
+            <p class="ulveo-hc__topics-label" aria-hidden="true">{{ section.settings.topics_label | escape }}</p>
+            <ul class="ulveo-hc__topic-list" role="list">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'topic' and block.settings.title != blank -%}
+                  <li>
+                    <a class="ulveo-hc__topic-link" href="#{{ block.settings.title | handle }}" data-hc-topic-link>
+                      <span class="ulveo-hc__topic-icon">{% render 'ulveo-contact-icon', name: block.settings.icon %}</span>
+                      {{- block.settings.title | escape -}}
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+
+        <div class="ulveo-hc__groups">
+          {%- assign group_open = false -%}
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'topic' -%}
+                {%- if group_open -%}
+                  </div></section>
+                {%- endif -%}
+                {%- assign topic_id = block.settings.title | handle -%}
+                <section class="ulveo-hc__group" id="{{ topic_id }}" aria-labelledby="{{ topic_id }}-title" data-hc-group {{ block.shopify_attributes }}>
+                  <h2 class="ulveo-hc__group-title" id="{{ topic_id }}-title">
+                    <span class="ulveo-hc__group-icon">{% render 'ulveo-contact-icon', name: block.settings.icon %}</span>
+                    {{- block.settings.title | escape -}}
+                  </h2>
+                  <div class="ulveo-hc__list">
+                {%- assign group_open = true -%}
+              {%- when 'question' -%}
+                {%- unless group_open -%}
+                  <section class="ulveo-hc__group" data-hc-group><div class="ulveo-hc__list">
+                  {%- assign group_open = true -%}
+                {%- endunless -%}
+                <details class="ulveo-hc__item" id="{{ block.settings.question | handle }}" data-hc-item {{ block.shopify_attributes }}>
+                  <summary class="ulveo-hc__question">
+                    <span>{{ block.settings.question | escape }}</span>
+                    <span class="ulveo-hc__plus" aria-hidden="true"></span>
+                  </summary>
+                  <div class="ulveo-hc__answer">{{ block.settings.answer }}</div>
+                </details>
+            {%- endcase -%}
+          {%- endfor -%}
+          {%- if group_open -%}
+            </div></section>
+          {%- endif -%}
+
+          <div class="ulveo-hc__empty" data-hc-empty hidden>
+            <p class="ulveo-hc__empty-title">Aucune réponse ne correspond à votre recherche.</p>
+            <p>
+              Essayez un autre mot, ou
+              {% if contact_url != blank %}<a href="{{ contact_url }}">écrivez-nous</a>{% else %}écrivez-nous{% endif %} :
+              nous vous répondrons personnellement.
+            </p>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Contact {%- endcomment -%}
+    {%- if section.settings.contact_heading != blank -%}
+      <aside class="ulveo-hc__contact" aria-labelledby="UlveoHcContact-{{ uid }}">
+        <div class="ulveo-hc__contact-text">
+          <span class="ulveo-hc__contact-badge" aria-hidden="true">{% render 'ulveo-contact-icon', name: 'chat' %}</span>
+          <div>
+            <h2 class="ulveo-hc__contact-title" id="UlveoHcContact-{{ uid }}">{{ section.settings.contact_heading | escape }}</h2>
+            {%- if section.settings.contact_text != blank -%}
+              <div class="ulveo-hc__contact-desc">{{ section.settings.contact_text }}</div>
+            {%- endif -%}
+          </div>
+        </div>
+        <div class="ulveo-hc__contact-actions">
+          {%- if section.settings.contact_label != blank and contact_url != blank -%}
+            <a class="ulveo-hc__btn ulveo-hc__btn--primary" href="{{ contact_url }}">{{ section.settings.contact_label | escape }}</a>
+          {%- endif -%}
+          {%- if section.settings.show_email and shop.email != blank -%}
+            <a class="ulveo-hc__btn ulveo-hc__btn--secondary" href="mailto:{{ shop.email }}">
+              {%- render 'ulveo-contact-icon', name: 'mail' -%}
+              <span>{{ shop.email }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      </aside>
+    {%- endif -%}
+  </div>
+</ulveo-help-center>
+
+{%- if section.settings.faq_schema and question_count > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- assign first = true -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'question' -%}
+            {%- unless first %},{% endunless -%}
+            {
+              "@type": "Question",
+              "name": {{ block.settings.question | strip_html | json }},
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": {{ block.settings.answer | strip_html | strip | json }}
+              }
+            }
+            {%- assign first = false -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% javascript %}
+  (() => {
+    if (customElements.get('ulveo-help-center')) return;
+
+    /* Recherche insensible aux accents et à la casse. */
+    const normalize = (text) =>
+      text
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase();
+
+    class UlveoHelpCenter extends HTMLElement {
+      connectedCallback() {
+        this.items = Array.from(this.querySelectorAll('[data-hc-item]'));
+        this.groups = Array.from(this.querySelectorAll('[data-hc-group]'));
+        this.empty = this.querySelector('[data-hc-empty]');
+        this.status = this.querySelector('[data-hc-status]');
+        this.form = this.querySelector('[data-hc-search]');
+        this.input = this.querySelector('[data-hc-input]');
+        this.clear = this.querySelector('[data-hc-clear]');
+
+        if (this.form && this.input) {
+          this.form.hidden = false;
+          this.index = this.items.map((item) => normalize(item.textContent));
+          this.input.addEventListener('input', () => this.filter());
+          this.form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const first = this.items.find((item) => !item.hidden);
+            if (first) {
+              first.open = true;
+              first.querySelector('summary').focus();
+            }
+          });
+          if (this.clear) {
+            this.clear.addEventListener('click', () => {
+              this.input.value = '';
+              this.filter();
+              this.input.focus();
+            });
+          }
+        }
+
+        this.onHash = () => this.openFromHash();
+        window.addEventListener('hashchange', this.onHash);
+        this.openFromHash();
+        this.watchTopics();
+      }
+
+      disconnectedCallback() {
+        window.removeEventListener('hashchange', this.onHash);
+        if (this.observer) this.observer.disconnect();
+      }
+
+      filter() {
+        const terms = normalize(this.input.value.trim()).split(/\s+/).filter(Boolean);
+        let count = 0;
+
+        this.items.forEach((item, i) => {
+          const match = terms.every((term) => this.index[i].includes(term));
+          item.hidden = !match;
+          if (match) count += 1;
+        });
+        this.groups.forEach((group) => {
+          group.hidden = !group.querySelector('[data-hc-item]:not([hidden])');
+        });
+
+        this.toggleAttribute('data-searching', terms.length > 0);
+        if (this.clear) this.clear.hidden = this.input.value === '';
+        if (this.empty) this.empty.hidden = count > 0;
+
+        if (this.status) {
+          window.clearTimeout(this.statusTimer);
+          this.statusTimer = window.setTimeout(() => {
+            if (!terms.length) this.status.textContent = '';
+            else if (count === 0) this.status.textContent = 'Aucune réponse trouvée.';
+            else this.status.textContent = count === 1 ? '1 réponse trouvée.' : `${count} réponses trouvées.`;
+          }, 400);
+        }
+      }
+
+      /* Un lien vers /pages/aide#une-question ouvre directement la réponse. */
+      openFromHash() {
+        let id = '';
+        try {
+          id = decodeURIComponent(window.location.hash.slice(1));
+        } catch (error) {
+          return;
+        }
+        if (!id) return;
+        const target = document.getElementById(id);
+        if (target && this.contains(target) && target.matches('details')) target.open = true;
+      }
+
+      /* Sommaire : la rubrique en cours de lecture est signalée. */
+      watchTopics() {
+        const links = Array.from(this.querySelectorAll('[data-hc-topic-link]'));
+        if (!links.length || !('IntersectionObserver' in window)) return;
+
+        const byId = new Map(links.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
+        this.observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              links.forEach((link) => link.removeAttribute('aria-current'));
+              const link = byId.get(entry.target.id);
+              if (link) link.setAttribute('aria-current', 'true');
+            });
+          },
+          { rootMargin: '-35% 0px -60% 0px' }
+        );
+        this.groups.forEach((group) => {
+          if (group.id) this.observer.observe(group);
+        });
+      }
+    }
+
+    customElements.define('ulveo-help-center', UlveoHelpCenter);
+  })();
+{% endjavascript %}
+
+{% stylesheet %}
+  .ulveo-hc {
+    --uhc-ink: #140a05;
+    --uhc-muted: rgb(20 10 5 / 0.66);
+    --uhc-hairline: rgb(20 10 5 / 0.08);
+    --uhc-line: rgb(20 10 5 / 0.14);
+    --uhc-beige: #f1ebeb;
+    --uhc-brown: #512815;
+    --uhc-brown-hover: #a05513;
+    --uhc-accent: #a8441a;
+    --uhc-shadow: 0 1px 2px rgb(20 10 5 / 0.04), 0 8px 24px rgb(20 10 5 / 0.05);
+    --uhc-shadow-hover: 0 2px 4px rgb(20 10 5 / 0.05), 0 18px 40px rgb(20 10 5 / 0.1);
+    --uhc-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --uhc-offset: calc(var(--header-height, 72px) + 24px);
+
+    display: block;
+    padding-block: var(--uhc-pt, 56px) var(--uhc-pb, 80px);
+    background: var(--color-background);
+    color: var(--uhc-ink);
+  }
+
+  .ulveo-hc [hidden] {
+    display: none !important;
+  }
+
+  .ulveo-hc :where(h1, h2, p, ul) {
+    margin: 0;
+  }
+
+  .ulveo-hc :where(ul) {
+    padding: 0;
+    list-style: none;
+  }
+
+  .ulveo-hc__container {
+    width: min(1120px, calc(100% - 32px));
+    margin-inline: auto;
+  }
+
+  .ulveo-hc .ulveo-contact-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* ---- En-tête -------------------------------------------------------- */
+
+  .ulveo-hc__hero {
+    max-width: 44rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .ulveo-hc__eyebrow {
+    margin-block-end: 14px;
+    color: var(--uhc-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .ulveo-hc__title {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 400);
+    font-size: clamp(2.375rem, 1.6rem + 3vw, 4rem);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .ulveo-hc__nowrap {
+    white-space: nowrap;
+  }
+
+  .ulveo-hc__intro {
+    max-width: 34rem;
+    margin: 18px auto 0;
+    color: var(--uhc-muted);
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .ulveo-hc__intro > * {
+    margin: 0;
+  }
+
+  .ulveo-hc__search {
+    position: relative;
+    max-width: 560px;
+    margin: 32px auto 0;
+  }
+
+  .ulveo-hc__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--uhc-muted);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  /* Sélecteur renforcé : la règle globale du thème sur les champs est plus
+     spécifique qu'une simple classe. */
+  .ulveo-hc .ulveo-hc__search .ulveo-hc__search-input {
+    width: 100%;
+    min-height: 60px;
+    margin: 0;
+    padding: 0 56px 0 56px;
+    border: 1px solid var(--uhc-line);
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: var(--uhc-shadow);
+    color: var(--uhc-ink);
+    font: inherit;
+    font-size: 1rem;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .ulveo-hc .ulveo-hc__search .ulveo-hc__search-input::placeholder {
+    color: rgb(20 10 5 / 0.5);
+    opacity: 1;
+  }
+
+  .ulveo-hc .ulveo-hc__search .ulveo-hc__search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .ulveo-hc .ulveo-hc__search .ulveo-hc__search-input:focus-visible {
+    border-color: var(--uhc-ink);
+    box-shadow: 0 0 0 3px rgb(20 10 5 / 0.12), var(--uhc-shadow);
+  }
+
+  .ulveo-hc__search-clear {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--uhc-beige);
+    color: var(--uhc-ink);
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+
+  .ulveo-hc__search-clear svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ---- Accès rapides -------------------------------------------------- */
+
+  .ulveo-hc__shortcuts {
+    margin-block-start: 40px;
+  }
+
+  .ulveo-hc__shortcut-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .ulveo-hc__shortcut-list > li {
+    display: flex;
+  }
+
+  .ulveo-hc__shortcut {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    padding: 18px 16px;
+    border: 1px solid var(--uhc-hairline);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--uhc-shadow);
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow 0.3s var(--uhc-ease), transform 0.3s var(--uhc-ease), border-color 0.3s ease;
+  }
+
+  .ulveo-hc__shortcut:hover {
+    border-color: var(--uhc-line);
+    box-shadow: var(--uhc-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .ulveo-hc__shortcut:focus-visible,
+  .ulveo-hc__topic-link:focus-visible,
+  .ulveo-hc__btn:focus-visible,
+  .ulveo-hc__search-clear:focus-visible {
+    outline: 2px solid var(--uhc-ink);
+    outline-offset: 3px;
+  }
+
+  .ulveo-hc__shortcut-icon,
+  .ulveo-hc__group-icon,
+  .ulveo-hc__contact-badge {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--uhc-beige);
+    color: var(--uhc-brown);
+  }
+
+  .ulveo-hc__shortcut-body {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ulveo-hc__shortcut-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .ulveo-hc__shortcut-text {
+    color: var(--uhc-muted);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .ulveo-hc__arrow {
+    position: absolute;
+    top: 20px;
+    right: 16px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.35;
+    transition: transform 0.3s var(--uhc-ease), opacity 0.3s ease;
+  }
+
+  .ulveo-hc__shortcut:hover .ulveo-hc__arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  /* ---- Rubriques ------------------------------------------------------ */
+
+  .ulveo-hc__body {
+    margin-block-start: 56px;
+  }
+
+  /* Mobile : sommaire en pastilles défilantes. */
+  .ulveo-hc__topics {
+    margin-block-end: 32px;
+  }
+
+  .ulveo-hc__topics-label {
+    margin-block-end: 12px;
+    color: var(--uhc-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ulveo-hc__topic-list {
+    display: flex;
+    gap: 8px;
+    margin-inline: -16px;
+    padding: 2px 16px 6px;
+    overflow-x: auto;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+  }
+
+  .ulveo-hc__topic-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ulveo-hc__topic-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px 0 12px;
+    border: 1px solid var(--uhc-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--uhc-ink);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+
+  .ulveo-hc__topic-link:hover {
+    border-color: var(--uhc-ink);
+  }
+
+  .ulveo-hc__topic-link[aria-current='true'] {
+    border-color: var(--uhc-brown);
+    background: var(--uhc-brown);
+    color: #fff;
+  }
+
+  .ulveo-hc__topic-icon {
+    display: inline-flex;
+  }
+
+  .ulveo-hc__topic-icon .ulveo-contact-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ulveo-hc__groups {
+    display: grid;
+    gap: 48px;
+    min-width: 0;
+  }
+
+  /* En recherche, les rubriques se resserrent. */
+  .ulveo-hc[data-searching] .ulveo-hc__groups {
+    gap: 32px;
+  }
+
+  .ulveo-hc__group {
+    scroll-margin-top: var(--uhc-offset);
+  }
+
+  .ulveo-hc__group-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-block-end: 16px;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 400);
+    font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  .ulveo-hc__list {
+    padding-inline: 20px;
+    border: 1px solid var(--uhc-hairline);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--uhc-shadow);
+  }
+
+  .ulveo-hc__item {
+    scroll-margin-top: var(--uhc-offset);
+  }
+
+  .ulveo-hc__item + .ulveo-hc__item {
+    border-block-start: 1px solid var(--uhc-hairline);
+  }
+
+  .ulveo-hc__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 64px;
+    padding-block: 18px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.25s ease;
+  }
+
+  .ulveo-hc__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .ulveo-hc__question:hover {
+    color: var(--uhc-brown);
+  }
+
+  .ulveo-hc__question:focus-visible {
+    outline: 2px solid var(--uhc-ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .ulveo-hc__plus {
+    position: relative;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--uhc-line);
+    border-radius: 50%;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+
+  .ulveo-hc__plus::before,
+  .ulveo-hc__plus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 1.6px;
+    margin: -0.8px 0 0 -6px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.3s var(--uhc-ease);
+  }
+
+  .ulveo-hc__plus::after {
+    transform: rotate(90deg);
+  }
+
+  .ulveo-hc__item[open] .ulveo-hc__plus {
+    border-color: var(--uhc-brown);
+    background: var(--uhc-brown);
+    color: #fff;
+  }
+
+  .ulveo-hc__item[open] .ulveo-hc__plus::after {
+    transform: rotate(0deg);
+  }
+
+  .ulveo-hc__answer {
+    padding-block-end: 22px;
+    color: rgb(20 10 5 / 0.74);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .ulveo-hc__answer > :first-child {
+    margin-block-start: 0;
+  }
+
+  .ulveo-hc__answer > :last-child {
+    margin-block-end: 0;
+  }
+
+  .ulveo-hc__answer :where(p, ul, ol) {
+    margin-block: 0 12px;
+  }
+
+  .ulveo-hc__answer :where(ul, ol) {
+    padding-inline-start: 1.25em;
+  }
+
+  .ulveo-hc__answer li + li {
+    margin-block-start: 6px;
+  }
+
+  .ulveo-hc__answer strong {
+    color: var(--uhc-ink);
+    font-weight: 600;
+  }
+
+  .ulveo-hc__answer a,
+  .ulveo-hc__empty a,
+  .ulveo-hc__contact-desc a {
+    color: var(--uhc-ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: rgb(20 10 5 / 0.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.25s ease;
+  }
+
+  .ulveo-hc__answer a:hover,
+  .ulveo-hc__empty a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .ulveo-hc__item[open] .ulveo-hc__answer {
+    animation: ulveo-hc-answer 0.3s var(--uhc-ease) both;
+  }
+
+  @keyframes ulveo-hc-answer {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    .ulveo-hc__item {
+      interpolate-size: allow-keywords;
+    }
+
+    .ulveo-hc__item::details-content {
+      block-size: 0;
+      overflow: hidden;
+      transition: block-size 0.3s var(--uhc-ease), content-visibility 0.3s allow-discrete;
+    }
+
+    .ulveo-hc__item[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  .ulveo-hc__empty {
+    display: grid;
+    gap: 6px;
+    padding: 28px 24px;
+    border-radius: 16px;
+    background: var(--uhc-beige);
+    color: var(--uhc-muted);
+    text-align: center;
+  }
+
+  .ulveo-hc__empty-title {
+    color: var(--uhc-ink);
+    font-weight: 600;
+  }
+
+  /* ---- Contact -------------------------------------------------------- */
+
+  .ulveo-hc__contact {
+    display: grid;
+    gap: 24px;
+    margin-block-start: 64px;
+    padding: 32px 24px;
+    border-radius: 24px;
+    background: var(--uhc-beige);
+  }
+
+  .ulveo-hc__contact-text {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .ulveo-hc__contact-badge {
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    box-shadow: var(--uhc-shadow);
+  }
+
+  .ulveo-hc__contact-title {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight, 400);
+    font-size: clamp(1.625rem, 1.35rem + 1vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-transform: none;
+    text-wrap: balance;
+  }
+
+  .ulveo-hc__contact-desc {
+    margin-block-start: 10px;
+    color: var(--uhc-muted);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .ulveo-hc__contact-desc > * {
+    margin: 0;
+  }
+
+  .ulveo-hc__contact-actions {
+    display: grid;
+    gap: 12px;
+  }
+
+  .ulveo-hc__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 54px;
+    padding: 14px 24px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s var(--uhc-ease);
+  }
+
+  .ulveo-hc__btn--primary {
+    background: var(--uhc-brown);
+    color: #fff;
+  }
+
+  .ulveo-hc__btn--primary:hover {
+    background: var(--uhc-brown-hover);
+  }
+
+  .ulveo-hc__btn--secondary {
+    border-color: rgb(20 10 5 / 0.12);
+    background: #fff;
+    color: var(--uhc-ink);
+    font-weight: 500;
+  }
+
+  .ulveo-hc__btn--secondary:hover {
+    border-color: var(--uhc-ink);
+  }
+
+  .ulveo-hc__btn .ulveo-contact-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+  }
+
+  .ulveo-hc__btn:active {
+    transform: scale(0.98);
+  }
+
+  /* ---- Tablette et ordinateur ---------------------------------------- */
+
+  @media screen and (min-width: 750px) {
+    .ulveo-hc__container {
+      width: min(1120px, calc(100% - 80px));
+    }
+
+    .ulveo-hc__shortcut-list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .ulveo-hc__shortcut {
+      padding: 22px 20px;
+    }
+
+    .ulveo-hc__list {
+      padding-inline: 28px;
+    }
+
+    .ulveo-hc__contact {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 40px;
+      padding: 40px 48px;
+    }
+
+    .ulveo-hc__contact-text {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      align-items: center;
+      gap: 24px;
+      text-align: start;
+    }
+
+    .ulveo-hc__contact-actions {
+      min-width: 280px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .ulveo-hc__body--with-nav {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      align-items: start;
+      gap: 64px;
+    }
+
+    .ulveo-hc__topics {
+      position: sticky;
+      top: var(--uhc-offset);
+      margin: 0;
+    }
+
+    .ulveo-hc__topic-list {
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+    }
+
+    .ulveo-hc__topic-link {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px 0 10px;
+      border-color: transparent;
+      border-radius: 12px;
+      background: transparent;
+      white-space: normal;
+    }
+
+    .ulveo-hc__topic-link:hover {
+      border-color: transparent;
+      background: #fff;
+    }
+
+    .ulveo-hc__topic-link[aria-current='true'] {
+      border-color: transparent;
+      background: #fff;
+      box-shadow: var(--uhc-shadow);
+      color: var(--uhc-brown);
+    }
+
+    .ulveo-hc__topic-icon {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--uhc-beige);
+      color: var(--uhc-brown);
+    }
+
+    .ulveo-hc__question {
+      font-size: 1.125rem;
+    }
+
+    .ulveo-hc__answer {
+      padding-inline-end: 52px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ulveo-hc__shortcut,
+    .ulveo-hc__arrow,
+    .ulveo-hc__plus,
+    .ulveo-hc__plus::before,
+    .ulveo-hc__plus::after,
+    .ulveo-hc__btn,
+    .ulveo-hc__item::details-content {
+      transition: none;
+    }
+
+    .ulveo-hc__shortcut:hover,
+    .ulveo-hc__shortcut:hover .ulveo-hc__arrow,
+    .ulveo-hc__btn:active {
+      transform: none;
+    }
+
+    .ulveo-hc__item[open] .ulveo-hc__answer {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Centre d'aide Ulvéo",
+  "tag": "section",
+  "class": "ulveo-help-center-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "En-tête"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Centre d'aide"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Comment pouvons-nous vous aider ?"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Texte"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Afficher la recherche",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Texte d'exemple de la recherche",
+      "default": "Rechercher une réponse…"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "text",
+      "id": "shortcuts_label",
+      "label": "Nom des accès rapides (accessibilité)",
+      "default": "Accès rapides"
+    },
+    {
+      "type": "text",
+      "id": "topics_label",
+      "label": "Titre du sommaire",
+      "default": "Rubriques"
+    },
+    {
+      "type": "header",
+      "content": "Encart de contact"
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Titre",
+      "default": "Vous n'avez pas trouvé votre réponse ?"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_text",
+      "label": "Texte"
+    },
+    {
+      "type": "text",
+      "id": "contact_label",
+      "label": "Bouton : texte",
+      "default": "Contactez notre support"
+    },
+    {
+      "type": "url",
+      "id": "contact_link",
+      "label": "Bouton : lien",
+      "info": "Vide : page Contact."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_email",
+      "label": "Afficher l'e-mail de la boutique",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Référencement et mise en page"
+    },
+    {
+      "type": "checkbox",
+      "id": "faq_schema",
+      "label": "Données structurées FAQ (SEO)",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Jeu de couleurs",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Marge haute",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Marge basse",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "shortcut",
+      "name": "Accès rapide",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Pictogramme",
+          "options": [
+            { "value": "box", "label": "Colis" },
+            { "value": "truck", "label": "Camion" },
+            { "value": "return", "label": "Retour" },
+            { "value": "chat", "label": "Bulle" },
+            { "value": "mail", "label": "E-mail" },
+            { "value": "clock", "label": "Horloge" },
+            { "value": "lock", "label": "Cadenas" },
+            { "value": "tool", "label": "Outil" },
+            { "value": "heart", "label": "Cœur" },
+            { "value": "check", "label": "Validation" }
+          ],
+          "default": "box"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Accès rapide"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien"
+        }
+      ]
+    },
+    {
+      "type": "topic",
+      "name": "Rubrique",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Les questions placées sous cette rubrique, jusqu'à la suivante, lui appartiennent."
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Pictogramme",
+          "options": [
+            { "value": "box", "label": "Colis" },
+            { "value": "truck", "label": "Camion" },
+            { "value": "return", "label": "Retour" },
+            { "value": "chat", "label": "Bulle" },
+            { "value": "mail", "label": "E-mail" },
+            { "value": "clock", "label": "Horloge" },
+            { "value": "lock", "label": "Cadenas" },
+            { "value": "tool", "label": "Outil" },
+            { "value": "heart", "label": "Cœur" },
+            { "value": "check", "label": "Validation" }
+          ],
+          "default": "check"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Rubrique"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Votre question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Réponse",
+          "default": "<p>Votre réponse.</p>"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 50,
+  "presets": [
+    {
+      "name": "Centre d'aide Ulvéo",
+      "blocks": [
+        { "type": "topic", "settings": { "title": "Le produit", "icon": "tool" } },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Comment se recharge-t-elle ?",
+            "answer": "<p>Par un port USB-C, avec le même câble que votre téléphone. Le câble est fourni.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

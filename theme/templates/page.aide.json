@@ -1,0 +1,272 @@
+{
+  "sections": {
+    "help": {
+      "type": "ulveo-help-center",
+      "blocks": {
+        "s_suivi": {
+          "type": "shortcut",
+          "settings": {
+            "icon": "box",
+            "title": "Suivre ma commande",
+            "text": "Où en est mon colis ?",
+            "link": "/apps/parcelpanel"
+          }
+        },
+        "s_livraison": {
+          "type": "shortcut",
+          "settings": {
+            "icon": "truck",
+            "title": "Livraison",
+            "text": "Zones, délais et frais",
+            "link": "shopify://pages/livraison"
+          }
+        },
+        "s_retours": {
+          "type": "shortcut",
+          "settings": {
+            "icon": "return",
+            "title": "Retours et remboursements",
+            "text": "14 jours pour changer d'avis",
+            "link": "shopify://pages/retours-et-remboursements"
+          }
+        },
+        "s_contact": {
+          "type": "shortcut",
+          "settings": {
+            "icon": "chat",
+            "title": "Nous contacter",
+            "text": "Du lundi au vendredi, 9 h – 18 h",
+            "link": "shopify://pages/contact"
+          }
+        },
+        "t_produit": {
+          "type": "topic",
+          "settings": {
+            "icon": "tool",
+            "title": "Le produit"
+          }
+        },
+        "q_produit_1": {
+          "type": "question",
+          "settings": {
+            "question": "Mes chips resteront-elles vraiment croquantes ?",
+            "answer": "<p>Oui. Ce qui ramollit les chips, c'est l'humidité de l'air qui entre dans le paquet. La scelleuse soude le plastique sur toute la largeur : l'échange avec l'air extérieur est coupé, là où une pince laisse toujours un passage.</p>"
+          }
+        },
+        "q_produit_2": {
+          "type": "question",
+          "settings": {
+            "question": "C'est compliqué à utiliser ?",
+            "answer": "<p>Non. Vous placez le bord du sachet dans l'appareil, vous appuyez, vous attendez trois secondes. Il n'y a rien d'autre à apprendre, aucun réglage à connaître.</p>"
+          }
+        },
+        "q_produit_3": {
+          "type": "question",
+          "settings": {
+            "question": "Ça fonctionne sur tous les sachets ?",
+            "answer": "<p>Sur tous les sachets en plastique alimentaire courant : polyéthylène et polypropylène. Concrètement, les paquets de chips et de biscuits, les sachets de surgelés et de congélation, le café, les pâtes, le riz, les bonbons, les croquettes pour animaux.</p><p>En revanche, elle ne fonctionne pas sur le papier, sur l'aluminium épais ni sur les emballages rigides. Sur les emballages très épais ou doublés d'aluminium, la soudure peut être irrégulière.</p>"
+          }
+        },
+        "q_produit_4": {
+          "type": "question",
+          "settings": {
+            "question": "Quelle différence entre les éditions Standard, Pro et Duo Pack ?",
+            "answer": "<ul><li><strong>Standard</strong> — 3 modes de soudure. L'essentiel, pour un usage quotidien.</li><li><strong>Pro</strong> — 6 modes de soudure, soudure plus rapide et coupe intégrée. Le choix le plus polyvalent si vous passez du paquet de chips au sac de congélation.</li><li><strong>Duo Pack</strong> — deux appareils, pour équiper deux cuisines ou en offrir un.</li></ul>"
+          }
+        },
+        "q_produit_5": {
+          "type": "question",
+          "settings": {
+            "question": "Comment se recharge-t-elle ?",
+            "answer": "<p>Par un port USB-C, avec le même câble que votre téléphone. Le câble est fourni.</p>"
+          }
+        },
+        "q_produit_6": {
+          "type": "question",
+          "settings": {
+            "question": "Peut-on rouvrir un sachet une fois scellé ?",
+            "answer": "<p>Oui. La lame intégrée de l'édition Pro ouvre proprement la soudure, et vous pouvez resceller ensuite : chaque soudure ne consomme que quelques millimètres de sachet.</p>"
+          }
+        },
+        "q_produit_7": {
+          "type": "question",
+          "settings": {
+            "question": "Est-ce dangereux à utiliser ?",
+            "answer": "<p>La résistance chauffante est isolée et vous n'entrez jamais en contact avec elle. Cela reste néanmoins un appareil chauffant : tenez-le hors de portée des jeunes enfants.</p>"
+          }
+        },
+        "q_produit_8": {
+          "type": "question",
+          "settings": {
+            "question": "Pourquoi pas simplement une pince ou un élastique ?",
+            "answer": "<p>Parce qu'ils referment sans fermer : le sachet reste ouvert à l'air, il est juste plié. Et une pince finit toujours par disparaître au fond d'un tiroir. La scelleuse, elle, reste aimantée sur la porte du réfrigérateur.</p>"
+          }
+        },
+        "t_commande": {
+          "type": "topic",
+          "settings": {
+            "icon": "lock",
+            "title": "Commande et paiement"
+          }
+        },
+        "q_commande_1": {
+          "type": "question",
+          "settings": {
+            "question": "Comment savoir si ma commande est bien enregistrée ?",
+            "answer": "<p>Dès que votre commande est validée, vous recevez un e-mail de confirmation récapitulant vos articles et le montant réglé. Vous ne le trouvez pas ? Vérifiez vos courriers indésirables, puis <a href=\"/pages/contact\" title=\"Contact\">écrivez-nous</a> en indiquant l'adresse e-mail utilisée pour la commande.</p>"
+          }
+        },
+        "q_commande_2": {
+          "type": "question",
+          "settings": {
+            "question": "Quels moyens de paiement acceptez-vous ?",
+            "answer": "<p>Les moyens de paiement disponibles s'affichent au moment du règlement. Les transactions sont sécurisées et nous n'avons jamais accès à vos données bancaires.</p>"
+          }
+        },
+        "t_livraison": {
+          "type": "topic",
+          "settings": {
+            "icon": "truck",
+            "title": "Livraison et suivi"
+          }
+        },
+        "q_livraison_1": {
+          "type": "question",
+          "settings": {
+            "question": "Où livrez-vous ?",
+            "answer": "<p>En France métropolitaine uniquement, pour le moment.</p>"
+          }
+        },
+        "q_livraison_2": {
+          "type": "question",
+          "settings": {
+            "question": "Sous quel délai vais-je recevoir ma commande ?",
+            "answer": "<p>Votre commande est préparée et expédiée sous 24 à 48 h. Les commandes passées le week-end ou un jour férié sont traitées le jour ouvré suivant.</p><p>Comptez ensuite 10 à 14 jours ouvrés de livraison en France métropolitaine. Ces délais sont des estimations à compter de l'expédition. Tous les détails sont sur la page <a href=\"/pages/livraison\" title=\"Livraison\">Livraison</a>.</p>"
+          }
+        },
+        "q_livraison_3": {
+          "type": "question",
+          "settings": {
+            "question": "La livraison est-elle offerte ?",
+            "answer": "<p>Oui, à partir de 39 € d'achat. En dessous, les frais de livraison vous sont indiqués avant le paiement.</p>"
+          }
+        },
+        "q_livraison_4": {
+          "type": "question",
+          "settings": {
+            "question": "Comment suivre mon colis ?",
+            "answer": "<p>Dès l'expédition, vous recevez un e-mail avec votre numéro de suivi. Vous pouvez aussi suivre votre colis à tout moment sur la page <a href=\"/apps/parcelpanel\" title=\"Suivre ma commande\">Suivre ma commande</a>.</p>"
+          }
+        },
+        "q_livraison_5": {
+          "type": "question",
+          "settings": {
+            "question": "Mon colis est endommagé ou n'est jamais arrivé",
+            "answer": "<p>S'il arrive endommagé, signalez-le au transporteur à la réception et écrivez-nous en joignant des photos.</p><p>S'il n'est jamais arrivé, contactez-nous : nous ouvrons une enquête auprès du transporteur et vous réexpédions ou remboursons votre commande.</p>"
+          }
+        },
+        "t_retours": {
+          "type": "topic",
+          "settings": {
+            "icon": "return",
+            "title": "Retours et garantie"
+          }
+        },
+        "q_retours_1": {
+          "type": "question",
+          "settings": {
+            "question": "Et si le produit ne me convient pas ?",
+            "answer": "<p>Vous disposez de 14 jours à compter de la réception pour changer d'avis, sans avoir à vous justifier. Le produit doit être retourné complet, dans un état permettant sa revente, avec ses accessoires et son emballage.</p>"
+          }
+        },
+        "q_retours_2": {
+          "type": "question",
+          "settings": {
+            "question": "Comment retourner un produit ?",
+            "answer": "<ol><li>Écrivez-nous en indiquant votre numéro de commande et le produit concerné.</li><li>Nous vous confirmons la procédure et l'adresse de retour sous 3 jours ouvrés.</li><li>Renvoyez le colis dans les 14 jours suivant votre demande, en conservant une preuve d'expédition.</li></ol><p>La procédure complète est sur la page <a href=\"/pages/retours-et-remboursements\" title=\"Retours et remboursements\">Retours et remboursements</a>.</p>"
+          }
+        },
+        "q_retours_3": {
+          "type": "question",
+          "settings": {
+            "question": "Qui paie les frais de retour ?",
+            "answer": "<p>Nous. Les frais de renvoi sont pris en charge par Ulvéo, y compris en cas de simple changement d'avis.</p>"
+          }
+        },
+        "q_retours_4": {
+          "type": "question",
+          "settings": {
+            "question": "Quand suis-je remboursé ?",
+            "answer": "<p>Au plus tard 14 jours après réception du produit retourné ou de la preuve de son expédition, sur votre moyen de paiement d'origine. Le remboursement inclut les frais de livraison standard initialement payés.</p>"
+          }
+        },
+        "q_retours_5": {
+          "type": "question",
+          "settings": {
+            "question": "Quels articles ne peuvent pas être retournés ?",
+            "answer": "<p>Le droit de rétractation ne s'applique pas aux produits personnalisés, ni aux produits descellés qui ne peuvent être renvoyés pour des raisons d'hygiène.</p>"
+          }
+        },
+        "q_retours_6": {
+          "type": "question",
+          "settings": {
+            "question": "Et s'il tombe en panne ?",
+            "answer": "<p>Tous nos produits bénéficient de la garantie légale de conformité pendant 2 ans à compter de la livraison, ainsi que de la garantie contre les vices cachés. Dans ce cadre, le remplacement ou le remboursement se fait sans frais pour vous. Écrivez-nous en décrivant le problème.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "s_suivi",
+        "s_livraison",
+        "s_retours",
+        "s_contact",
+        "t_produit",
+        "q_produit_1",
+        "q_produit_2",
+        "q_produit_3",
+        "q_produit_4",
+        "q_produit_5",
+        "q_produit_6",
+        "q_produit_7",
+        "q_produit_8",
+        "t_commande",
+        "q_commande_1",
+        "q_commande_2",
+        "t_livraison",
+        "q_livraison_1",
+        "q_livraison_2",
+        "q_livraison_3",
+        "q_livraison_4",
+        "q_livraison_5",
+        "t_retours",
+        "q_retours_1",
+        "q_retours_2",
+        "q_retours_3",
+        "q_retours_4",
+        "q_retours_5",
+        "q_retours_6"
+      ],
+      "settings": {
+        "eyebrow": "Centre d'aide",
+        "heading": "Comment pouvons-nous vous aider ?",
+        "intro": "<p>Des réponses claires sur la scelleuse, votre commande, la livraison et les retours.</p>",
+        "show_search": true,
+        "search_placeholder": "Rechercher une réponse…",
+        "shortcuts_label": "Accès rapides",
+        "topics_label": "Rubriques",
+        "contact_heading": "Vous n'avez pas trouvé votre réponse ?",
+        "contact_text": "<p>Notre équipe vous répond personnellement, du lundi au vendredi, de 9 h à 18 h.</p>",
+        "contact_label": "Contactez notre support",
+        "contact_link": "shopify://pages/contact",
+        "show_email": true,
+        "faq_schema": true,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 56,
+        "padding-block-end": 80
+      }
+    }
+  },
+  "order": [
+    "help"
+  ]
+}
