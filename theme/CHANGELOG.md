@@ -25,3 +25,19 @@ en ligne. On publie après prévisualisation.
 | Pied de page | Groupe vide | Menu « Informations » (menu `footer`) | Rendre l'aide, la livraison, les retours et les mentions faciles à trouver. |
 | Pop-up | Après 2 s, « Abonnez-vous », sans contrepartie | Après 25 s, code de livraison offerte (ULVEO20, déjà actif) | À 2 s, la pop-up masque le produit avant qu'il soit compris (surtout sur mobile). Une contrepartie réelle cible le frein principal : les frais de port. |
 | Page avis | « Achat vérifié » sur tous les avis, 4,8/329 saisis à la main | Aucune mention « Achat vérifié », note calculée sur les avis affichés, avis en double désactivé | Aucune commande enregistrée : la mention « Achat vérifié » ne peut pas être exacte. |
+
+### Modifié directement en production (données de la boutique, hors thème)
+
+- **Description produit** (`content/product-description.html`) : retrait de
+  « Vous économisez par rapport à deux achats séparés » (faux : le Duo est
+  facturé au prix de deux unités) et de « dans un seul coffret » ; « Coupe
+  intégrée » précisée « édition Pro » ; suppression des blocs « Trois gestes »
+  et « Questions fréquentes », déjà présents dans les sections sous le produit.
+- **Textes alternatifs** des 7 photos produit (ils étaient tous vides).
+- **Page FAQ** : lien cassé `/pages/suivre-ma-commande` remplacé par
+  `/apps/parcelpanel` (le même lien que le menu) ; délai de livraison et retour
+  gratuit précisés.
+- **Menu principal** : « Catalogue » (collection d'un seul produit) devient
+  « La scelleuse » (fiche produit directe) ; ajout de « Aide et FAQ ».
+- **Menu du pied de page** : FAQ, Livraison, Retours, Notre histoire, Contact.
+  Ce menu ne s'affiche que dans le thème « Audit CRO v1 ».
