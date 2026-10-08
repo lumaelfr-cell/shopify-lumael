@@ -295,7 +295,30 @@
             "padding-inline-start": 0,
             "padding-inline-end": 0
           },
-          "blocks": {}
+          "blocks": {
+            "menu_footer_infos": {
+              "type": "menu",
+              "settings": {
+                "menu": "footer",
+                "heading": "Informations",
+                "menu_spacing": 8,
+                "show_as_accordion": false,
+                "accordion_icon": "caret",
+                "accordion_dividers": false,
+                "inherit_color_scheme": true,
+                "color_scheme": "scheme-1",
+                "heading_preset": "h3",
+                "link_preset": "paragraph",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": [
+            "menu_footer_infos"
+          ]
         }
       },
       "block_order": [

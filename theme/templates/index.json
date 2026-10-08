@@ -200,8 +200,8 @@
                       "type": "ulveo-rating",
                       "name": "Note Ulvéo",
                       "settings": {
-                        "rating": "4.8",
-                        "rating_count": "329",
+                        "rating": "",
+                        "rating_count": "",
                         "show_count": true,
                         "anchor": "/pages/avis-clients"
                       },
@@ -253,7 +253,7 @@
                 "discount_1": "",
                 "chips_2": "6 modes de soudure, Coupe intégrée",
                 "desc_2": "Du sachet de chips au sac de congélation",
-                "badge_2": "Le plus choisi",
+                "badge_2": "Le plus polyvalent",
                 "perk_2": "",
                 "units_2": 1,
                 "price_2": "",
@@ -261,8 +261,8 @@
                 "discount_2": "",
                 "chips_3": "",
                 "desc_3": "Un pour la maison, un pour partout ailleurs",
-                "badge_3": "Meilleure offre",
-                "perk_3": "+ Livraison offerte",
+                "badge_3": "Idéal à offrir",
+                "perk_3": "",
                 "units_3": 2,
                 "price_3": "",
                 "compare_3": "",
@@ -422,7 +422,7 @@
                 "accordion_row_UxihnK": {
                   "type": "_accordion-row",
                   "settings": {
-                    "heading": "Expédition",
+                    "heading": "Livraison et retours",
                     "open_by_default": false,
                     "icon": "none",
                     "width": 20
@@ -431,7 +431,7 @@
                     "text_RbzWNV": {
                       "type": "text",
                       "settings": {
-                        "text": "<p>Votre commande est préparée dès sa validation. Vous recevez un e-mail avec le suivi dès qu'elle est expédiée. Le délai de livraison dépend ensuite de votre adresse.</p>",
+                        "text": "<p><strong>Expédiée sous 24 à 48 h ouvrées</strong>, avec le numéro de suivi par e-mail. Livraison en France métropolitaine en 10 à 14 jours ouvrés après expédition.</p><p><strong>Livraison offerte dès 39 € d'achat</strong> (7,99 € en dessous).</p><p><strong>Retour gratuit sous 14 jours</strong>, sans justification. Garantie légale de conformité de 2 ans.</p>",
                         "width": "100%",
                         "max_width": "normal",
                         "alignment": "left",
@@ -457,51 +457,11 @@
                   "block_order": [
                     "text_RbzWNV"
                   ]
-                },
-                "accordion_row_kJkiUw": {
-                  "type": "_accordion-row",
-                  "settings": {
-                    "heading": "Fabrication",
-                    "open_by_default": false,
-                    "icon": "none",
-                    "width": 20
-                  },
-                  "blocks": {
-                    "text_rpatKE": {
-                      "type": "text",
-                      "settings": {
-                        "text": "<p>Nos produits sont fabriqués localement et dans le monde entier. Nous sélectionnons soigneusement nos partenaires de fabrication pour garantir que nos produits sont de haute qualité et d’un juste rapport qualité-prix.</p>",
-                        "width": "100%",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "rte",
-                        "font": "var(--font-body--family)",
-                        "font_size": "1rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "color": "var(--color-foreground)",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 0,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "text_rpatKE"
-                  ]
                 }
               },
               "block_order": [
                 "accordion_row_xwGLtQ",
-                "accordion_row_UxihnK",
-                "accordion_row_kJkiUw"
+                "accordion_row_UxihnK"
               ]
             }
           },
@@ -697,7 +657,7 @@
         "text_marquee_product": {
           "type": "text",
           "settings": {
-            "text": "<ul><li><h4><em><strong>Soudure en 3 secondes · Rechargeable USB-C · Aimantée sur le frigo · Coupe intégrée · Gravure personnalisée · Garantie légale 2 ans</strong></em></h4></li></ul>",
+            "text": "<ul><li><h4><em><strong>Soudure en 3 secondes · Rechargeable USB-C · Aimantée sur le frigo · Livraison offerte dès 39 € · Retour gratuit sous 14 jours · Garantie légale 2 ans</strong></em></h4></li></ul>",
             "width": "100%",
             "max_width": "normal",
             "alignment": "center",
@@ -737,9 +697,9 @@
       "name": "Garantie Ulvéo",
       "settings": {
         "eyebrow": "Achetez l'esprit tranquille",
-        "heading": "14 jours pour changer d'avis, 2 ans de garantie",
+        "heading": "Retour gratuit sous 14 jours, garantie 2 ans",
         "text": "<p>Si la scelleuse ne vous convient pas, renvoyez-la sous 14 jours et vous êtes remboursé, sans avoir à vous justifier. En cas de défaut, la garantie légale de conformité couvre le remplacement ou le remboursement pendant 2 ans.</p>",
-        "small": "<p>Les articles gravés, personnalisés à votre demande, ne sont pas repris.</p>",
+        "small": "<p>Les frais de retour sont à notre charge, même pour un simple changement d'avis.</p>",
         "color_scheme": "scheme-2",
         "padding-block-start": 8,
         "padding-block-end": 40
@@ -786,8 +746,8 @@
         "q6": {
           "type": "question",
           "settings": {
-            "question": "Comment fonctionne la gravure ?",
-            "answer": "<p>Choisissez l'option « Avec gravure », saisissez votre texte (20 caractères maximum) et nous le gravons sur le capot avant expédition. L'article gravé étant personnalisé, il n'est ni repris ni échangé.</p>"
+            "question": "Sous quel délai vais-je la recevoir ?",
+            "answer": "<p>Votre commande est expédiée sous 24 à 48 h ouvrées, puis livrée en 10 à 14 jours ouvrés en France métropolitaine. Le numéro de suivi vous est envoyé par e-mail dès l'expédition. La livraison est offerte dès 39 € d'achat.</p>"
           }
         },
         "q7": {
@@ -796,12 +756,20 @@
             "question": "Et s'il tombe en panne ?",
             "answer": "<p>Tous nos produits bénéficient de la garantie légale de conformité pendant 2 ans à compter de la livraison. Le remplacement ou le remboursement se fait sans frais pour vous.</p>"
           }
+        },
+        "q_edition": {
+          "type": "question",
+          "settings": {
+            "question": "Standard ou Pro : laquelle choisir ?",
+            "answer": "<p>La <strong>Standard</strong> (3 modes de soudure) suffit pour les sachets du quotidien : chips, biscuits, café. La <strong>Pro</strong> (6 modes, soudure plus rapide, coupe intégrée) est plus à l'aise avec les sacs de congélation et les emballages épais, et rouvre proprement le sachet scellé.</p>"
+          }
         }
       },
       "block_order": [
         "q1",
         "q2",
         "q3",
+        "q_edition",
         "q4",
         "q5",
         "q6",
@@ -963,7 +931,8 @@
         "color_scheme": "scheme-1",
         "padding-block-start": 32,
         "padding-block-end": 32
-      }
+      },
+      "disabled": true
     },
     "divider_j8iDEH": {
       "type": "divider",
