@@ -262,7 +262,7 @@
                 "chips_3": "",
                 "desc_3": "Un pour la maison, un pour partout ailleurs",
                 "badge_3": "Idéal à offrir",
-                "perk_3": "",
+                "perk_3": "+ Livraison offerte",
                 "units_3": 2,
                 "price_3": "",
                 "compare_3": "",
@@ -431,7 +431,7 @@
                     "text_RbzWNV": {
                       "type": "text",
                       "settings": {
-                        "text": "<p><strong>Expédiée sous 24 à 48 h ouvrées</strong>, avec le numéro de suivi par e-mail. Livraison en France métropolitaine en 10 à 14 jours ouvrés après expédition.</p><p><strong>Livraison offerte dès 39 € d'achat</strong> (7,99 € en dessous).</p><p><strong>Retour gratuit sous 14 jours</strong>, sans justification. Garantie légale de conformité de 2 ans.</p>",
+                        "text": "<p><strong>Expédiée sous 24 à 48 h ouvrées</strong>, avec le numéro de suivi par e-mail. Livraison en France métropolitaine en 10 à 14 jours ouvrés après expédition.</p><p><strong>Livraison offerte dès 39 € d'achat</strong> (4,90 € en dessous).</p><p><strong>Retour gratuit sous 14 jours</strong>, sans justification. Garantie légale de conformité de 2 ans.</p>",
                         "width": "100%",
                         "max_width": "normal",
                         "alignment": "left",

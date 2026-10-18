@@ -41,3 +41,19 @@ en ligne. On publie après prévisualisation.
   « La scelleuse » (fiche produit directe) ; ajout de « Aide et FAQ ».
 - **Menu du pied de page** : FAQ, Livraison, Retours, Notre histoire, Contact.
   Ce menu ne s'affiche que dans le thème « Audit CRO v1 ».
+
+## 2026-10-18 — Prix v2 : livraison moins chère, prix produit ajustés
+
+| | Avant | Après |
+|---|---|---|
+| Standard | 17,95 € (barré 30,95 €) | 19,90 €, sans prix barré |
+| Pro | 22,95 € (barré 38,95 €) | 24,90 €, sans prix barré |
+| Variante Duo Pack (non vendue telle quelle) | 39,90 € (barré 56,90 €) | 39,80 € = 2 × Standard, sans prix barré |
+| Livraison standard | 7,99 € | 4,90 €, offerte dès 39 € (inchangé) |
+
+Cohérence : deux Standard font 39,80 € ≥ 39 €, donc tout Duo est livré
+gratuitement ; la carte Duo retrouve « + Livraison offerte », vraie cette fois.
+Les prix barrés, jamais pratiqués, sont retirés (prix de référence
+invérifiable). Thème : accordéon « Livraison et retours » passé à 4,90 €.
+Hors thème : tableau de prix de la description produit, page Livraison
+(champ « [10,00€] » et avertissement retirés).
