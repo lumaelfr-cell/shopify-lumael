@@ -57,3 +57,10 @@ Les prix barrés, jamais pratiqués, sont retirés (prix de référence
 invérifiable). Thème : accordéon « Livraison et retours » passé à 4,90 €.
 Hors thème : tableau de prix de la description produit, page Livraison
 (champ « [10,00€] » et avertissement retirés).
+
+Livraison (Paramètres → Expédition, profil général, zone France) : le tarif
+« Standard » combinait 7,99 € et un seuil de gratuité dans un format que
+l'API disponible ne sait pas modifier. Il a été reconstruit à l'identique en
+deux tarifs exclusifs : « Standard » 4,90 € de 0 à 38,99 €, « Standard »
+gratuit dès 39 €. « Express » 10,99 € inchangé. Vérifié par relecture de
+l'API après modification.
