@@ -237,7 +237,12 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const chassis = new THREE.Group();
   chassis.name = 'chassis';
   root.add(chassis);
-  const Y = (y: number) => y * s + dy;
+  // proportions verticales calées sur les cotes réelles : le bas du cadre est à la
+  // garde au sol, la selle à la hauteur de selle (dessin de référence : 0.20 → 0.96)
+  const gc = spec.groundClearance;
+  const ky = (spec.seatHeight - gc) / 0.76;
+  const Y = (y: number) => gc + (y - 0.2) * ky;
+  void dy;
   const Z = (z: number) => z * s;
 
   // --- cadre (double poutre + berceau + boucle arrière)
@@ -373,7 +378,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   airbox.translate(0, seatTop - 0.18, Z(0.25));
   mesh(airbox, darkMat, chassis);
   // repose-pieds
-  const pegY = Y(0.36), pegZ = Z(0.55);
+  const pegY = Y(0.33), pegZ = Z(0.55);
   for (const sd of [-1, 1]) {
     const peg = new THREE.BoxGeometry(0.1, 0.022, 0.05);
     peg.translate(sd * 0.2, pegY, pegZ);
@@ -526,7 +531,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   cal.translate(0.075, (isSM ? 0.26 : 0.22) * 0.75, -0.11);
   mesh(cal, Mats.metal(isSM ? '#c41a1a' : '#bfa03a', 0.4, 0.8), forkSlider);
   const frontWheel = buildWheel({
-    r: rF, rimInch: spec.rimFront, width: isSM ? 0.12 : 0.085, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
+    r: rF, rimInch: spec.rimFront, width: spec.tireWF, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
     disc: { r: isSM || cfg.brakes === 'oversize' ? 0.155 : 0.13, side: 1 }, spokes: 36,
   });
   forkSlider.add(frontWheel);
@@ -559,7 +564,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   calR.translate(-0.075, ax.y + 0.08, ax.z + 0.07);
   mesh(calR, Mats.metal('#bfa03a', 0.4, 0.8), swingarm);
   const rearWheel = buildWheel({
-    r: rR, rimInch: spec.rimRear, width: isSM ? 0.16 : 0.11, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
+    r: rR, rimInch: spec.rimRear, width: spec.tireWR, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
     disc: { r: 0.11, side: -1 }, sprocket: { r: 0.11, side: 1 }, spokes: 36,
   });
   rearWheel.position.copy(ax);
@@ -658,7 +663,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   mesh(sidePanel(rearProf, 0.3, 0, 0.09, 4, true), [decalMat, paint], body);
   // plancher
   const floor = roundedBox(0.34, 0.06, 0.5, 0.025);
-  floor.translate(0, 0.35, 0.8);
+  floor.translate(0, spec.groundClearance + 0.23, 0.8);
   mesh(floor, dark, body);
   // tablier / bouclier avant
   const shieldProf: [number, number][] = [P(0.98, 0.33), P(1.08, 0.36), P(1.18, 0.6), P(1.2, 0.84 + tall), P(1.13, 1.0 + tall), P(1.02, 1.0 + tall), P(1.0, 0.7), P(0.96, 0.45)];
@@ -694,7 +699,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   hl.userData.keep = true;
   body.add(hl);
   const headlight = new THREE.Object3D();
-  headlight.position.set(0, 0.88, 1.24);
+  headlight.position.set(0, 0.88, 1.24 * (L / 1.3));
   root.add(headlight);
   // selle
   const seatTex = seatTexture(cfg.seatColor, cfg.seat);
@@ -762,14 +767,17 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   for (const sd of [-1, 1]) {
     mesh(cylBetween([sd * 0.07, colH * 0.62, -0.02], [sd * 0.07, 0.02, -0.02], 0.02, 0.019, 10), Mats.metal('#2b2c30', 0.3, 0.9), forkSlider);
   }
-  const frontWheel = buildWheel({ r: rF, rimInch: spec.rimFront, width: 0.12, tire: cfg.tire, rimStyle: 'cast', rimColor: cfg.rimColor, disc: { r: 0.11, side: 1 }, spokes: 0 });
+  const frontWheel = buildWheel({ r: rF, rimInch: spec.rimFront, width: spec.tireWF, tire: cfg.tire, rimStyle: 'cast', rimColor: cfg.rimColor, disc: { r: 0.11, side: 1 }, spokes: 0 });
   forkSlider.add(frontWheel);
   const cal = roundedBox(0.03, 0.07, 0.05, 0.01);
   cal.translate(0.07, 0.07, -0.09);
   mesh(cal, Mats.metal('#c41a1a', 0.4, 0.8), forkSlider);
 
   // --- bloc moteur oscillant (fait office de bras oscillant)
-  const pivotZ = 0.48, pivotY = 0.34;
+  // la carrosserie est dessinée pour 1,30 m d'empattement : on l'étire à l'empattement réel
+  const sz = L / 1.3;
+  body.scale.z = sz;
+  const pivotZ = 0.48 * sz, pivotY = 0.34;
   const swingarm = new THREE.Object3D();
   swingarm.position.set(0, pivotY, pivotZ);
   root.add(swingarm);
@@ -789,7 +797,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const silStart = new THREE.Vector3(-0.17, ax.y + 0.06, ax.z + 0.14);
   const silEnd = new THREE.Vector3(-0.19, ax.y + 0.2, ax.z - 0.18);
   mesh(cylBetween([silStart.x, silStart.y, silStart.z], [silEnd.x, silEnd.y, silEnd.z], kitted ? 0.042 : 0.05, kitted ? 0.045 : 0.05, 14), kitted ? exMat : Mats.metal('#3c3d40', 0.5, 0.6), swingarm);
-  const rearWheel = buildWheel({ r: rR, rimInch: spec.rimRear, width: 0.13, tire: cfg.tire, rimStyle: 'cast', rimColor: cfg.rimColor, spokes: 0 });
+  const rearWheel = buildWheel({ r: rR, rimInch: spec.rimRear, width: spec.tireWR, tire: cfg.tire, rimStyle: 'cast', rimColor: cfg.rimColor, spokes: 0 });
   rearWheel.position.copy(ax);
   swingarm.add(rearWheel);
   // amortisseur
@@ -811,9 +819,9 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const exhaustTip = silEnd.clone().add(swingarm.position);
   const vis: BikeVisual = {
     root, steer, forkSlider, frontWheel, rearWheel, swingarm, gripL, gripR,
-    seat: new THREE.Vector3(0, seatTop - 0.01, 0.05),
-    pegL: new THREE.Vector3(0.12, 0.38, 0.72),
-    pegR: new THREE.Vector3(-0.12, 0.38, 0.72),
+    seat: new THREE.Vector3(0, seatTop - 0.01, 0.05 * sz),
+    pegL: new THREE.Vector3(0.12, spec.groundClearance + 0.26, 0.72 * sz),
+    pegR: new THREE.Vector3(-0.12, spec.groundClearance + 0.26, 0.72 * sz),
     headlight, headlightMat, taillightMat, exhaustTip, isScooter: true,
     update(steerA, compF, compR, rotF, rotR) {
       steer.rotation.y = -steerA;

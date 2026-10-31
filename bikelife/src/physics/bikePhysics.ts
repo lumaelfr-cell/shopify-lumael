@@ -198,17 +198,20 @@ export class BikePhysics {
     const toLocal = (zm: number, ym: number) => ({ a: zm - b, b: ym - this.comY });
     const pts: ScrapePoint[] = [];
     if (s.cls === 'scooter') {
-      pts.push({ ...toLocal(-0.46, 0.78), crash: false });
-      pts.push({ ...toLocal(L * 0.55, 0.16), crash: false });
-      pts.push({ ...toLocal(L * 0.38, 1.62), crash: true });
-      pts.push({ ...toLocal(L - 0.32, 1.05), crash: true });
+      // points calés sur les cotes réelles (selle, garde au sol, empattement)
+      const sz = L / 1.3, seat = s.seatHeight + t.rideHeight, gc = s.groundClearance + t.rideHeight;
+      pts.push({ ...toLocal(-0.46 * sz, seat - 0.03), crash: false });
+      pts.push({ ...toLocal(L * 0.55, gc), crash: false });
+      pts.push({ ...toLocal(L * 0.38, seat + 0.82), crash: true });
+      pts.push({ ...toLocal(L - 0.32 * sz, seat + 0.25), crash: true });
     } else {
       const tidy = s.cls === 'stunt' || t.hasStuntBar;
-      pts.push({ ...toLocal(tidy ? -0.34 : -0.56, tidy ? 0.86 : 0.93), crash: false });
-      if (t.hasStuntBar) pts.push({ ...toLocal(-0.36, 0.78), crash: false, bar: true });
-      pts.push({ ...toLocal(L * 0.6, 0.27), crash: false });
-      pts.push({ ...toLocal(L * 0.36, 1.78), crash: true });
-      pts.push({ ...toLocal(L - 0.44, 1.14), crash: true });
+      const sx = L / 1.48, seat = s.seatHeight + t.rideHeight, gc = s.groundClearance + t.rideHeight;
+      pts.push({ ...toLocal(tidy ? -0.34 * sx : -0.56 * sx, tidy ? seat - 0.1 : seat - 0.035), crash: false });
+      if (t.hasStuntBar) pts.push({ ...toLocal(-0.36 * sx, seat - 0.18), crash: false, bar: true });
+      pts.push({ ...toLocal(L * 0.6, gc), crash: false });
+      pts.push({ ...toLocal(L * 0.36, seat + 0.82), crash: true });
+      pts.push({ ...toLocal(L - 0.44 * sx, seat + 0.2), crash: true });
     }
     this.scrapePts = pts;
   }
@@ -417,8 +420,9 @@ export class BikePhysics {
         if (vn < 0) {
           // le pilote et le pneu absorbent une partie du choc : inertie effective accrue
           const rn = Ca * nb - Cb * na;
-          const Ieff = s.pitchInertia * 3;
-          const J = -vn / (1 / m + (rn * rn) / Ieff);
+          const Ieff = s.pitchInertia;
+          // impulsion d'un corps rigide, plafonnée (pneu et pilote absorbent le reste)
+          const J = Math.min(-vn / (1 / m + (rn * rn) / Ieff), m * 2.6);
           vF += (J * na) / m;
           vU += (J * nb) / m;
           w += clamp((J * rn) / Ieff, -2.2, 2.2);

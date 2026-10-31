@@ -102,7 +102,7 @@ Gâchette droite = gaz · gauche = frein avant · **B/○** = frein arrière · 
 
 ## Contenu
 
-### Véhicules (38)
+### Véhicules (41)
 
 - **Motocross / enduro** : 2T 50/85/125/250 et 4T 250F/450F (Aozora AZ 125/250/250F/450F, Midori KR 85/125/250F,
   Hinode HR 125/250/HRF 450R, Kronos 125 XS/250 XS-F/450 XS-F, Nordvik NC 125/NF 450, Fiammo FX 50/125/250/FXF 250,
@@ -114,6 +114,73 @@ Gâchette droite = gaz · gauche = frein avant · **B/○** = frein arrière · 
 
 Chaque véhicule a sa courbe de couple, sa boîte (ou son variateur CVT), sa masse, son centre de gravité,
 ses suspensions, ses freins, ses pneus et son **son moteur synthétisé** (2T MX, 2T 50, 4T MX, gros mono, scooter 2T/4T).
+
+### Dimensions réelles
+
+Les noms et logos du jeu sont fictifs, mais **chaque véhicule reprend les cotes publiées du modèle réel dont il
+s'inspire** (`src/data/realSpecs.ts`). Ces cotes pilotent directement le jeu :
+
+- **empattement**, **hauteur de selle** et **garde au sol** → géométrie du modèle 3D, position du pilote,
+  points de frottement (garde-boue, sabot, barre de 12h) et centre de gravité ;
+- **dimensions de pneus** (ex. `80/100-21`) → rayon réel des roues (jante + flanc) et largeur des pneus ;
+- **poids** (sec, sans carburant ou en ordre de marche) + **réservoir** (essence à 0,74 kg/L) → masse en jeu plein fait,
+  inertie en tangage recalculée ;
+- **débattements** et **angle de chasse** → suspensions et direction.
+
+La fiche **« Dimensions réelles »** du garage (Mes véhicules / Concession) affiche ces valeurs ; celles marquées
+**≈** sont estimées faute de donnée constructeur publiée. Les motos de stunt sont des préparations (roues 17",
+suspensions abaissées) : leurs cotes sont estimées à partir de la moto d'origine. Les modèles réels ne sont cités
+qu'à titre de référence technique ; le jeu n'est affilié à aucun constructeur. `npx tsx scripts/specs-table.ts`
+affiche les valeurs appliquées (rayons de roues, centre de gravité…).
+
+Empattement, selle et garde au sol en mm ; poids : o.m. = ordre de marche, s. carb. = sans carburant.
+
+| Véhicule (jeu) | Cotes reprises de | Empatt. | Selle | Garde sol | Poids | Pneus AV / AR | Estimé |
+|---|---|---|---|---|---|---|---|
+| Aozora AZ 125 | Yamaha YZ125 (2024) | 1445 | 980 | 366 | 95 kg (o.m.) | 80/100-21 / 100/90-19 | — |
+| Aozora AZ 250 | Yamaha YZ250 (2024) | 1486 | 975 | 361 | 103 kg (o.m.) | 80/100-21 / 110/90-19 | — |
+| Aozora AZ 250F | Yamaha YZ250F (2024) | 1475 | 970 | 351 | 106 kg (o.m.) | 80/100-21 / 100/90-19 | — |
+| Aozora AZ 450F | Yamaha YZ450F (2024) | 1480 | 965 | 351 | 109 kg (o.m.) | 80/100-21 / 120/80-19 | — |
+| Midori KR 85 | Kawasaki KX85 (2024) | 1265 | 830 | 290 | 74,6 kg (o.m.) | 70/100-17 / 90/100-14 | débattements, chasse |
+| Midori KR 125 | Kawasaki KX125 (2008) | 1460 | 945 | 375 | 87,5 kg (sec) | 80/100-21 / 100/90-19 | débattements, chasse |
+| Midori KR 250F | Kawasaki KX250 (2024) | 1486 | 960 | 345 | 107,8 kg (o.m.) | 80/100-21 / 100/90-19 | — |
+| Hinode HR 125 | Honda CR125R (2007) | 1471 | 947 | 351 | 89,4 kg (sec) | 80/100-21 / 100/90-19 | débattements, chasse |
+| Hinode HR 250 | Honda CR250R (2007) | 1481 | 942 | 338 | 96,6 kg (sec) | 80/100-21 / 110/90-19 | débattements, chasse |
+| Hinode HRF 450R | Honda CRF450R (2024) | 1481 | 965 | 335 | 113 kg (o.m.) | 80/100-21 / 120/80-19 | — |
+| Kronos 125 XS | KTM 125 SX (2024) | 1485 | 958 | 359 | 92,4 kg (s. carb.) | 80/100-21 / 100/90-19 | — |
+| Kronos 250 XS-F | KTM 250 SX-F (2024) | 1485 | 958 | 343 | 106,6 kg (o.m.) | 80/100-21 / 110/90-19 | — |
+| Kronos 450 XS-F | KTM 450 SX-F (2024) | 1491 | 958 | 343 | 108 kg (o.m.) | 80/100-21 / 120/80-19 | — |
+| Nordvik NC 125 | Husqvarna TC 125 (2024) | 1485 | 939 | 350 | 92,5 kg (s. carb.) | 80/100-21 / 100/90-19 | — |
+| Nordvik NF 450 | Husqvarna FC 450 (2024) | 1485 | 939 | 336 | 102,8 kg (s. carb.) | 80/100-21 / 120/80-19 | — |
+| Fiammo FX 50 | Fantic XE 50 Performance | 1435 | 870 | 300 | 94 kg (o.m.) | 80/90-21 / 110/80-18 | garde au sol, débattement arrière, chasse |
+| Fiammo FX 125 | Fantic XX 125 (2024) | 1440 | 975 | 360 | 90 kg (sec) | 80/100-21 / 100/90-19 | garde au sol, réservoir, débattements, chasse |
+| Fiammo FX 250 | Fantic XX 250 (2024) | 1485 | 970 | 360 | 98 kg (o.m.) | 80/100-21 / 110/90-19 | garde au sol, débattements, chasse |
+| Fiammo FXF 250 | Fantic XXF 250 (2024) | 1475 | 970 | 350 | 105 kg (sec) | 80/100-21 / 100/90-19 | garde au sol, débattements, chasse |
+| Kiiro KZ 250 | Suzuki RM-Z250 (2024) | 1485 | 955 | 330 | 106 kg (o.m.) | 80/100-21 / 100/90-19 | débattements |
+| Kiiro KZ 450 | Suzuki RM-Z450 (2024) | 1480 | 960 | 330 | 112 kg (o.m.) | 80/100-21 / 120/80-19 | débattements |
+| Brava BC 125 | GasGas MC 125 (2024) | 1485 | 950 | 350 | 87,5 kg (sec) | 80/100-21 / 100/90-19 | garde au sol |
+| Brava BC 450F | GasGas MC 450F (2024) | 1485 | 956 | 354 | 103,3 kg (sec) | 80/100-21 / 120/80-19 | — |
+| Brava BX 50 | Derbi Senda DRD X-Treme 50 R | 1413 | 890 | 300 | 105 kg (o.m.) | 90/90-21 / 120/80-18 | hauteur de selle, garde au sol, poids, pneus, débattements, chasse |
+| Kronos 690 SMR | KTM 690 SMC R (2023) | 1470 | 890 | 237 | 147 kg (sec) | 120/70-17 / 160/60-17 | — |
+| Nordvik 701 SM | Husqvarna 701 Supermoto (2024) | 1470 | 890 | 238 | 147 kg (sec) | 120/70-17 / 160/60-17 | — |
+| Aozora WS 450 SM | Yamaha WR450F (2024) | 1470 | 925 | 300 | 117 kg (o.m.) | 120/70-17 / 150/60-17 | hauteur de selle et garde au sol après passage en 17" |
+| Hinode HRF 450 SM | Honda CRF450R (2024) | 1481 | 935 | 300 | 113 kg (o.m.) | 120/70-17 / 150/60-17 | hauteur de selle et garde au sol après passage en 17" |
+| Fiammo XSM 125 | Fantic XMF 125 Competition | 1435 | 880 | 260 | 112 kg (sec) | 100/80-17 / 130/70-17 | garde au sol, réservoir, débattements, chasse |
+| Brava SMX 50 | Derbi Senda DRD X-Treme 50 SM (2019) | 1413 | 865 | 240 | 105 kg (o.m.) | 100/80-17 / 130/70-17 | garde au sol, poids, pneus, débattements, chasse |
+| Custom Wheelie 125 2T | Yamaha YZ125 (2024) | 1445 | 945 | 300 | 100 kg (o.m.) | 120/70-17 / 150/60-17 | cotes après préparation |
+| Custom Stunt 450R | Honda CRF450R (2024) | 1481 | 920 | 290 | 120 kg (o.m.) | 120/70-17 / 160/60-17 | cotes après préparation |
+| Custom Stunt 690 | KTM 690 SMC R (2023) | 1470 | 870 | 225 | 155 kg (sec) | 120/70-17 / 160/60-17 | cotes après préparation |
+| Sina Orbiter 50 | SYM Orbit II 50 | 1310 | 805 | 120 | 99 kg (sec) | 120/70-12 / 130/70-12 | garde au sol, débattements, chasse |
+| Aozora Aerix 50 | Yamaha Aerox 50 2T (2013-2017) | 1300 | 804 | 120 | 97 kg (sec) | 130/60-13 / 140/60-13 | empattement, garde au sol, débattements, chasse |
+| Velox Nitrox 50 | MBK Nitro 50 2T (plateforme Aerox) | 1300 | 804 | 120 | 97 kg (sec) | 130/60-13 / 140/60-13 | empattement, garde au sol, débattements, chasse |
+| Pegaso Zap 50 | Piaggio Zip 50 | 1230 | 770 | 110 | 85 kg (sec) | 100/80-10 / 120/70-10 | garde au sol, débattements, chasse |
+| Lionne Speedstrike 50 | Peugeot Speedfight 4 50 2T | 1306 | 800 | 125 | 100 kg (sec) | 130/60-13 / 130/60-13 | garde au sol, réservoir, débattements, chasse |
+| Gilardi Sprinter 50 | Gilera Runner 50 SP | 1300 | 830 | 125 | 105 kg (o.m.) | 120/70-12 / 130/70-12 | empattement, garde au sol, pneus, débattements, chasse |
+| Gilardi Sprinter 125 | Gilera Runner 125 ST | 1340 | 815 | 130 | 137 kg (o.m.) | 120/70-14 / 140/60-13 | garde au sol, réservoir, débattements, chasse |
+| Aozora Aerix 70 Kit | Yamaha Aerox 50 2T (kit 70 cm³) | 1300 | 804 | 120 | 99 kg (sec) | 130/60-13 / 140/60-13 | empattement, garde au sol, débattements, chasse |
+
+Sources principales : fiches constructeur (Yamaha, Kawasaki, Honda, KTM, Fantic), 1000ps.com, motorcycle.com,
+dirtrider.com, totalmotorcycle.com, 50factory.com, largus.fr, motorradundreisen.de, ultimatespecs.com.
 
 ### Physique de conduite
 
@@ -230,6 +297,8 @@ bikelife/
 **Terminé et testé** : tout ce qui est décrit ci-dessus fonctionne dans le navigateur (testé dans Chromium avec rendu
 logiciel, scénarios automatisés de conduite/wheeling, garage, nuit, pluie, spots, mise en page mobile) ;
 22 tests automatisés (physique, collisions, progression/sauvegarde, synthèse audio, serveur multijoueur).
+Les 41 véhicules, avec leurs cotes réelles, passent les scénarios automatisés (wheeling tenu, rampe, trottoir de 15 cm)
+sans chute.
 
 **Limites connues / à développer** :
 - Modèles 3D **procéduraux** (pas de modèles photoréalistes sous licence) : bonne silhouette et détails mécaniques
@@ -243,3 +312,5 @@ logiciel, scénarios automatisés de conduite/wheeling, garage, nuit, pluie, spo
 - Multijoueur : nécessite de lancer `server/server.mjs` (aucun serveur public fourni) ; pas de collisions entre joueurs
   ni de modes compétitifs en ligne pour l'instant.
 - Musique et sons entièrement synthétisés (pas d'enregistrements réels).
+- Dimensions réelles : certaines cotes (garde au sol de scooters, débattements, chasse, motos de stunt préparées)
+  ne sont pas publiées et sont estimées (marquées ≈ dans le jeu). La forme des carénages reste générique.

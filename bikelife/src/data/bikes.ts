@@ -1,6 +1,10 @@
 // Catalogue des véhicules. Toutes les marques et tous les modèles sont FICTIFS :
 // ils s'inspirent des catégories demandées (MX 2T/4T, supermotards, scooters…)
-// sans utiliser de marque déposée ni de logo officiel.
+// sans utiliser de marque déposée ni de logo officiel. Les cotes (empattement,
+// selle, garde au sol, poids, pneus, débattements, chasse) sont celles des vraies
+// machines de référence : voir realSpecs.ts.
+
+import { REAL_SPECS, RealSpec, parseTire, runningMass } from './realSpecs';
 
 export type BikeClass = 'mx' | 'mini' | 'sm' | 'stunt' | 'scooter';
 export type TireType = 'knobby' | 'enduro' | 'street' | 'slick';
@@ -57,6 +61,13 @@ export interface BikeSpec {
   cda: number;
   tire: TireType;
   seatHeight: number;
+  /** garde au sol (m) */
+  groundClearance: number;
+  /** largeur des pneus (m) */
+  tireWF: number;
+  tireWR: number;
+  /** fiche du modèle réel de référence */
+  real?: RealSpec;
   colors: BikeColors;
   /** variante esthétique (forme des plastiques) */
   shape: number;
@@ -281,6 +292,43 @@ export const BIKES: BikeSpec[] = [
   scooter({ id: 'gil-sprinter125', brand: 'Gilardi', model: 'Sprinter 125', cc: 125, stroke: 4, price: 4800, level: 3, scooterStyle: 'aggressive', desc: '125 4T : 100 km/h et du couple pour lever.' }),
   scooter({ id: 'aoz-aerix70', brand: 'Aozora', model: 'Aerix 70 Kit', cc: 70, stroke: 2, price: 5600, level: 2, scooterStyle: 'sport', desc: 'Kit 70 cm³, pot de détente, variateur : la préparation ultime.', colors: { primary: '#0d0d0d', secondary: '#1f4fd1', accent: '#39ff6a', frame: '#0d0d0d', rim: '#39ff6a', seat: '#0d0d0d' } }),
 ];
+
+/**
+ * Applique les cotes réelles : empattement, rayons de roue calculés depuis la
+ * taille des pneus, jantes, selle, garde au sol, masse, débattements, chasse.
+ * Le centre de gravité et l'inertie suivent les nouvelles proportions.
+ */
+function applyReal(b: BikeSpec): void {
+  const r = REAL_SPECS[b.id];
+  if (!r) return;
+  const tf = parseTire(r.tireF), tr = parseTire(r.tireR);
+  const oldWb = b.wheelbase, oldSeat = b.seatHeight, oldMass = b.mass;
+  b.real = r;
+  b.wheelbase = r.wheelbase / 1000;
+  b.seatHeight = r.seat / 1000;
+  b.groundClearance = r.ground / 1000;
+  b.rFront = tf.radius;
+  b.rRear = tr.radius;
+  b.rimFront = tf.rim;
+  b.rimRear = tr.rim;
+  b.tireWF = tf.width;
+  b.tireWR = tr.width;
+  b.mass = Math.round(runningMass(r) * 10) / 10;
+  if (r.travelF) b.travelF = r.travelF / 1000;
+  if (r.travelR) b.travelR = r.travelR / 1000;
+  if (r.rake) b.rake = r.rake;
+  // CG : même répartition avant/arrière, hauteur proportionnelle à la selle
+  b.comX = b.comX * (b.wheelbase / oldWb);
+  b.comY = b.comY * (0.55 + 0.45 * (b.seatHeight / oldSeat));
+  b.pitchInertia = b.pitchInertia * ((b.mass + 75) / (oldMass + 75)) * (b.wheelbase / oldWb) ** 2;
+}
+
+for (const b of BIKES) {
+  b.groundClearance ??= b.cls === 'scooter' ? 0.12 : b.cls === 'sm' || b.cls === 'stunt' ? 0.26 : 0.34;
+  b.tireWF ??= b.cls === 'scooter' ? 0.12 : b.cls === 'sm' || b.cls === 'stunt' ? 0.12 : 0.08;
+  b.tireWR ??= b.cls === 'scooter' ? 0.13 : b.cls === 'sm' || b.cls === 'stunt' ? 0.16 : 0.11;
+  applyReal(b);
+}
 
 export const BIKE_BY_ID: Record<string, BikeSpec> = Object.fromEntries(BIKES.map((b) => [b.id, b]));
 

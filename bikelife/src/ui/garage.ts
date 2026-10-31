@@ -342,6 +342,41 @@ export class GarageView {
     );
   }
 
+  /** Fiche des cotes réelles reprises par le modèle (empattement, selle, pneus…). */
+  private specSheet(spec: BikeSpec): HTMLElement | null {
+    const r = spec.real;
+    if (!r) return null;
+    const est = new Set(r.estimated ?? []);
+    const isEst = (...k: string[]) => k.some((x) => est.has(x));
+    const n = (v: number) => v.toLocaleString('fr-FR');
+    const rows: [string, string, boolean][] = [
+      ['Empattement', `${n(r.wheelbase)} mm`, isEst('empattement')],
+      ['Hauteur de selle', `${n(r.seat)} mm`, isEst('hauteur de selle')],
+      ['Garde au sol', `${n(r.ground)} mm`, isEst('garde au sol')],
+      [`Poids (${r.basis})`, `${n(r.weight)} kg`, isEst('poids')],
+      ['Réservoir', `${n(r.fuel)} L`, isEst('réservoir')],
+      ['Pneu avant', r.tireF, isEst('pneus')],
+      ['Pneu arrière', r.tireR, isEst('pneus')],
+    ];
+    if (r.travelF) rows.push(['Débattement AV', `${n(r.travelF)} mm`, isEst('débattements')]);
+    if (r.travelR) rows.push(['Débattement AR', `${n(r.travelR)} mm`, isEst('débattements', 'débattement arrière')]);
+    if (r.rake) rows.push(['Angle de chasse', `${n(r.rake)}°`, isEst('chasse')]);
+    if (r.length) rows.push(['Longueur', `${n(r.length)} mm`, false]);
+    rows.push(['Masse en jeu (plein fait)', `${spec.mass.toFixed(0)} kg`, isEst('poids')]);
+    const known = new Set(['empattement', 'hauteur de selle', 'garde au sol', 'poids', 'réservoir', 'pneus', 'débattements', 'débattement arrière', 'chasse']);
+    const other = [...est].filter((x) => !known.has(x));
+    const kv = h('div', { class: 'kv spec-kv' });
+    for (const [k, v, e] of rows) kv.append(h('span', { class: 'muted' }, k), h('b', { class: e ? 'est' : '' }, e ? `≈ ${v}` : v));
+    return h('div', { class: 'spec-sheet' },
+      h('div', { class: 'slot-title' }, 'Dimensions réelles'),
+      h('div', { class: 'spec-ref' }, `Cotes reprises de : ${r.ref}`),
+      r.note ? h('div', { class: 'muted', style: 'font-size:12px;margin:2px 0 4px' }, r.note) : null,
+      kv,
+      h('div', { class: 'muted', style: 'font-size:11px;margin-top:4px' },
+        `${est.size ? '≈ = valeur estimée (donnée constructeur non publiée)' : 'Toutes les valeurs sont des données constructeur publiées'}${other.length ? ` · estimé : ${other.join(', ')}` : ''}. Modèle cité comme référence technique uniquement ; jeu non affilié, aucun logo officiel.`),
+    );
+  }
+
   private renderMine(body: HTMLElement): void {
     const p = this.prog.p;
     body.append(h('div', { class: 'muted', style: 'margin-bottom:6px' }, `Places : ${Object.keys(p.bikes).length}/${garageSlots(p.level)} (le garage s’agrandit tous les 2 niveaux)`));
@@ -353,6 +388,8 @@ export class GarageView {
     body.append(grid);
     if (this.owned()) {
       body.append(h('div', { class: 'slot-title' }, 'Caractéristiques'), this.statBlock(this.spec, this.cfg), h('div', { class: 'muted', style: 'font-size:13px;margin:6px 0' }, this.spec.desc));
+      const sheet = this.specSheet(this.spec);
+      if (sheet) body.append(sheet);
       if (Object.keys(p.bikes).length > 1) {
         const value = Math.round((this.spec.price || 1500) * 0.6);
         body.append(h('button', { class: 'btn small danger', onclick: () => {
@@ -385,6 +422,8 @@ export class GarageView {
       body.append(grid);
     }
     body.append(h('div', { class: 'slot-title' }, 'Fiche'), this.statBlock(this.spec, this.cfg), h('div', { class: 'muted', style: 'font-size:13px' }, this.spec.desc));
+    const sheet = this.specSheet(this.spec);
+    if (sheet) body.append(sheet);
   }
 
   private swatches(get: () => string, set: (c: string) => void): HTMLElement {
