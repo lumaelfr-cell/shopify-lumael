@@ -81,7 +81,7 @@ export const PART_SLOTS = {
   tire: [
     { value: 'knobby', name: 'Crampons MX', price: 0, desc: 'Grip max sur terre, glisse sur bitume.' },
     { value: 'enduro', name: 'Mixte enduro', price: 250, desc: 'Compromis terre / route.' },
-    { value: 'street', name: 'Route', price: 300, desc: 'Bon grip bitume, médiocre sur terre.' },
+    { value: 'street', name: 'Route / supermotard', price: 300, desc: 'Bon grip bitume, médiocre sur terre.' },
     { value: 'slick', name: 'Slicks stunt', price: 600, desc: 'Accroche maximale sur béton sec.' },
   ] as PartOption<TireType>[],
   bars: [

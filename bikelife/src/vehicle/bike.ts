@@ -10,6 +10,7 @@ import { BikePhysics, BikeInput, AssistLevel } from '../physics/bikePhysics';
 import type { CollisionWorld, GroundHit } from '../physics/collision';
 import { buildBikeVisual, BikeVisual } from './bikeModel';
 import { Rider, TrickName, BodyTargets } from './rider';
+import { Ragdoll } from './ragdoll';
 import { clamp, damp } from '../core/math';
 import { isLoose } from '../physics/collision';
 
@@ -58,7 +59,7 @@ export class PlayerBike {
   private gripR = new THREE.Vector3();
   private inv = new THREE.Matrix4();
   // chute
-  wreck: { t: number; bikeV: THREE.Vector3; bikeW: THREE.Vector3; riderV: THREE.Vector3; riderW: THREE.Vector3; riderObj: THREE.Group } | null = null;
+  wreck: { t: number; bikeV: THREE.Vector3; bikeW: THREE.Vector3; riderV: THREE.Vector3; riderW: THREE.Vector3; riderObj: THREE.Group; doll: Ragdoll | null } | null = null;
   headWorld = new THREE.Vector3();
   private gh: GroundHit = { h: 0, surf: 'asphalt', id: -1 };
   /** moto garée (pilote descendu) */
@@ -281,16 +282,19 @@ export class PlayerBike {
   private startWreck(): void {
     const p = this.phys;
     const riderObj = new THREE.Group();
-    // détache le pilote en conservant sa transformation monde
+    // articulations en coordonnées monde → poupée de chiffon
     this.rider.root.updateMatrixWorld(true);
     const m = this.rider.root.matrixWorld.clone();
+    const joints = this.rider.jointsLocal();
+    for (const k in joints) joints[k].applyMatrix4(m);
     this.visual.root.remove(this.rider.root);
     riderObj.add(this.rider.root);
-    m.decompose(riderObj.position, riderObj.quaternion, riderObj.scale);
     this.rider.root.position.set(0, 0, 0);
     this.rider.root.quaternion.identity();
     this.scene.add(riderObj);
     const v = new THREE.Vector3(p.vx, p.vy, p.vz);
+    const spin = new THREE.Vector3((Math.random() - 0.5) * 4 + Math.cos(p.yaw) * p.pitch * 3, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 4 - Math.sin(p.yaw) * p.pitch * 3);
+    const doll = new Ragdoll(joints, v.clone().multiplyScalar(1.02).add(new THREE.Vector3(0, 1.6 + p.speed * 0.05, 0)), spin, this.world);
     this.wreck = {
       t: 0,
       bikeV: v.clone().multiplyScalar(0.9),
@@ -298,7 +302,9 @@ export class PlayerBike {
       riderV: v.clone().multiplyScalar(1.05).add(new THREE.Vector3(0, 2.2 + p.speed * 0.08, 0)),
       riderW: new THREE.Vector3((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 6),
       riderObj,
+      doll,
     };
+    this.rider.poseJoints(doll.p);
   }
 
   private tumble(obj: THREE.Object3D, v: THREE.Vector3, w: THREE.Vector3, dt: number, radius: number): number {
@@ -338,7 +344,10 @@ export class PlayerBike {
     const w = this.wreck!;
     w.t += dt;
     this.wreckScrape = this.tumble(this.rig.outer, w.bikeV, w.bikeW, dt, 0.35);
-    this.tumble(w.riderObj, w.riderV, w.riderW, dt, 0.25);
+    if (w.doll) {
+      w.doll.step(dt);
+      this.rider.poseJoints(w.doll.p);
+    } else this.tumble(w.riderObj, w.riderV, w.riderW, dt, 0.25);
     this.rig.outer.updateMatrixWorld(true);
   }
 
@@ -347,6 +356,7 @@ export class PlayerBike {
   }
 
   get wreckPos(): THREE.Vector3 {
+    if (this.wreck?.doll) return this.wreck.doll.p.pelvis;
     return this.wreck ? this.wreck.riderObj.position : this.rig.outer.position;
   }
 

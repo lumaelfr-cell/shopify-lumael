@@ -82,12 +82,19 @@ sans en-tête HTML, prête à être hébergée comme page web autonome.
 | Pause | **Échap** ou **P** |
 | Klaxon | **H** |
 | Masquer l'aide | **F1** |
+| **Interagir** (porte, comptoir, pompe, objet…) / **descendre** à l'arrêt / **monter** près de la moto | **F** (appui long sur F = descendre quand une autre action est proposée) |
+| Défis du lieu (marqueur rose) | **Entrée** |
+
+**À pied** : **W A S D** ou flèches = marcher (relatif à la caméra), **Maj** = courir (endurance), **Espace** = sauter,
+**F** = interagir, **C** = vue subjective / troisième personne, clic-glisser = tourner la caméra.
 
 ### Manette (mapping standard Xbox/PlayStation)
 
 Gâchette droite = gaz · gauche = frein avant · **B/○** = frein arrière · stick gauche = direction + appui avant/arrière ·
 **A/✕** = embrayage/wheeling · **X/□** = saut · **Y/△** = figure · **RB/LB** = rapports · stick droit = regard ·
-**Select** = caméra · **Start** = pause · croix bas = réapparaître · croix haut = klaxon.
+**Select** = caméra · **Start** = pause · croix bas = réapparaître · croix haut = klaxon · **Y/△** à l'arrêt = interagir /
+descendre / monter (maintenir = descendre) · croix gauche = défis du lieu. À pied : stick gauche = marcher, **B/○** ou
+clic du stick = courir, **A/✕** = sauter, stick droit = caméra.
 
 ### Écran tactile
 
@@ -96,13 +103,15 @@ Gâchette droite = gaz · gauche = frein avant · **B/○** = frein arrière · 
 - **WHEELIE** : sur une moto à vitesses, maintenir = embrayage tiré (le moteur monte en régime en mode Arcade),
   relâcher = coup d'embrayage ; sur un scooter = tirer sur le guidon. On peut glisser le pouce de WHEELIE vers GAZ.
 - **SAUT**, **FIGURE** (s'illumine en l'air), caméra ◉, pause II, réapparaître ↺, rapports +/− en boîte manuelle.
+- **ACTION** (apparaît quand une interaction est possible) ; l'invite à l'écran est aussi cliquable (OK / Descendre / Voir les défis).
+- À pied : joystick = marcher (poussé à fond = courir), **SAUT**, **ACTION** ; glisser le doigt ailleurs = tourner la caméra.
 - Paramètres → *Commandes tactiles* : taille, opacité, mode gaucher, **déplacement libre de chaque bouton**.
 
 ---
 
 ## Contenu
 
-### Véhicules (41)
+### Véhicules (49)
 
 - **Motocross / enduro** : 2T 50/85/125/250 et 4T 250F/450F (Aozora AZ 125/250/250F/450F, Midori KR 85/125/250F,
   Hinode HR 125/250/HRF 450R, Kronos 125 XS/250 XS-F/450 XS-F, Nordvik NC 125/NF 450, Fiammo FX 50/125/250/FXF 250,
@@ -110,7 +119,18 @@ Gâchette droite = gaz · gauche = frein avant · **B/○** = frein arrière · 
 - **Supermotards** : Kronos 690 SMR, Nordvik 701 SM, Aozora WS 450 SM, Hinode HRF 450 SM, Fiammo XSM 125, Brava SMX 50.
 - **Stunt** : Custom Wheelie 125 2T, Stunt 450R, Stunt 690 (barre de 12h, crash cage, frein arrière au guidon).
 - **Scooters** : Sina Orbiter 50, Aozora Aerix 50 et Aerix 70 Kit, Velox Nitrox 50, Pegaso Zap 50, Lionne Speedstrike 50,
-  Gilardi Sprinter 50/125.
+  Gilardi Sprinter 50/125, **maxi-scooter Aozora TX 560**.
+- **Enduro / pit bike / 50 à boîte** : Cobalt SE 300 Factory, Vermeil RR 300 2T, Pitstar P125 (pit bike 14/12"), Rayo MRT 50.
+- **Routières** : Aozora RZ 600 (sportive 4 cylindres carénée), MZ-07 (roadster bicylindre 270°), MZ-125.
+
+**Identité visuelle par modèle** (`src/data/modelStyles.ts`) : chaque moto reprend les traits reconnaissables du modèle
+réel de référence, sans logo : cadre aluminium double poutre (japonaises) ou acier peint (orange façon KTM, bleu façon
+Husqvarna, rouge façon GasGas) avec cadre arrière composite, échappement à culasse inversée qui sort vers l'arrière
+(YZ250F/YZ450F), **double silencieux selon l'année** (CRF450R 2017-2020, sélectionnable au garage), forme des écopes et
+de la plaque avant par famille, phare pointu (690 SMC R), rond (701 Supermoto) ou d'enduro, couleurs de garde-boue,
+de plaques et déco d'usine en aplats. Routières : carénage, bracelets, double disque, cadre périmétrique ; roadster :
+guidon large, écopes, phare compact. Sons distincts : 4 cylindres, bicylindre calé à 270° (allumages irréguliers),
+bicylindre 360°, gros mono, 2T, scooters.
 
 Chaque véhicule a sa courbe de couple, sa boîte (ou son variateur CVT), sa masse, son centre de gravité,
 ses suspensions, ses freins, ses pneus et son **son moteur synthétisé** (2T MX, 2T 50, 4T MX, gros mono, scooter 2T/4T).
@@ -161,6 +181,13 @@ Empattement, selle et garde au sol en mm ; poids : o.m. = ordre de marche, s. ca
 | Brava BC 125 | GasGas MC 125 (2024) | 1485 | 950 | 350 | 87,5 kg (sec) | 80/100-21 / 100/90-19 | garde au sol |
 | Brava BC 450F | GasGas MC 450F (2024) | 1485 | 956 | 354 | 103,3 kg (sec) | 80/100-21 / 120/80-19 | — |
 | Brava BX 50 | Derbi Senda DRD X-Treme 50 R | 1413 | 890 | 300 | 105 kg (o.m.) | 90/90-21 / 120/80-18 | hauteur de selle, garde au sol, poids, pneus, débattements, chasse |
+| Cobalt SE 300 Factory | Sherco 300 SE Factory (2024) | 1480 | 950 | 370 | 103 kg (sec) | 90/90-21 / 140/80-18 | garde au sol, poids, chasse |
+| Vermeil RR 300 2T | Beta RR 300 2T (2024) | 1482 | 930 | 320 | 103,5 kg (sec) | 90/90-21 / 140/80-18 | poids, débattements, chasse |
+| Pitstar P125 Pit | Pit bike 125 4T type YCF Pilot (roues 14/12") | 1150 | 790 | 300 | 68 kg (sec) | 60/100-14 / 80/100-12 | empattement, hauteur de selle, garde au sol, poids, réservoir, débattements, chasse |
+| Rayo MRT 50 | Rieju MRT 50 (2021) | 1365 | 890 | 300 | 89 kg (sec) | 90/90-21 / 120/80-18 | empattement, hauteur de selle, garde au sol, poids, réservoir, débattements, chasse |
+| Aozora RZ 600 | Yamaha YZF-R6 (2017-2020) | 1375 | 850 | 130 | 190 kg (o.m.) | 120/70-17 / 180/55-17 | — |
+| Aozora MZ-07 | Yamaha MT-07 (2021) | 1400 | 805 | 140 | 184 kg (o.m.) | 120/70-17 / 180/55-17 | — |
+| Aozora MZ-125 | Yamaha MT-125 (2020) | 1325 | 810 | 155 | 142 kg (o.m.) | 100/80-17 / 140/70-17 | garde au sol, débattement arrière, chasse |
 | Kronos 690 SMR | KTM 690 SMC R (2023) | 1470 | 890 | 237 | 147 kg (sec) | 120/70-17 / 160/60-17 | — |
 | Nordvik 701 SM | Husqvarna 701 Supermoto (2024) | 1470 | 890 | 238 | 147 kg (sec) | 120/70-17 / 160/60-17 | — |
 | Aozora WS 450 SM | Yamaha WR450F (2024) | 1470 | 925 | 300 | 117 kg (o.m.) | 120/70-17 / 150/60-17 | hauteur de selle et garde au sol après passage en 17" |
@@ -177,10 +204,44 @@ Empattement, selle et garde au sol en mm ; poids : o.m. = ordre de marche, s. ca
 | Lionne Speedstrike 50 | Peugeot Speedfight 4 50 2T | 1306 | 800 | 125 | 100 kg (sec) | 130/60-13 / 130/60-13 | garde au sol, réservoir, débattements, chasse |
 | Gilardi Sprinter 50 | Gilera Runner 50 SP | 1300 | 830 | 125 | 105 kg (o.m.) | 120/70-12 / 130/70-12 | empattement, garde au sol, pneus, débattements, chasse |
 | Gilardi Sprinter 125 | Gilera Runner 125 ST | 1340 | 815 | 130 | 137 kg (o.m.) | 120/70-14 / 140/60-13 | garde au sol, réservoir, débattements, chasse |
+| Aozora TX 560 | Yamaha TMAX 560 (2022) | 1575 | 800 | 125 | 220 kg (o.m.) | 120/70-15 / 160/60-15 | garde au sol, chasse |
 | Aozora Aerix 70 Kit | Yamaha Aerox 50 2T (kit 70 cm³) | 1300 | 804 | 120 | 99 kg (sec) | 130/60-13 / 140/60-13 | empattement, garde au sol, débattements, chasse |
 
 Sources principales : fiches constructeur (Yamaha, Kawasaki, Honda, KTM, Fantic), 1000ps.com, motorcycle.com,
 dirtrider.com, totalmotorcycle.com, 50factory.com, largus.fr, motorradundreisen.de, ultimatespecs.com.
+
+### À pied, bâtiments visitables et commerces
+
+- **Descendre / remonter** : à l'arrêt, F (ou Y, ou ACTION). Animation : pied au sol, jambe qui passe au-dessus de la
+  selle. La moto reste **garée là où on l'a laissée** sur sa béquille (latérale pour les motards et routières, trépied
+  de bord de piste pour les cross, béquille centrale pour les scooters). Moteur coupé quand on descend.
+- **Personnage à pied** : marche, course (endurance), saut, escaliers et étages, s'asseoir (canapé, banc, chaise),
+  dormir dans un lit (passe au matin, santé pleine), vue à la 3ᵉ personne (épaule) ou subjective, bruits de pas selon
+  le sol. Collisions séparées : les piétons passent les portes, les motos sont arrêtées par les portes piétonnes.
+- **9 bâtiments modélisés dans la ville, sans écran de chargement** (`src/world/buildings.ts`) :
+  - *Garage Bike Life* (rideau métallique ouvrable, établi → personnalisation, **tes autres motos exposées** et
+    prenables, salon, TV, frigo, interrupteur) ;
+  - *Atelier moto* (accueil, mécanicien, ponts, outillage) : **réparation** payante si la moto est dans l'atelier,
+    accès pièces / performances / peinture ;
+  - *Concession* : motos exposées sur podiums, **borne pour changer de rayon** (toutes les motos du jeu), fiche avec
+    cotes réelles, achat (livrée au garage), essai, configurateur ;
+  - *MX Gear* : mur de casques, portants, bottes, sacs → achat et port immédiat (visible sur le personnage), cabine ;
+  - *Station-service* : pompes (plein payé au litre), *Supérette 24/7* (rayons, frigos, caisse) ;
+  - *Burger Street* : comptoir, cuisine, salle, tables où s'asseoir ;
+  - *Résidence Les Tilleuls* : hall, **4 niveaux** reliés par l'escalier, 16 appartements meublés (portes, TV, lits,
+    canapés, frigos), **toit accessible** ;
+  - *Entrepôt abandonné* : on y entre à pied ou à moto, mezzanine, rampes de fortune, une trouvaille à fouiller ;
+  - *Le Local (Bike Life)* : la bande (PNJ qui parlent et donnent des conseils), sono (change la musique), tableau
+    des défis du quartier, motos des potes.
+- **Portes fonctionnelles** : battantes (ouvrir/fermer), coulissantes automatiques des commerces, rideaux métalliques ;
+  chaque porte fermée bloque le passage.
+- **PNJ** animés (respiration, regard qui suit le joueur, gestes) avec dialogues et services.
+- **Économie de la vie courante** : essence consommée selon la puissance délivrée (réservoir réel du modèle),
+  réserve et panne sèche, jerrican, dépanneuse ; **état mécanique** (chutes et réceptions violentes : puissance réduite,
+  guidon tordu, phare cassé) ; **santé du pilote** (chutes, voitures ; nourriture, repos, sommeil ; K.O. → soins payants) ;
+  **sac** d'articles utilisables partout (pause → Sac).
+- **Chute physique** : le pilote devient une poupée de chiffon articulée (15 points, os, frottement au sol), puis en
+  balade il se relève et **remonte sur la moto** avec animation.
 
 ### Physique de conduite
 
@@ -257,6 +318,12 @@ et **musique originale procédurale** (trap, boom bap, drill) désactivable.
 
 ## Architecture
 
+Nouveaux modules (jeu à pied et bâtiments) : `vehicle/walker.ts` (personnage à pied), `vehicle/poses.ts` (poses
+debout / marche / course / assis / allongé), `vehicle/ragdoll.ts` (chute), `world/interiorKit.ts` (murs à ouvertures,
+dalles et trémies, escaliers, portes animées, mobilier, PNJ, motos d'exposition), `world/buildings.ts` (les 9
+bâtiments), `world/worldGeom.ts`, `ui/panel.ts` (commerces, dialogues, sac), `data/items.ts`, `data/modelStyles.ts`
+(identité visuelle par modèle), `vehicle/roadModel.ts` (routières).
+
 ```
 bikelife/
   index.html, public/          page, manifeste PWA, icône
@@ -297,14 +364,16 @@ bikelife/
 **Terminé et testé** : tout ce qui est décrit ci-dessus fonctionne dans le navigateur (testé dans Chromium avec rendu
 logiciel, scénarios automatisés de conduite/wheeling, garage, nuit, pluie, spots, mise en page mobile) ;
 22 tests automatisés (physique, collisions, progression/sauvegarde, synthèse audio, serveur multijoueur).
-Les 41 véhicules, avec leurs cotes réelles, passent les scénarios automatisés (wheeling tenu, rampe, trottoir de 15 cm)
-sans chute.
+Les 49 véhicules, avec leurs cotes réelles, passent les scénarios automatisés (wheeling tenu, rampe, trottoir de 15 cm)
+sans chute. `scripts/walk.mjs` teste dans Chromium le jeu à pied de bout en bout : descendre, marcher, murs, rideau
+ouvert/fermé, établi → garage, concession (borne, fiche de vente), achat à la supérette, porte du fast-food, escalier
+jusqu'au 1er étage, appartement, toit, remonter, consommation d'essence, chute en poupée de chiffon et remontée.
 
 **Limites connues / à développer** :
 - Modèles 3D **procéduraux** (pas de modèles photoréalistes sous licence) : bonne silhouette et détails mécaniques
   (rayons, disques, fourche, chaîne, amortisseur, pots), mais pas le niveau d'un jeu AAA.
 - Physique latérale simplifiée (modèle cinématique d'inclinaison, pas de dynamique de contre-braquage complète).
-- Le pilote n'a pas de vrai ragdoll articulé : en chute, il tombe d'un bloc et roule.
+- Poupée de chiffon simplifiée (pas de limites angulaires fines des articulations, pas de collision entre les membres).
 - Piétons et voitures simplifiés (pas d'animations détaillées ; les voitures peuvent se chevaucher dans un carrefour).
 - Pas de virages relevés (berms) au MX Park, pas de relief naturel (ville plate hors rampes et parkings).
 - Les performances n'ont pas pu être mesurées sur de vrais téléphones dans cet environnement : 3 niveaux de qualité
@@ -312,5 +381,11 @@ sans chute.
 - Multijoueur : nécessite de lancer `server/server.mjs` (aucun serveur public fourni) ; pas de collisions entre joueurs
   ni de modes compétitifs en ligne pour l'instant.
 - Musique et sons entièrement synthétisés (pas d'enregistrements réels).
+- **Modèles 3D procéduraux, pas des reproductions exactes** : les motos reprennent les cotes réelles et les traits
+  distinctifs listés plus haut, mais pas la forme exacte de chaque pièce ni les logos / graphismes officiels (marques
+  déposées, non reproduites). Des modèles 3D sous licence du constructeur seraient nécessaires pour une copie fidèle.
+- Bâtiments visitables : 9 (les autres immeubles de la ville restent des façades). Pas de centre commercial visitable
+  ni de maisons ouvertes pour l'instant. Les PNJ des commerces ne se déplacent pas.
+- Interactions entre joueurs en ligne : uniquement les motos (pas de joueurs à pied visibles en multijoueur).
 - Dimensions réelles : certaines cotes (garde au sol de scooters, débattements, chasse, motos de stunt préparées)
   ne sont pas publiées et sont estimées (marquées ≈ dans le jeu). La forme des carénages reste générique.

@@ -179,6 +179,16 @@ const f0 = await ev(() => window.__game.prog.fuel());
 await hold('KeyW', () => window.__game.player.phys.kmh > 30, null, 60000);
 const f1 = await ev(() => window.__game.prog.fuel());
 check('consommation d’essence', f1 < f0, `${f0} → ${f1}`);
+// chute : poupée de chiffon puis remontée animée
+await ev(() => window.__game.player.phys.doCrash('Test de chute', 12));
+await frames(30);
+const doll = await ev(() => { const w = window.__game.player.wreck; return !!w?.doll && w.doll.p.pelvis.y > -1; });
+check('chute en poupée de chiffon', doll);
+await shot('15-ragdoll');
+await page.waitForFunction(() => window.__game.onFoot === true || window.__game.player.wreck === null, null, { timeout: 60000 }).catch(() => logs.push('pas de réapparition'));
+await page.waitForFunction(() => window.__game.onFoot === false && !window.__game.player.wreck, null, { timeout: 60000 }).catch(() => logs.push('pas remonté après la chute'));
+s = await W();
+check('remonté sur la moto après la chute', !s.onFoot, JSON.stringify(s));
 const stats = await ev(() => ({ calls: window.__game.renderer.info.render.calls, tris: window.__game.renderer.info.render.triangles, fps: window.__game.fps }));
 logs.push('rendu : ' + JSON.stringify(stats));
 console.log(logs.join('\n'));

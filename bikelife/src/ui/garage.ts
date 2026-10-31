@@ -15,6 +15,7 @@ import { buildBikeVisual, BikeVisual } from '../vehicle/bikeModel';
 import { Rider } from '../vehicle/rider';
 import type { AudioManager } from '../audio/audio';
 import { clamp } from '../core/math';
+import { lookFor } from '../data/modelStyles';
 
 export type Tab = 'mine' | 'shop' | 'paint' | 'parts' | 'perf' | 'rider' | 'presets';
 
@@ -416,11 +417,23 @@ export class GarageView {
     }
   }
 
+  private shopBrand = '';
+  private shopCc = '';
+
   private renderShop(body: HTMLElement): void {
     const p = this.prog.p;
     const order: BikeClass[] = ['scooter', 'mx', 'mini', 'sm', 'road', 'stunt'];
+    // filtres : marque et cylindrée
+    const brands = [...new Set(BIKES.map((b) => b.brand))];
+    const ccs: [string, (cc: number) => boolean][] = [['50', (c) => c <= 50], ['70–125', (c) => c > 50 && c <= 125], ['250–300', (c) => c > 125 && c <= 300], ['450+', (c) => c > 300]];
+    const fb = h('div', { class: 'opt-list' }, h('button', { class: `btn small ${this.shopBrand ? '' : 'sel'}`, onclick: () => { this.shopBrand = ''; this.render(); } }, 'Toutes marques'));
+    for (const b of brands) fb.append(h('button', { class: `btn small ${this.shopBrand === b ? 'sel' : ''}`, onclick: () => { this.shopBrand = b; this.render(); } }, b));
+    const fc = h('div', { class: 'opt-list' }, h('button', { class: `btn small ${this.shopCc ? '' : 'sel'}`, onclick: () => { this.shopCc = ''; this.render(); } }, 'Toutes cylindrées'));
+    for (const [label] of ccs) fc.append(h('button', { class: `btn small ${this.shopCc === label ? 'sel' : ''}`, onclick: () => { this.shopCc = label; this.render(); } }, `${label} cm³`));
+    body.append(h('div', { class: 'slot-title' }, 'Marque'), fb, h('div', { class: 'slot-title' }, 'Cylindrée'), fc);
+    const ccTest = ccs.find(([l]) => l === this.shopCc)?.[1];
     for (const cls of order) {
-      const list = BIKES.filter((b) => b.cls === cls);
+      const list = BIKES.filter((b) => b.cls === cls && (!this.shopBrand || b.brand === this.shopBrand) && (!ccTest || ccTest(b.cc)));
       if (!list.length) continue;
       body.append(h('div', { class: 'slot-title' }, CLASS_LABEL[cls]));
       const grid = h('div', { class: 'grid', style: 'grid-template-columns:1fr' });
@@ -460,6 +473,17 @@ export class GarageView {
     col('Guidon', 'barColor');
     col('Selle', 'seatColor');
     col('Plaques numéro', 'plateColor');
+    if (this.spec.cls !== 'scooter') col('Garde-boue arrière', 'fenderColor');
+    col('Moyeux de roues', 'hubColor');
+    col('Poignées', 'gripColor');
+    // année-modèle (change la géométrie quand le modèle réel a évolué)
+    const years = lookFor(this.spec.id).years;
+    if (years.length > 1) {
+      body.append(h('div', { class: 'slot-title' }, 'Année-modèle'));
+      const yr = h('div', { class: 'opt-list' });
+      for (const y of years) yr.append(h('button', { class: `btn small ${(c.year ?? years[0].year) === y.year ? 'sel' : ''}`, onclick: () => this.setCfg('year', y.year) }, `${y.year}${y.note ? ` · ${y.note}` : ''}`));
+      body.append(yr);
+    }
     body.append(h('div', { class: 'slot-title' }, 'Kit déco'));
     const row = h('div', { class: 'opt-list' });
     for (const d of DECALS) {

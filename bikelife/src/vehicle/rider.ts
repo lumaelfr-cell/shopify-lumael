@@ -279,6 +279,69 @@ export class Rider {
     return g;
   }
 
+  /** Positions des articulations (repère local du pilote) après la dernière pose. */
+  jointsLocal(): Record<string, THREE.Vector3> {
+    const t = this.tmp;
+    return {
+      pelvis: this.pelvisPos.clone(), neck: this.neckPos.clone(), head: this.headPos.clone(),
+      shL: t.shL.clone(), shR: t.shR.clone(), elL: t.elL.clone(), elR: t.elR.clone(), wrL: t.wrL.clone(), wrR: t.wrR.clone(),
+      hipL: t.hipL.clone(), hipR: t.hipR.clone(), knL: t.kneeL.clone(), knR: t.kneeR.clone(), anL: t.ankleL.clone(), anR: t.ankleR.clone(),
+    };
+  }
+
+  /** Place directement le corps sur des articulations données (poupée de chiffon). */
+  poseJoints(j: Record<string, THREE.Vector3>): void {
+    const dir = j.neck.clone().sub(j.pelvis).normalize();
+    let side = j.shL.clone().sub(j.shR);
+    if (side.lengthSq() < 1e-6) side.set(1, 0, 0);
+    side.normalize();
+    const fwd = new THREE.Vector3().crossVectors(side, dir).normalize();
+    side = new THREE.Vector3().crossVectors(dir, fwd).normalize();
+    const m = new THREE.Matrix4().makeBasis(side, dir, fwd);
+    this.torso.position.copy(j.pelvis).addScaledVector(dir, -0.02);
+    this.torso.quaternion.setFromRotationMatrix(m);
+    this.torso.scale.set(1, j.pelvis.distanceTo(j.neck) / 0.5 * 0.56, 1);
+    this.pelvis.position.copy(j.pelvis);
+    this.pelvis.quaternion.copy(this.torso.quaternion);
+    this.neck.set(j.neck, j.head);
+    this.head.position.copy(j.head);
+    const hd = j.head.clone().sub(j.neck).normalize();
+    const hm = new THREE.Matrix4().makeBasis(side, hd, new THREE.Vector3().crossVectors(side, hd).normalize());
+    this.head.quaternion.setFromRotationMatrix(hm);
+    this.head.visible = true;
+    this.neck.mesh.visible = true;
+    this.limbs.upperArmL.set(j.shL, j.elL);
+    this.limbs.foreArmL.set(j.elL, j.wrL);
+    this.limbs.upperArmR.set(j.shR, j.elR);
+    this.limbs.foreArmR.set(j.elR, j.wrR);
+    this.limbs.thighL.set(j.hipL, j.knL);
+    this.limbs.shinL.set(j.knL, j.anL);
+    this.limbs.thighR.set(j.hipR, j.knR);
+    this.limbs.shinR.set(j.knR, j.anR);
+    this.joints.shL.position.copy(j.shL);
+    this.joints.shR.position.copy(j.shR);
+    this.joints.elL.position.copy(j.elL);
+    this.joints.elR.position.copy(j.elR);
+    this.joints.knL.position.copy(j.knL);
+    this.joints.knR.position.copy(j.knR);
+    this.hands[0].position.copy(j.wrL);
+    this.hands[1].position.copy(j.wrR);
+    this.hands[0].lookAt(j.wrL.clone().add(j.wrL.clone().sub(j.elL)));
+    this.hands[1].lookAt(j.wrR.clone().add(j.wrR.clone().sub(j.elR)));
+    const an = [j.anL, j.anR], kn = [j.knL, j.knR];
+    for (let i = 0; i < 2; i++) {
+      const f = this.feet[i];
+      f.position.copy(an[i]);
+      const shin = an[i].clone().sub(kn[i]).normalize();
+      let ff = fwd.clone().sub(shin.clone().multiplyScalar(shin.dot(fwd)));
+      if (ff.lengthSq() < 1e-6) ff = new THREE.Vector3(0, 0, 1);
+      ff.normalize();
+      const r = new THREE.Vector3().crossVectors(shin.clone().negate(), ff).normalize();
+      f.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(r, shin.clone().negate(), ff));
+      if (this.bootShafts[i]) this.bootShafts[i].set(an[i].clone().addScaledVector(shin, 0.02), an[i].clone().lerp(kn[i], this.cfg.shoes === 'mxboots' ? 0.75 : 0.25));
+    }
+  }
+
   /** Dernière pose appliquée (repère local du pilote) : sert aux transitions monter / descendre. */
   last: BodyTargets | null = null;
 

@@ -4,14 +4,15 @@
 import * as THREE from 'three';
 import { clamp, damp, dampAngle, lerp } from '../core/math';
 
-export type CamMode = 'chase' | 'close' | 'fpv' | 'cine' | 'wheelie';
-export const CAM_MODES: CamMode[] = ['chase', 'close', 'fpv', 'cine', 'wheelie'];
+export type CamMode = 'chase' | 'close' | 'fpv' | 'cine' | 'wheelie' | 'orbit';
+export const CAM_MODES: CamMode[] = ['chase', 'close', 'fpv', 'cine', 'wheelie', 'orbit'];
 export const CAM_LABEL: Record<CamMode, string> = {
   chase: 'Poursuite',
   close: 'Rapprochée',
   fpv: 'Vue pilote',
   cine: 'Cinématique',
   wheelie: 'Caméra wheeling',
+  orbit: 'Caméra libre (glisser pour tourner)',
 };
 
 export interface CamTarget {
@@ -45,6 +46,18 @@ export class CameraRig {
   private activeAuto = false;
   private sideSign = 1;
   orbit = 0; // menu : rotation automatique
+  // caméra libre : angles persistants (souris / stick droit / doigt)
+  freeYaw = 0;
+  freePitch = 0.25;
+  private freeIdle = 0;
+
+  /** Rotation manuelle de la caméra libre. */
+  addFree(dX: number, dY: number, dt: number): void {
+    if (Math.abs(dX) + Math.abs(dY) > 1e-4) this.freeIdle = 0;
+    else this.freeIdle += dt;
+    this.freeYaw += dX * 1.2 + (this.freeIdle > 3 ? dt * 0.25 : 0);
+    this.freePitch = clamp(this.freePitch + dY * 0.8, -0.05, 1.2);
+  }
   raycast: ((ax: number, ay: number, az: number, bx: number, by: number, bz: number, step?: number) => number) | null = null;
 
   constructor(aspect: number) {
@@ -59,6 +72,7 @@ export class CameraRig {
     const i = CAMERA_ORDER.indexOf(this.mode);
     this.mode = CAMERA_ORDER[(i + 1) % CAMERA_ORDER.length];
     this.cineTimer = 0;
+    if (this.mode === 'orbit') this.freeYaw = Math.atan2(this.pos.x - this.look.x, this.pos.z - this.look.z);
     return this.mode;
   }
 
@@ -135,6 +149,14 @@ export class CameraRig {
         fov = clamp(1400 / (d + 10), 18, 60);
         rate = 40;
         lookRate = 8;
+        break;
+      }
+      case 'orbit': {
+        const d = 4.2, p = this.freePitch;
+        desired.set(t.x + Math.sin(this.freeYaw) * Math.cos(p) * d, t.y + 0.3 + Math.sin(p) * d, t.z + Math.cos(this.freeYaw) * Math.cos(p) * d);
+        lookAt.set(t.x, t.y + 0.1, t.z);
+        fov = 50;
+        rate = 12;
         break;
       }
       case 'wheelie': {

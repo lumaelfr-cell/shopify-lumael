@@ -281,6 +281,26 @@ export class AudioManager {
     for (let i = 0; i < 4; i++) this.tone(900 + Math.random() * 1500, 0.08, 'square', 0.06, 400, 0.08 + i * 0.09);
   }
 
+  /** Pas (surface dure, terre/herbe, intérieur). */
+  footstep(kind: 'hard' | 'soft' | 'indoor', run: boolean): void {
+    const v = run ? 0.16 : 0.09;
+    if (kind === 'soft') this.noiseBurst(0.07, 'lowpass', 700, 0.7, v * 0.9);
+    else if (kind === 'indoor') this.noiseBurst(0.05, 'bandpass', 1500, 2.5, v * 0.8);
+    else this.noiseBurst(0.05, 'bandpass', 1100, 1.6, v);
+    this.tone(90 + Math.random() * 20, 0.05, 'sine', v * 0.6, 60);
+  }
+
+  /** Porte qui s'ouvre / rideau métallique. */
+  door(rollup: boolean): void {
+    if (rollup) {
+      this.noiseBurst(0.8, 'bandpass', 950, 2.5, 0.1, 'sfx', 0.05);
+      this.tone(140, 0.8, 'sawtooth', 0.02, 110);
+    } else {
+      this.noiseBurst(0.12, 'bandpass', 600, 2, 0.12);
+      this.tone(180, 0.15, 'triangle', 0.05, 120);
+    }
+  }
+
   shift(): void {
     this.noiseBurst(0.03, 'bandpass', 1800, 8, 0.12);
   }

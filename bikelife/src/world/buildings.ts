@@ -76,6 +76,8 @@ export class Interiors {
   private showCat = 0;
   private showPage = 0;
   private cash: THREE.Mesh | null = null;
+  /** son d'ouverture / fermeture (branché par le jeu) */
+  onDoor: ((rollup: boolean) => void) | null = null;
   private t = 0;
 
   constructor(world: CollisionWorld) {
@@ -133,6 +135,7 @@ export class Interiors {
         action: () => {
           if (d.locked?.()) return;
           d.toggle();
+          this.onDoor?.(o.kind === 'rollup');
         },
       });
     } else {

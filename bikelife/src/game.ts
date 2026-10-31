@@ -127,6 +127,7 @@ export class Game implements GameAPI {
   private fuelTouch = 0;
   private preSpeed = 0;
   private condApplied = -1;
+  private lastStep = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
     const mobile = isMobile();
@@ -193,6 +194,7 @@ export class Game implements GameAPI {
       this.roomLights.push(l);
     }
     this.city.interiors.host = this.buildingHost();
+    this.city.interiors.onDoor = (rollup) => this.audio.door(rollup);
     this.buildMarkers();
     const start = this.prog.p.lastPos ?? spotById('garage');
     this.player.reset(start.x, start.z, start.yaw);
@@ -494,6 +496,7 @@ export class Game implements GameAPI {
 
   respawn(): void {
     this.forceMount();
+    const wasCrash = !!this.player.wreck;
     const s = this.pickSafe();
     this.player.reset(s.x, s.z, s.yaw, s.y);
     this.crashHandled = false;
@@ -501,6 +504,24 @@ export class Game implements GameAPI {
     this.skids.clear();
     this.rig.snap(this.camTarget());
     events.emit('respawn', {});
+    if (wasCrash && this.mode instanceof FreeRide && !this.testRide && this.state === 'ride') this.remountAfterCrash();
+  }
+
+  /** Après une chute en balade : le pilote se relève à côté de la moto puis remonte. */
+  private remountAfterCrash(): void {
+    const { matrix } = this.player.park();
+    const side = new THREE.Vector3(0.62, 0, this.player.visual.seat.z).applyMatrix4(matrix);
+    this.walker.place(side.x, side.y + 0.4, side.z, this.player.phys.yaw);
+    const r = this.player.rider.root;
+    r.position.set(0, 0, 0);
+    r.rotation.set(0, 0, 0);
+    this.walker.root.add(r);
+    this.scene.add(this.walker.root);
+    this.onFoot = true;
+    this.touch.setMode('foot');
+    this.rig.snapFoot(this.player.phys.yaw);
+    this.mount();
+    this.trans!.dur = 0.9;
   }
 
   toMainMenu(): void {
@@ -939,7 +960,8 @@ export class Game implements GameAPI {
     const tp = this.tricks.trickPose;
     const fpv = this.rig.mode === 'fpv';
     this.player.sync(dt, { trick: tp?.name ?? null, trickW: this.tricks.trickWeight, firstPerson: fpv, night: this.atmo.night });
-    this.rig.update(dt, this.camTarget(), ctl.lookX, ctl.lookY);
+    if (this.rig.mode === 'orbit') this.rig.addFree(ctl.lookDX, ctl.lookDY, dt);
+    this.rig.update(dt, this.camTarget(), this.rig.mode === 'orbit' ? 0 : ctl.lookX, this.rig.mode === 'orbit' ? 0 : ctl.lookY);
     this.updateFx(dt);
     this.updateAudio(dt);
     this.updateWorld(dt);
@@ -983,6 +1005,13 @@ export class Game implements GameAPI {
       }
       w.pose(this.player.rider, fpv);
       if (w.seat && !w.seat.lie) this.prog.p.health = Math.min(100, this.prog.p.health + dt * 1.2);
+      // bruits de pas (à chaque appui)
+      const step = Math.floor(w.phase / Math.PI);
+      if (step !== this.lastStep && w.grounded && w.speed > 0.4) {
+        const surf = this.world.groundAt(w.x, w.z, w.y + 0.3, { h: 0, surf: 'asphalt', id: -1 }, 'foot').surf;
+        this.audio.footstep(this.inBuilding ? 'indoor' : isLoose(surf) ? 'soft' : 'hard', w.speed > 3);
+      }
+      this.lastStep = step;
     }
     this.player.sync(dt, { trick: null, trickW: 0, firstPerson: false, night: this.atmo.night });
     this.updateMarkers();
@@ -1707,8 +1736,8 @@ export class Game implements GameAPI {
       skid: crashed ? 0 : Math.max(rear.contact ? rear.skid : 0, p.front.contact ? p.front.skid : 0, Math.abs(p.slipAngle) > 0.25 ? 0.6 : 0),
       skidLoose: isLoose(rear.surf),
       speed: p.speed,
-      city: 1,
-      rain: this.atmo.weather === 'rain' ? 1 : 0,
+      city: this.inBuilding ? 0.3 : 1,
+      rain: this.atmo.weather === 'rain' ? (this.inBuilding ? 0.25 : 1) : 0,
       scrape: crashed ? (this.player.wreckScrape > 1 ? 1 : 0) : p.scrape,
       night: this.atmo.night,
     });
