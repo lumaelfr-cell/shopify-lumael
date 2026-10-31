@@ -502,6 +502,14 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
     fpg.rotateX(-0.12);
     fpg.translate(0, lowClampY + 0.04, 0.07);
     mesh(fpg, plateMat, steer);
+    // rampe LED sur la plaque avant (éclairage de nuit)
+    headlightMat = Mats.emissive('#eaf4ff', 0.25).clone();
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.02).translate(0, lowClampY - 0.03, 0.09), headlightMat);
+    led.userData.keep = true;
+    steer.add(led);
+    headlight = new THREE.Object3D();
+    headlight.position.set(0, lowClampY - 0.03, 0.12);
+    steer.add(headlight);
   }
   // coulisse de fourche (se déplace le long de l'axe)
   const forkSlider = new THREE.Object3D();

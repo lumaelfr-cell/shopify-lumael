@@ -138,7 +138,11 @@ export class Menus {
       for (const c of CHALLENGES) {
         const m = p.challenges[c.id] ?? 0;
         const req = c.classes ? ` · ${c.classes.map((k) => CLASS_LABEL[k]).join(', ')} uniquement` : '';
-        grid.append(tile(c.name, `${c.desc}${req} — ${c.thresholds.join(' / ')} ${c.unit}`, () => this.g.startMode('challenge', c.id), medalStr(m)));
+        const near = Math.hypot(c.start.x - this.g.playerPos().x, c.start.z - this.g.playerPos().z) < 10;
+        const t = tile(c.name, `${c.desc}${req} — ${c.thresholds.join(' / ')} ${c.unit}`, () => this.g.startMode('challenge', c.id), medalStr(m));
+        if (near) t.classList.add('sel');
+        if (near) grid.prepend(t);
+        else grid.append(t);
       }
     } else {
       for (const t of TIME_TRIALS) {

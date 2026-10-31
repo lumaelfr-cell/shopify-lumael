@@ -98,6 +98,10 @@ export class Game implements GameAPI {
   private lastTopSpeedSave = 0;
   private distAcc = 0;
   private clutchHeld = false;
+  private markers: { x: number; z: number; y: number; ids: string[]; mesh: THREE.Mesh }[] = [];
+  private markerGroup = new THREE.Group();
+  private promptEl: HTMLElement | null = null;
+  private promptFor: string[] | null = null;
 
   constructor(private canvas: HTMLCanvasElement) {
     const mobile = isMobile();
@@ -156,6 +160,7 @@ export class Game implements GameAPI {
     this.rig.raycast = (ax, ay, az, bx, by, bz) => this.world.raycast(ax, ay, az, bx, by, bz);
     this.particles = new Particles(this.renderer.getPixelRatio());
     this.scene.add(this.particles.points, this.skids.mesh);
+    this.buildMarkers();
     const start = this.prog.p.lastPos ?? spotById('garage');
     this.player.reset(start.x, start.z, start.yaw);
     this.rig.snap(this.camTarget());
@@ -200,8 +205,8 @@ export class Game implements GameAPI {
         this.applyAudioSettings();
       });
     };
-    window.addEventListener('pointerdown', unlock, { once: false });
-    window.addEventListener('keydown', unlock, { once: false });
+    // iOS/Safari n'autorise l'audio qu'après un geste : on tente sur plusieurs types d'événements
+    for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlock, { passive: true });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         this.audio.suspend();
@@ -373,6 +378,20 @@ export class Game implements GameAPI {
     this.delta();
     this.canvas.focus();
     if (isMobile()) this.goFullscreen();
+    this.tutorial();
+  }
+
+  /** Conseils au premier lancement. */
+  private tutorial(): void {
+    const s = this.prog.p.settings;
+    if (s.tutorialDone) return;
+    s.tutorialDone = true;
+    this.prog.save();
+    const touch = !document.getElementById('touch')!.classList.contains('hidden');
+    const tips = touch
+      ? ['Gâchette GAZ à droite : plus le doigt est haut, plus ça accélère.', 'WHEELIE : maintiens (le moteur monte en régime), puis glisse le pouce vers GAZ pour lever la roue.', 'Joystick vers le bas = pilote en arrière (plus d’angle), vers le haut = en avant. FREIN AR pour redescendre.']
+      : ['Z/W pour accélérer (progressif), Espace = frein arrière, S = frein avant.', 'Wheeling : maintiens Maj + Z/W pour monter en régime, puis relâche Maj (coup d’embrayage).', 'Dose avec les gaz, ↓ pour reculer le corps, Espace pour faire redescendre la roue. Jauge d’angle à droite.'];
+    tips.forEach((t, i) => setTimeout(() => this.hud.toast(t, 'info', 6500), 600 + i * 4200));
   }
 
   private goFullscreen(): void {
@@ -431,6 +450,8 @@ export class Game implements GameAPI {
 
   private pause(): void {
     if (this.state !== 'ride') return;
+    this.promptEl?.classList.add('hidden');
+    this.promptFor = null;
     this.state = 'paused';
     this.menus.showPause();
   }
@@ -559,6 +580,63 @@ export class Game implements GameAPI {
 
   mpConnect(url: string, room: string): void {
     this.mp.connect(url, room, { name: this.prog.p.rider.name, bike: this.player.spec.id, cfg: this.player.cfg, rider: this.prog.p.rider });
+  }
+
+  // ------------------------------------------------------------------ marqueurs de défis
+  private buildMarkers(): void {
+    const groups = new Map<string, { x: number; z: number; y: number; ids: string[] }>();
+    for (const c of CHALLENGES) {
+      const k = `${Math.round(c.start.x / 8)},${Math.round(c.start.z / 8)}`;
+      if (!groups.has(k)) groups.set(k, { x: c.start.x, z: c.start.z, y: c.start.y ?? 0, ids: [] });
+      groups.get(k)!.ids.push(c.id);
+    }
+    const geo = new THREE.CylinderGeometry(2.6, 2.6, 7, 24, 1, true).translate(0, 3.5, 0);
+    const mat = new THREE.MeshBasicMaterial({ color: '#ff2bd6', transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+    for (const g of groups.values()) {
+      const gh = this.world.groundAt(g.x, g.z, 50, { h: 0, surf: 'asphalt', id: -1 });
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(g.x, gh.h, g.z);
+      this.markerGroup.add(m);
+      this.markers.push({ ...g, y: gh.h, mesh: m });
+    }
+    this.scene.add(this.markerGroup);
+    this.promptEl = h('div', { id: 'hud-prompt', class: 'hidden' });
+    document.body.append(this.promptEl);
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Enter' && this.promptFor && this.state === 'ride') this.openSpotChallenges();
+    });
+  }
+
+  private openSpotChallenges(): void {
+    this.state = 'paused';
+    this.promptEl?.classList.add('hidden');
+    this.menus.showModes('challenges');
+  }
+
+  private updateMarkers(): void {
+    const free = this.mode instanceof FreeRide && !this.testRide;
+    this.markerGroup.visible = free;
+    let near: typeof this.markers[number] | null = null;
+    if (free && this.state === 'ride') {
+      const p = this.player.phys;
+      for (const m of this.markers) if (Math.hypot(p.x - m.x, p.z - m.z) < 4.5 && Math.abs(p.y - p.comHeight - m.y) < 3 && p.kmh < 25) near = m;
+    }
+    if (!near) {
+      if (this.promptFor) this.promptEl!.classList.add('hidden');
+      this.promptFor = null;
+      return;
+    }
+    if (this.promptFor === near.ids) return;
+    this.promptFor = near.ids;
+    const names = near.ids.map((id) => CHALLENGES.find((c) => c.id === id)!.name);
+    const el = this.promptEl!;
+    el.innerHTML = '';
+    el.append(
+      h('div', { style: 'font-weight:800;color:#ff2bd6;letter-spacing:1px' }, `DÉFI${names.length > 1 ? 'S' : ''} ICI`),
+      h('div', { style: 'margin:4px 0 8px' }, names.join(' · ')),
+      h('button', { class: 'btn pink small', onclick: () => this.openSpotChallenges() }, 'Voir les défis (Entrée)'),
+    );
+    el.classList.remove('hidden');
   }
 
   // ------------------------------------------------------------------ modes
@@ -794,6 +872,7 @@ export class Game implements GameAPI {
       }
     }
     this.mode.update(dt);
+    this.updateMarkers();
     this.updateGhost(dt);
     // rendu moto
     const tp = this.tricks.trickPose;

@@ -49,6 +49,17 @@ npx tsx scripts/sim.ts aoz-az125 hold 1   # banc d'essai physique en ligne de co
 `scripts/sim.ts <moto> <scénario> [aide 0|1|2]` — scénarios : `launch`, `hold` (wheeling piloté),
 `spull` (wheeling scooter), `brake`, `stoppie`, `ramp`, `curb`, `wall`, `turn`, `drift`.
 
+Tests dans un vrai navigateur (Playwright + Chromium requis, jeu servi sur l'URL donnée) :
+
+```bash
+node scripts/play.mjs http://localhost:5173/ ./captures wheelie   # conduite + coup d'embrayage + freinage
+node scripts/tour.mjs http://localhost:8787/ ./captures           # garage, nuit, pluie, spots, mise en page mobile
+node scripts/light.mjs http://localhost:8787/ ./captures          # éclairage jour / pluie / nuit / crépuscule
+```
+
+`node scripts/build-artifact.mjs` (après `npm run build`) produit `dist-artifact/`, une variante de la page
+sans en-tête HTML, prête à être hébergée comme page web autonome.
+
 ---
 
 ## Commandes
@@ -127,7 +138,7 @@ quartiers commerçants avec enseignes, résidentiel (maisons, haies), **la Cité
 quarter-pipes, table, muret), **zone d'entraînement** (cercles, slalom, lignes de distance), **MX Park** (tables, doubles,
 whoops, step-up, gros saut), **route de la Corniche** (~900 m de ligne droite) et périphérique.
 Trafic IA (voies à droite, feux tricolores, rond-point, distances de sécurité, klaxons), piétons qui s'écartent,
-cycle **jour/nuit** (éclairage public, fenêtres allumées, phare), **météo** (dégagé, nuageux, pluie avec route mouillée
+cycle **jour/nuit** (éclairage public, fenêtres allumées, phare / rampe LED avant), **météo** (dégagé, nuageux, pluie avec route mouillée
 et adhérence réduite, brouillard). Pas d'écran de chargement en jeu : téléportation instantanée depuis la carte.
 
 ### Caméras
@@ -162,7 +173,8 @@ pied posé à l'arrêt, poses dédiées aux figures.
 
 ### Modes
 
-Balade libre · Mode wheeling (Boulevard / Corniche) · Session stunt 2 min · **16 défis** à médailles ·
+Balade libre (colonnes lumineuses roses = défis disponibles sur place : s'y arrêter puis Entrée / bouton) ·
+Mode wheeling (Boulevard / Corniche) · Session stunt 2 min · **16 défis** à médailles ·
 **3 contre-la-montre** avec fantôme du meilleur temps · Garage · **Multijoueur** (serveur WebSocket inclus,
 salons, chat, exploits partagés, interpolation des autres joueurs).
 
@@ -216,7 +228,8 @@ bikelife/
 ## État d'avancement (honnête)
 
 **Terminé et testé** : tout ce qui est décrit ci-dessus fonctionne dans le navigateur (testé dans Chromium avec rendu
-logiciel, scénarios automatisés de conduite/wheeling, garage, nuit, pluie, spots, mise en page mobile) ; 21 tests unitaires.
+logiciel, scénarios automatisés de conduite/wheeling, garage, nuit, pluie, spots, mise en page mobile) ;
+22 tests automatisés (physique, collisions, progression/sauvegarde, synthèse audio, serveur multijoueur).
 
 **Limites connues / à développer** :
 - Modèles 3D **procéduraux** (pas de modèles photoréalistes sous licence) : bonne silhouette et détails mécaniques

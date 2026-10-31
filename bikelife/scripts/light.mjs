@@ -11,7 +11,7 @@ await page.addInitScript({ content: `try { localStorage.setItem('bikelife-street
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__ready === true, null, { timeout: 200000 });
 const settle = (n) => page.evaluate((n) => new Promise((r) => { let k = 0; const f = () => (++k >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
-const shots = [['l1-day', 13, 'clear', 'downtown'], ['l2-rain', 15, 'rain', 'cite'], ['l3-night', 22.5, 'clear', 'stunt'], ['l4-dusk', 19.3, 'clear', 'boulevard']];
+const shots = (process.env.SHOTS ? JSON.parse(process.env.SHOTS) : [['l1-day', 13, 'clear', 'downtown'], ['l2-rain', 15, 'rain', 'cite'], ['l3-night', 22.5, 'clear', 'stunt'], ['l4-dusk', 19.3, 'clear', 'boulevard']]);
 for (const [name, t, w, spot] of shots) {
   await page.evaluate(([t, w, spot]) => { const g = window.__game; g.setWeather(w); g.atmo.wetness = w === 'rain' ? 1 : 0; g.setTime(t); g.startRide(spot); }, [t, w, spot]);
   await settle(8);

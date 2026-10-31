@@ -67,7 +67,7 @@ export class PlayerBike {
     this.cfg = cfg;
     this.phys = new BikePhysics(spec, tuningFromConfig(spec, cfg), world);
     this.rider = new Rider(riderCfg);
-    this.headlight = new THREE.SpotLight('#fff2d8', 0, 70, 0.5, 0.45, 1.4);
+    this.headlight = new THREE.SpotLight('#fff2d8', 0, 80, 0.55, 0.45, 1.6);
     this.headlight.castShadow = false;
     scene.add(this.rig.outer);
     scene.add(this.headlight);
@@ -150,9 +150,11 @@ export class PlayerBike {
     if (this.visual.headlight) {
       const hl = this.visual.headlight;
       hl.getWorldPosition(this.headlight.position);
-      const fwd = new THREE.Vector3(0, -0.12, 1).applyQuaternion(hl.getWorldQuaternion(new THREE.Quaternion()));
+      // le phare des motos est dans le repère de fourche (incliné de l'angle de chasse)
+      const local = this.visual.isScooter ? new THREE.Vector3(0, -0.1, 1) : new THREE.Vector3(0, -0.54, 0.85);
+      const fwd = local.applyQuaternion(hl.getWorldQuaternion(new THREE.Quaternion()));
       this.headlight.target.position.copy(this.headlight.position).addScaledVector(fwd, 10);
-      this.headlight.intensity = ex.night > 0.05 ? 60 * ex.night : 0;
+      this.headlight.intensity = ex.night > 0.05 ? 260 * ex.night : 0;
       if (this.visual.headlightMat) this.visual.headlightMat.emissiveIntensity = 0.3 + ex.night * 3;
     } else this.headlight.intensity = 0;
     if (this.visual.taillightMat) this.visual.taillightMat.emissiveIntensity = 0.6 + ex.night * 2 + (p.front.longF < -200 || p.rear.longF < -200 ? 2 : 0);

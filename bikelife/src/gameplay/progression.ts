@@ -30,6 +30,7 @@ export interface Settings {
   showHelp: boolean;
   traffic: boolean;
   mpServer: string;
+  tutorialDone: boolean;
 }
 
 export interface OwnedBike {
@@ -114,6 +115,7 @@ export function defaultSettings(): Settings {
     showHelp: true,
     traffic: true,
     mpServer: '',
+    tutorialDone: false,
   };
 }
 

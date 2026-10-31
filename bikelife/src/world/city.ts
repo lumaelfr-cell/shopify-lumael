@@ -1250,7 +1250,7 @@ export class City {
       c.visible = dx * dx + dz * dz < vd * vd;
     }
     for (const n of this.nightMats) n.mat.emissiveIntensity = n.base * night + (n.mat === this.m.sign ? 0.12 : 0);
-    this.lightPoolMat.opacity = clamp(night * 0.4, 0, 0.3);
+    this.lightPoolMat.opacity = clamp(night * 0.55, 0, 0.45);
     for (const w of this.wetMats) {
       // chaussée mouillée : plus sombre et plus brillante (sans devenir un miroir)
       w.mat.roughness = w.dry * (1 - wet * 0.5);
