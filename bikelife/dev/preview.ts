@@ -1,0 +1,53 @@
+// Visionneuse de développement : /dev/preview.html?bike=<id>&yaw=<deg>
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { BIKE_BY_ID } from '../src/data/bikes';
+import { defaultConfig } from '../src/data/parts';
+import { buildBikeVisual } from '../src/vehicle/bikeModel';
+
+const q = new URLSearchParams(location.search);
+const spec = BIKE_BY_ID[q.get('bike') ?? 'aoz-az125'];
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#2b2f36');
+const pm = new THREE.PMREMGenerator(renderer);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight('#ffffff', 2.5);
+sun.position.set(3, 5, 2);
+sun.castShadow = true;
+scene.add(sun);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: '#555' }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+const cfg = defaultConfig(spec);
+for (const k of ['decal', 'exhaust', 'stuntBar', 'cage', 'fender', 'bars', 'plastics']) if (q.get(k)) (cfg as any)[k] = q.get(k) === 'true' ? true : q.get(k);
+const vis = buildBikeVisual(spec, cfg);
+scene.add(vis.root);
+vis.update(Number(q.get('steer') ?? 0.3), spec.travelF * 0.3, spec.travelR * 0.3, 0, 0);
+const cam = new THREE.PerspectiveCamera(Number(q.get('fov') ?? 32), innerWidth / innerHeight, 0.05, 100);
+const yaw = (Number(q.get('yaw') ?? 60) * Math.PI) / 180;
+const dist = Number(q.get('dist') ?? 3.6);
+const target = new THREE.Vector3(0, 0.6, spec.wheelbase / 2);
+cam.position.set(target.x + Math.sin(yaw) * dist, Number(q.get('h') ?? 1.3), target.z + Math.cos(yaw) * dist);
+cam.lookAt(target);
+let calls = 0;
+renderer.render(scene, cam);
+calls = renderer.info.render.calls;
+(window as any).__ready = { calls, tris: renderer.info.render.triangles };
+
+// pilote
+import { Rider } from '../src/vehicle/rider';
+import { defaultRider } from '../src/data/apparel';
+const rider = new Rider({ ...defaultRider(), ...(q.get('helmet') ? { helmet: q.get('helmet') as any } : {}), ...(q.get('top') ? { top: q.get('top') as any } : {}), ...(q.get('shoes') ? { shoes: q.get('shoes') as any } : {}) });
+vis.root.add(rider.root);
+vis.root.updateMatrixWorld(true);
+const gl = vis.gripL.getWorldPosition(new THREE.Vector3()); vis.root.worldToLocal(gl);
+const gr = vis.gripR.getWorldPosition(new THREE.Vector3()); vis.root.worldToLocal(gr);
+rider.pose({ seat: vis.seat, pegL: vis.pegL, pegR: vis.pegR, gripL: gl, gripR: gr, stand: Number(q.get('stand') ?? 0), lean: Number(q.get('lean') ?? 0), pitch: 0, roll: 0, steer: 0.3, trick: (q.get('trick') as any) ?? null, trickW: 1, footDown: Number(q.get('foot') ?? 0), scooter: vis.isScooter, firstPerson: false });
+renderer.render(scene, cam);
+(window as any).__ready = { calls: renderer.info.render.calls, tris: renderer.info.render.triangles };

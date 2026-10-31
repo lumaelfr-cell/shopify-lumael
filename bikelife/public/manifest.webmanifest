@@ -1,0 +1,10 @@
+{
+  "name": "Bike Life: Street Kings",
+  "short_name": "Bike Life",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#07080c",
+  "theme_color": "#07080c",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

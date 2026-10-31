@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#07080c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Bike Life: Street Kings — jeu 3D de wheeling et de bike life en monde ouvert." />
+  <title>Bike Life: Street Kings</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="game" tabindex="0"></canvas>
+  <div id="loading">
+    <div class="logo">BIKE <span>LIFE</span><br /><small style="font-size:0.3em;letter-spacing:8px;color:#ff2bd6">STREET KINGS</small></div>
+    <div class="bar"><i></i></div>
+    <div class="msg">Chargement…</div>
+  </div>
+  <div id="hud" class="hidden"></div>
+  <div id="touch" class="hidden"></div>
+  <div id="ui"></div>
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

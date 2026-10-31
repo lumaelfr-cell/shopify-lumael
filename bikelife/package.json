@@ -1,0 +1,26 @@
+{
+  "name": "bikelife-street-kings",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bike Life: Street Kings - jeu 3D de wheeling / bike life en monde ouvert (navigateur, mobile & PC)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "server": "node server/server.mjs",
+    "start": "npm run build && node server/server.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.187.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}
