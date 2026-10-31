@@ -418,7 +418,7 @@ export class GarageView {
 
   private renderShop(body: HTMLElement): void {
     const p = this.prog.p;
-    const order: BikeClass[] = ['scooter', 'mx', 'mini', 'sm', 'stunt'];
+    const order: BikeClass[] = ['scooter', 'mx', 'mini', 'sm', 'road', 'stunt'];
     for (const cls of order) {
       const list = BIKES.filter((b) => b.cls === cls);
       if (!list.length) continue;

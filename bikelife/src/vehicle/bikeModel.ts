@@ -8,6 +8,8 @@ import type { BikeConfig } from '../data/parts';
 import { DEG } from '../core/math';
 import { Mats, decalTexture, plateTexture, licenseTexture, seatTexture, shade } from './materials';
 import { cylBetween, merge, mergeStatic, mesh, roundedBox, shell, sidePanel, tube, varTube, yawAroundCenter, V3 } from './geom';
+import { lookFor, exhaustFor } from '../data/modelStyles';
+import { buildRoad } from './roadModel';
 
 export interface BikeVisual {
   root: THREE.Group;
@@ -85,7 +87,7 @@ function rimGeometry(rimR: number, w: number): THREE.BufferGeometry {
   return g;
 }
 
-function discGeometry(radius: number, wave: boolean): THREE.BufferGeometry {
+export function discGeometry(radius: number, wave: boolean): THREE.BufferGeometry {
   const s = new THREE.Shape();
   const N = 72;
   for (let i = 0; i <= N; i++) {
@@ -122,7 +124,7 @@ function sprocketGeometry(radius: number, teeth: number): THREE.BufferGeometry {
   return g;
 }
 
-interface WheelOpts {
+export interface WheelOpts {
   r: number;
   rimInch: number;
   width: number;
@@ -132,16 +134,17 @@ interface WheelOpts {
   disc?: { r: number; side: number };
   sprocket?: { r: number; side: number };
   spokes: number;
+  hubColor?: string;
 }
 
-function buildWheel(o: WheelOpts): THREE.Group {
+export function buildWheel(o: WheelOpts): THREE.Group {
   const g = new THREE.Group();
   const rimR = (o.rimInch * 0.0254) / 2 + 0.012;
   mesh(tireGeometry(o.r, rimR, o.width, o.tire), Mats.rubber(), g);
   const rimW = o.rimStyle === 'deep' ? o.width * 0.95 : o.width * 0.72;
   const rimMat = o.rimStyle === 'cast' ? Mats.metal(o.rimColor, 0.3, 0.75) : Mats.metal(o.rimColor, 0.28, 0.85);
   mesh(rimGeometry(rimR, rimW), rimMat, g);
-  const hubMat = Mats.metal('#b8bcc2', 0.3, 1);
+  const hubMat = Mats.metal(o.hubColor ?? '#b8bcc2', 0.3, 1);
   // moyeu
   const hub = new THREE.CylinderGeometry(0.042, 0.042, 0.15, 16);
   hub.rotateZ(Math.PI / 2);
@@ -197,7 +200,7 @@ function buildWheel(o: WheelOpts): THREE.Group {
 // ------------------------------------------------------------------ helpers locaux
 const P = (z: number, y: number): [number, number] => [z, y];
 
-function exhaustMat(cfg: BikeConfig): THREE.Material {
+export function exhaustMat(cfg: BikeConfig): THREE.Material {
   switch (cfg.exhaust) {
     case 'titanium':
       return Mats.titanium();
@@ -231,7 +234,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const engMat = Mats.engine(fourT ? '#34363b' : '#2a2b2f');
   const alu = Mats.metal('#c3c8ce', 0.28, 1);
   const brandName = spec.brand === 'Custom' ? 'STREET KINGS' : spec.brand;
-  const decalTex = decalTexture(cfg.decal, primary, cfg.secondary, cfg.accent, brandName, cfg.plateNumber);
+  const decalTex = decalTexture(cfg.decal === 'factory' ? `factory:${lookFor(spec.id).graphic}` : cfg.decal, primary, cfg.secondary, cfg.accent, brandName, cfg.plateNumber);
   const decalMat = Mats.textured(`dec:${decalTex.uuid}`, decalTex, { roughness: 0.36 });
 
   const chassis = new THREE.Group();
@@ -245,18 +248,39 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   void dy;
   const Z = (z: number) => z * s;
 
-  // --- cadre (double poutre + berceau + boucle arrière)
+  // --- cadre : aluminium double poutre (japonaises, Fantic) ou acier chrome-molybdène peint (européennes)
+  const look = lookFor(spec.id);
+  const ex4 = exhaustFor(spec.id, cfg.year);
+  const subMat = look.subframeColor && !spec.stuntKit ? Mats.plastic(look.subframeColor, 0.55) : frameMat;
   const head: V3 = [0, Y(1.06), Z(1.1)];
   const headLow: V3 = [0, Y(0.9), Z(1.17)];
   const pivotZ = Z(0.585), pivotY = Y(0.5);
-  for (const sd of [-1, 1]) {
-    const x = sd * 0.1;
-    mesh(varTube([[0.03 * sd, head[1], head[2]], [x, Y(1.0), Z(0.98)], [x * 1.1, Y(0.86), Z(0.76)], [x, Y(0.66), Z(0.62)], [x * 0.95, pivotY + 0.03, pivotZ + 0.02]], (t) => 0.026 - t * 0.006, 20, 8), frameMat, chassis);
-    // berceau
-    mesh(tube([[0.02 * sd, headLow[1], headLow[2] - 0.02], [x * 0.5, Y(0.6), Z(1.07)], [x * 0.6, Y(0.28), Z(0.98)], [x * 0.6, Y(0.2), Z(0.8)], [x * 0.7, Y(0.26), Z(0.62)], [x * 0.9, pivotY - 0.05, pivotZ]], 0.013, 24, 6), frameMat, chassis);
-    // boucle arrière
-    mesh(tube([[x * 0.9, Y(0.84), Z(0.7)], [x * 0.85, Y(0.88), Z(0.35)], [x * 0.75, Y(0.9), Z(-0.05)]], 0.012, 12, 6), frameMat, chassis);
-    mesh(tube([[x * 0.9, Y(0.6), Z(0.6)], [x * 0.85, Y(0.72), Z(0.3)], [x * 0.75, Y(0.88), Z(0.0)]], 0.01, 12, 6), frameMat, chassis);
+  if (look.frame === 'alu') {
+    // poutres plates de section rectangulaire, de la colonne de direction à l'axe de bras
+    const path: [number, number][] = [[Z(1.1), Y(1.06)], [Z(0.98), Y(1.0)], [Z(0.78), Y(0.88)], [Z(0.64), Y(0.7)], [pivotZ + 0.02, pivotY + 0.04]];
+    const hw = [0.045, 0.05, 0.052, 0.055, 0.06];
+    const up = path.map(([z, y], i) => P(z, y + hw[i]));
+    const dn = path.map(([z, y], i) => P(z, y - hw[i])).reverse();
+    for (const sd of [-1, 1]) {
+      const spar = sidePanel([...up, ...dn], 0.034, 0, 0.008);
+      spar.translate(sd * 0.105, 0, 0);
+      mesh(spar, frameMat, chassis);
+      // berceau inférieur fin
+      mesh(tube([[0.02 * sd, headLow[1], headLow[2] - 0.02], [sd * 0.05, Y(0.6), Z(1.07)], [sd * 0.06, Y(0.28), Z(0.98)], [sd * 0.06, Y(0.2), Z(0.8)], [sd * 0.07, Y(0.26), Z(0.62)], [sd * 0.09, pivotY - 0.05, pivotZ]], 0.012, 24, 6), frameMat, chassis);
+      // cadre arrière (boucle)
+      mesh(tube([[sd * 0.09, Y(0.84), Z(0.7)], [sd * 0.085, Y(0.88), Z(0.35)], [sd * 0.075, Y(0.9), Z(-0.05)]], 0.013, 12, 6), subMat, chassis);
+      mesh(tube([[sd * 0.09, Y(0.6), Z(0.6)], [sd * 0.085, Y(0.72), Z(0.3)], [sd * 0.075, Y(0.88), Z(0.0)]], 0.01, 12, 6), subMat, chassis);
+    }
+  } else {
+    for (const sd of [-1, 1]) {
+      const x = sd * 0.1;
+      mesh(varTube([[0.03 * sd, head[1], head[2]], [x, Y(1.0), Z(0.98)], [x * 1.1, Y(0.86), Z(0.76)], [x, Y(0.66), Z(0.62)], [x * 0.95, pivotY + 0.03, pivotZ + 0.02]], (t) => 0.024 - t * 0.006, 20, 8), frameMat, chassis);
+      // berceau
+      mesh(tube([[0.02 * sd, headLow[1], headLow[2] - 0.02], [x * 0.5, Y(0.6), Z(1.07)], [x * 0.6, Y(0.28), Z(0.98)], [x * 0.6, Y(0.2), Z(0.8)], [x * 0.7, Y(0.26), Z(0.62)], [x * 0.9, pivotY - 0.05, pivotZ]], 0.013, 24, 6), frameMat, chassis);
+      // boucle arrière (cadre arrière composite / alu selon le modèle)
+      mesh(tube([[x * 0.9, Y(0.84), Z(0.7)], [x * 0.85, Y(0.88), Z(0.35)], [x * 0.75, Y(0.9), Z(-0.05)]], 0.014, 12, 6), subMat, chassis);
+      mesh(tube([[x * 0.9, Y(0.6), Z(0.6)], [x * 0.85, Y(0.72), Z(0.3)], [x * 0.75, Y(0.88), Z(0.0)]], 0.011, 12, 6), subMat, chassis);
+    }
   }
   // tube de direction
   mesh(cylBetween([0, Y(0.88), Z(1.175)], [0, Y(1.1), Z(1.065)], 0.028, 0.028, 14), frameMat, chassis);
@@ -321,18 +345,46 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
     mesh(cylBetween([sil0.x, sil0.y, sil0.z], [sil1.x, sil1.y, sil1.z], 0.04, 0.042, 16), exMat, chassis);
     exhaustTip.copy(sil1);
   } else {
-    const pts: V3[] = [
-      [0, cylTop.y - 0.03, cylTop.z + 0.06], [-0.04, Y(0.62), Z(1.08)], [-0.1, Y(0.42), Z(1.06)], [-0.15, Y(0.38), Z(0.86)],
-      [-0.16, Y(0.5), Z(0.6)], [-0.165, Y(0.66), Z(0.38)],
-    ];
-    mesh(varTube(pts, () => 0.021 * s, 40, 10), cfg.exhaust === 'titanium' ? Mats.titanium() : pipeMat, chassis);
-    const sil0 = new THREE.Vector3(-0.165, Y(0.68), Z(0.4));
-    const sil1 = new THREE.Vector3(-0.175, Y(0.87), Z(-0.2));
     const silR = cfg.exhaust === 'stock' ? 0.048 : 0.052;
-    mesh(cylBetween([sil0.x, sil0.y, sil0.z], [sil1.x, sil1.y, sil1.z], silR * 0.9, silR, 16), exMat, chassis);
-    const cap = cylBetween([sil1.x, sil1.y, sil1.z], [sil1.x, sil1.y + 0.01, sil1.z - 0.03], silR * 0.95, silR * 0.6, 16);
-    mesh(cap, Mats.metal('#2b2b2b', 0.4, 1), chassis);
-    exhaustTip.copy(sil1);
+    const hdrMat = cfg.exhaust === 'titanium' ? Mats.titanium() : pipeMat;
+    const silencer = (sd: number) => {
+      const sil0 = new THREE.Vector3(sd * 0.165, Y(0.68), Z(0.4));
+      const sil1 = new THREE.Vector3(sd * 0.175, Y(0.87), Z(-0.2));
+      mesh(cylBetween([sil0.x, sil0.y, sil0.z], [sil1.x, sil1.y, sil1.z], silR * 0.9, silR, 16), exMat, chassis);
+      mesh(cylBetween([sil1.x, sil1.y, sil1.z], [sil1.x, sil1.y + 0.01, sil1.z - 0.03], silR * 0.95, silR * 0.6, 16), Mats.metal('#2b2b2b', 0.4, 1), chassis);
+      return sil1;
+    };
+    if (ex4 === 'reversed') {
+      // culasse inversée : admission à l'avant, collecteur qui sort vers l'arrière et contourne la culasse
+      const pts: V3[] = [
+        [0, cylTop.y - 0.01, cylTop.z - 0.07], [-0.02, cylTop.y + 0.02, Z(0.66)], [-0.08, Y(0.86), Z(0.56)], [-0.14, Y(0.8), Z(0.48)], [-0.165, Y(0.72), Z(0.42)],
+      ];
+      mesh(varTube(pts, () => 0.022 * s, 30, 10), hdrMat, chassis);
+      exhaustTip.copy(silencer(-1));
+    } else {
+      const pts: V3[] = [
+        [0, cylTop.y - 0.03, cylTop.z + 0.06], [-0.04, Y(0.62), Z(1.08)], [-0.1, Y(0.42), Z(1.06)], [-0.15, Y(0.38), Z(0.86)],
+        [-0.16, Y(0.5), Z(0.6)], [-0.165, Y(0.66), Z(0.38)],
+      ];
+      mesh(varTube(pts, () => 0.021 * s, 40, 10), hdrMat, chassis);
+      exhaustTip.copy(silencer(-1));
+      if (ex4 === 'dual') {
+        // double silencieux (un de chaque côté, collecteurs séparés)
+        const ptsL: V3[] = pts.map(([x, y, z], i) => [i === 0 ? 0.02 : -x, y, z] as V3);
+        mesh(varTube(ptsL, () => 0.019 * s, 40, 10), hdrMat, chassis);
+        silencer(1);
+      }
+    }
+  }
+
+  // prises d'air frontales (admission par l'avant de la culasse inversée)
+  if (look.intakeVents) {
+    for (const sd of [-1, 1]) {
+      const v = roundedBox(0.03, 0.05, 0.12, 0.01);
+      v.rotateX(-0.5);
+      v.translate(sd * 0.075, Y(1.03), Z(1.0));
+      mesh(v, Mats.dark(), chassis);
+    }
   }
 
   // --- plastiques
@@ -342,9 +394,21 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   // écopes de radiateur
   const raceKit = cfg.plastics === 'race';
   const retro = cfg.plastics === 'retro';
+  const stockShrouds: Record<string, [number, number][]> = {
+    // arrondies, bord avant incliné (YZ)
+    rounded: [P(Z(0.8), Y(1.0)), P(Z(0.98), Y(1.06)), P(Z(1.18), Y(1.0)), P(Z(1.24), Y(0.84)), P(Z(1.12), Y(0.62)), P(Z(0.98), Y(0.66)), P(Z(0.86), Y(0.86))],
+    // anguleuses à arêtes vives (KX, SX, MC, Fantic)
+    angular: [P(Z(0.78), Y(1.01)), P(Z(1.0), Y(1.07)), P(Z(1.22), Y(1.02)), P(Z(1.2), Y(0.9)), P(Z(1.28), Y(0.78)), P(Z(1.1), Y(0.6)), P(Z(0.95), Y(0.7)), P(Z(0.84), Y(0.9))],
+    // longues et effilées vers l'arrière (CR/CRF, RM-Z)
+    swept: [P(Z(0.72), Y(0.97)), P(Z(0.96), Y(1.05)), P(Z(1.2), Y(1.01)), P(Z(1.26), Y(0.86)), P(Z(1.16), Y(0.6)), P(Z(1.0), Y(0.64)), P(Z(0.8), Y(0.86))],
+    // hautes et carrées (TC / FC)
+    blocky: [P(Z(0.82), Y(1.02)), P(Z(1.02), Y(1.07)), P(Z(1.22), Y(1.05)), P(Z(1.25), Y(0.8)), P(Z(1.16), Y(0.6)), P(Z(0.98), Y(0.62)), P(Z(0.86), Y(0.8))],
+  };
   const shroudProf: [number, number][] = retro
     ? [P(Z(0.82), Y(0.98)), P(Z(1.0), Y(1.04)), P(Z(1.2), Y(0.92)), P(Z(1.16), Y(0.66)), P(Z(0.98), Y(0.68)), P(Z(0.84), Y(0.86))]
-    : [P(Z(0.8), Y(1.0)), P(Z(0.98), Y(1.06)), P(Z(1.18 + (raceKit ? 0.04 : 0)), Y(1.0)), P(Z(1.24 + (raceKit ? 0.05 : 0)), Y(0.84)), P(Z(1.12), Y(0.62)), P(Z(0.98), Y(0.66)), P(Z(0.86), Y(0.86))];
+    : raceKit
+      ? [P(Z(0.8), Y(1.0)), P(Z(0.98), Y(1.06)), P(Z(1.22), Y(1.0)), P(Z(1.29), Y(0.84)), P(Z(1.12), Y(0.62)), P(Z(0.98), Y(0.66)), P(Z(0.86), Y(0.86))]
+      : stockShrouds[look.shroud];
   for (const sd of [-1, 1]) {
     const g = yawAroundCenter(sidePanel(shroudProf, 0.012, 0, 0.003), sd * 0.1, sd * (0.15 + (raceKit ? 0.015 : 0)));
     mesh(g, decalMat, chassis);
@@ -362,7 +426,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   // garde-boue arrière
   const fenderLen = tidy || cfg.fender === 'short' ? 0.3 : 0.58;
   const fProf: [number, number][] = [P(Z(0.05), seatTop - 0.07), P(Z(-0.15), seatTop - 0.05), P(Z(-fenderLen + 0.08), seatTop - 0.03), P(Z(-fenderLen), seatTop - 0.02), P(Z(-fenderLen), seatTop - 0.05), P(Z(-fenderLen + 0.08), seatTop - 0.06), P(Z(-0.15), seatTop - 0.1), P(Z(0.05), seatTop - 0.12)];
-  mesh(sidePanel(fProf, 0.2, 0, 0.01), plastMat, chassis);
+  mesh(sidePanel(fProf, 0.2, 0, 0.01), Mats.plastic(cfg.fenderColor ?? primary, 0.38), chassis);
   // plaques latérales (numéro)
   const plateTex = plateTexture(cfg.plateNumber, cfg.plateColor);
   const plateMat = Mats.textured(`plate:${plateTex.uuid}`, plateTex, { roughness: 0.4 });
@@ -440,7 +504,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const low = roundedBox(0.26, 0.05, 0.09, 0.015);
   low.translate(0, lowClampY, -0.025);
   mesh(low, clampMat, steer);
-  const forkColor = spec.cls === 'stunt' ? cfg.accent : spec.brand === 'Hinode' || spec.brand === 'Kiiro' ? '#c9a227' : '#1d1f24';
+  const forkColor = spec.cls === 'stunt' ? cfg.accent : look.forkOuter;
   const outerMat = Mats.metal(forkColor, 0.3, 0.9);
   for (const sd of [-1, 1]) {
     mesh(cylBetween([sd * 0.085, topClampY + 0.02, -0.03], [sd * 0.085, forkLen * 0.42, -0.03], 0.027, 0.029, 14), outerMat, steer);
@@ -458,7 +522,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   if (cfg.bars !== 'low') mesh(pad, Mats.plastic(cfg.accent, 0.8), steer);
   for (const sd of [-1, 1]) {
     // poignées + leviers
-    mesh(cylBetween([sd * (barW - 0.12), barBase + barRise + 0.015, -0.115], [sd * (barW + 0.005), barBase + barRise + 0.02, -0.12], 0.017, 0.017, 10), Mats.rubber(), steer);
+    mesh(cylBetween([sd * (barW - 0.12), barBase + barRise + 0.015, -0.115], [sd * (barW + 0.005), barBase + barRise + 0.02, -0.12], 0.017, 0.017, 10), cfg.gripColor && cfg.gripColor !== '#1a1a1a' ? Mats.plastic(cfg.gripColor, 0.85) : Mats.rubber(), steer);
     mesh(tube([[sd * (barW - 0.15), barBase + barRise + 0.02, -0.1], [sd * (barW - 0.05), barBase + barRise + 0.03, -0.04], [sd * (barW - 0.0), barBase + barRise + 0.025, -0.05]], 0.006, 6, 5), Mats.metal('#2d2f33', 0.3, 0.9), steer);
   }
   if (cfg.bars === 'stunt') {
@@ -476,26 +540,61 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const ffPts: V3[] = [[0, lowClampY - 0.06, -0.2], [0, lowClampY - 0.06, -0.02], [0, lowClampY - 0.09, ffLen * 0.5], [0, lowClampY - (cfg.fender === 'high' ? 0.14 : 0.2), ffLen]];
   const ffGeo = shell(ffPts, (t) => 0.075 + Math.sin(t * Math.PI) * 0.012 - t * 0.02, 0.025, 0.004, 18, 8);
   mesh(ffGeo, isSM ? Mats.plastic(primary) : plastMat, steer);
-  if (isSM) {
+  const lampKind = look.lamp !== 'none' ? look.lamp : isSM ? 'pointed' : 'none';
+  if (lampKind === 'pointed') {
+    // masque de phare pointu (supermotard)
     headlightMat = Mats.emissive('#fff4dc', 0.25).clone();
-    const mask = sidePanel([P(-0.06, 0), P(0.08, 0.05), P(0.1, 0.24), P(-0.02, 0.28), P(-0.08, 0.18)], 0.2, 0, 0.02);
+    const mask = sidePanel([P(-0.06, 0), P(0.1, 0.03), P(0.13, 0.2), P(0.02, 0.3), P(-0.08, 0.18)], 0.2, 0, 0.02);
     mask.translate(0, lowClampY - 0.12, 0.05);
     mesh(mask, decalMat, steer);
-    const lens = new THREE.SphereGeometry(0.05, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-    lens.rotateX(Math.PI / 2);
-    lens.translate(0, lowClampY - 0.02, 0.16);
+    const lens = new THREE.BoxGeometry(0.11, 0.045, 0.03);
+    lens.rotateX(-0.35);
+    lens.translate(0, lowClampY + 0.0, 0.17);
     const lm = new THREE.Mesh(lens, headlightMat);
     lm.userData.keep = true;
     steer.add(lm);
     headlight = new THREE.Object3D();
     headlight.position.set(0, lowClampY - 0.02, 0.2);
     steer.add(headlight);
+  } else if (lampKind === 'round') {
+    // optique ronde dans un masque clair
+    headlightMat = Mats.emissive('#fff4dc', 0.25).clone();
+    const mask = sidePanel([P(-0.06, 0), P(0.07, 0.02), P(0.1, 0.22), P(0.0, 0.3), P(-0.08, 0.2)], 0.22, 0, 0.025);
+    mask.translate(0, lowClampY - 0.12, 0.04);
+    mesh(mask, Mats.plastic(cfg.secondary === '#13235b' ? '#eef2f6' : cfg.primary, 0.4), steer);
+    const ring = new THREE.TorusGeometry(0.068, 0.012, 8, 28);
+    ring.translate(0, lowClampY - 0.0, 0.14);
+    mesh(ring, Mats.metal('#2b2e33', 0.3, 0.8), steer);
+    const lens = new THREE.CircleGeometry(0.066, 28);
+    lens.translate(0, lowClampY - 0.0, 0.145);
+    const lm = new THREE.Mesh(lens, headlightMat);
+    lm.userData.keep = true;
+    steer.add(lm);
+    headlight = new THREE.Object3D();
+    headlight.position.set(0, lowClampY - 0.0, 0.2);
+    steer.add(headlight);
   } else {
+    // plaque frontale (forme selon le modèle)
     const fplate = new THREE.Shape();
-    fplate.moveTo(-0.12, -0.11);
-    fplate.quadraticCurveTo(0, -0.16, 0.12, -0.11);
-    fplate.lineTo(0.14, 0.09);
-    fplate.quadraticCurveTo(0, 0.14, -0.14, 0.09);
+    if (look.plate === 'angular') {
+      fplate.moveTo(-0.11, -0.13);
+      fplate.lineTo(0.11, -0.13);
+      fplate.lineTo(0.15, 0.06);
+      fplate.lineTo(0.08, 0.13);
+      fplate.lineTo(-0.08, 0.13);
+      fplate.lineTo(-0.15, 0.06);
+    } else if (look.plate === 'shield') {
+      fplate.moveTo(0, -0.16);
+      fplate.lineTo(0.13, -0.06);
+      fplate.lineTo(0.14, 0.1);
+      fplate.quadraticCurveTo(0, 0.15, -0.14, 0.1);
+      fplate.lineTo(-0.13, -0.06);
+    } else {
+      fplate.moveTo(-0.12, -0.11);
+      fplate.quadraticCurveTo(0, -0.16, 0.12, -0.11);
+      fplate.lineTo(0.14, 0.09);
+      fplate.quadraticCurveTo(0, 0.14, -0.14, 0.09);
+    }
     fplate.closePath();
     const fpg = new THREE.ExtrudeGeometry(fplate, { depth: 0.008, bevelEnabled: false, curveSegments: 8 });
     // UV 0..1
@@ -507,19 +606,31 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
     fpg.rotateX(-0.12);
     fpg.translate(0, lowClampY + 0.04, 0.07);
     mesh(fpg, plateMat, steer);
-    // rampe LED sur la plaque avant (éclairage de nuit)
-    headlightMat = Mats.emissive('#eaf4ff', 0.25).clone();
-    const led = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.02).translate(0, lowClampY - 0.03, 0.09), headlightMat);
-    led.userData.keep = true;
-    steer.add(led);
-    headlight = new THREE.Object3D();
-    headlight.position.set(0, lowClampY - 0.03, 0.12);
-    steer.add(headlight);
+    if (lampKind === 'enduro') {
+      // phare d'enduro intégré à la plaque (homologué route)
+      headlightMat = Mats.emissive('#fff4dc', 0.25).clone();
+      const lens = new THREE.BoxGeometry(0.1, 0.06, 0.025).translate(0, lowClampY + 0.0, 0.085);
+      const lm = new THREE.Mesh(lens, headlightMat);
+      lm.userData.keep = true;
+      steer.add(lm);
+      headlight = new THREE.Object3D();
+      headlight.position.set(0, lowClampY, 0.12);
+      steer.add(headlight);
+    } else {
+      // rampe LED sur la plaque avant (éclairage de nuit)
+      headlightMat = Mats.emissive('#eaf4ff', 0.25).clone();
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.02).translate(0, lowClampY - 0.03, 0.09), headlightMat);
+      led.userData.keep = true;
+      steer.add(led);
+      headlight = new THREE.Object3D();
+      headlight.position.set(0, lowClampY - 0.03, 0.12);
+      steer.add(headlight);
+    }
   }
   // coulisse de fourche (se déplace le long de l'axe)
   const forkSlider = new THREE.Object3D();
   steer.add(forkSlider);
-  const stanchionMat = spec.cls === 'stunt' || spec.cc >= 250 ? Mats.metal('#d4a546', 0.15, 1) : Mats.chrome();
+  const stanchionMat = look.stanchion === 'gold' || spec.cls === 'stunt' ? Mats.metal('#d4a546', 0.15, 1) : look.stanchion === 'black' ? Mats.metal('#222', 0.2, 1) : Mats.chrome();
   for (const sd of [-1, 1]) {
     mesh(cylBetween([sd * 0.085, forkLen * 0.48, -0.03], [sd * 0.085, 0.05, -0.03], 0.021, 0.021, 12), stanchionMat, forkSlider);
     const lug = roundedBox(0.04, 0.1, 0.06, 0.012);
@@ -532,7 +643,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   mesh(cal, Mats.metal(isSM ? '#c41a1a' : '#bfa03a', 0.4, 0.8), forkSlider);
   const frontWheel = buildWheel({
     r: rF, rimInch: spec.rimFront, width: spec.tireWF, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
-    disc: { r: isSM || cfg.brakes === 'oversize' ? 0.155 : 0.13, side: 1 }, spokes: 36,
+    disc: { r: isSM || cfg.brakes === 'oversize' ? 0.155 : 0.13, side: 1 }, spokes: 36, hubColor: cfg.hubColor,
   });
   forkSlider.add(frontWheel);
 
@@ -540,7 +651,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const swingarm = new THREE.Object3D();
   swingarm.position.set(0, pivotY, pivotZ);
   root.add(swingarm);
-  const armMat = Mats.metal(spec.cls === 'mx' || spec.cls === 'mini' ? '#c3c8ce' : cfg.frame, 0.3, 0.9);
+  const armMat = Mats.metal(spec.cls === 'mx' || spec.cls === 'mini' ? look.swingarmColor : spec.stuntKit ? cfg.frame : look.swingarmColor, 0.3, 0.9);
   const ax = new THREE.Vector3(0, rR - pivotY, -pivotZ);
   for (const sd of [-1, 1]) {
     const x = sd * 0.1;
@@ -565,7 +676,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   mesh(calR, Mats.metal('#bfa03a', 0.4, 0.8), swingarm);
   const rearWheel = buildWheel({
     r: rR, rimInch: spec.rimRear, width: spec.tireWR, tire: cfg.tire, rimStyle: cfg.rimStyle, rimColor: cfg.rimColor,
-    disc: { r: 0.11, side: -1 }, sprocket: { r: 0.11, side: 1 }, spokes: 36,
+    disc: { r: 0.11, side: -1 }, sprocket: { r: 0.11, side: 1 }, spokes: 36, hubColor: cfg.hubColor,
   });
   rearWheel.position.copy(ax);
   swingarm.add(rearWheel);
@@ -625,7 +736,7 @@ function buildMoto(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   return vis;
 }
 
-function springGeometry(r: number, len: number, turns: number): THREE.BufferGeometry {
+export function springGeometry(r: number, len: number, turns: number): THREE.BufferGeometry {
   const pts: V3[] = [];
   const n = turns * 12;
   for (let i = 0; i <= n; i++) {
@@ -651,7 +762,8 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const decalMat = Mats.textured(`sdec:${decalTex.uuid}`, decalTex, { roughness: 0.3, clearcoat: 0.9 });
   const body = new THREE.Group();
   root.add(body);
-  const tall = style === 'round' ? 0.03 : 0;
+  const tall = style === 'round' ? 0.03 : style === 'maxi' ? 0.12 : 0;
+  const maxi = style === 'maxi';
 
   // carrosserie arrière (flancs décorés)
   const tailUp = style === 'sport' || style === 'aggressive' ? 0.07 : 0.02;
@@ -682,7 +794,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
       g.translate(sd * 0.09, 0.86, 1.2);
       lightParts.push(g);
     }
-  } else if (style === 'aggressive') {
+  } else if (style === 'aggressive' || maxi) {
     for (const sd of [-1, 1]) {
       const g = new THREE.BoxGeometry(0.1, 0.035, 0.04);
       g.rotateZ(sd * 0.3);
@@ -701,6 +813,21 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   const headlight = new THREE.Object3D();
   headlight.position.set(0, 0.88, 1.24 * (L / 1.3));
   root.add(headlight);
+  if (maxi) {
+    // tunnel central entre les pieds, bulle fumée, flancs de carénage
+    const tunnel = roundedBox(0.2, 0.24, 0.62, 0.06);
+    tunnel.translate(0, spec.groundClearance + 0.36, 0.72);
+    mesh(tunnel, paint, body);
+    const screen = new THREE.PlaneGeometry(0.42, 0.34);
+    screen.rotateX(-0.55);
+    screen.translate(0, 1.18 + tall * 0.6, 1.1);
+    mesh(screen, Mats.glass('#1b2836', 0.55), body);
+    for (const sd of [-1, 1]) {
+      const vent = roundedBox(0.02, 0.06, 0.24, 0.01);
+      vent.translate(sd * 0.19, 0.78, 1.04);
+      mesh(vent, dark, body);
+    }
+  }
   // selle
   const seatTex = seatTexture(cfg.seatColor, cfg.seat);
   const seatMat = Mats.textured(`sseat:${seatTex.uuid}`, seatTex, { roughness: 0.7, clearcoat: 0 });
@@ -777,6 +904,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
   // la carrosserie est dessinée pour 1,30 m d'empattement : on l'étire à l'empattement réel
   const sz = L / 1.3;
   body.scale.z = sz;
+  if (maxi) body.scale.x = 1.3;
   const pivotZ = 0.48 * sz, pivotY = 0.34;
   const swingarm = new THREE.Object3D();
   swingarm.position.set(0, pivotY, pivotZ);
@@ -845,7 +973,7 @@ function buildScooter(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
 }
 
 export function buildBikeVisual(spec: BikeSpec, cfg: BikeConfig): BikeVisual {
-  const v = spec.cls === 'scooter' ? buildScooter(spec, cfg) : buildMoto(spec, cfg);
+  const v = spec.cls === 'scooter' ? buildScooter(spec, cfg) : spec.cls === 'road' ? buildRoad(spec, cfg) : buildMoto(spec, cfg);
   v.root.traverse((o) => {
     if ((o as THREE.Mesh).isMesh) {
       o.castShadow = true;

@@ -50,13 +50,15 @@ interface Slot {
   id: string | null;
 }
 
-const SHOW_CATS: { cls: BikeClass[]; label: string }[] = [
-  { cls: ['mx'], label: 'Motocross' },
-  { cls: ['sm'], label: 'Supermotard' },
-  { cls: ['scooter'], label: 'Scooters' },
-  { cls: ['stunt'], label: 'Stunt' },
-  { cls: ['mini'], label: 'Mini & 50 cm³' },
+const SHOW_CATS: { f: (b: BikeSpec) => boolean; label: string }[] = [
+  { f: (b) => b.cls === 'mx' && b.cc > 50, label: 'Motocross & enduro' },
+  { f: (b) => b.cls === 'sm', label: 'Supermotard' },
+  { f: (b) => b.cls === 'road', label: 'Routières' },
+  { f: (b) => b.cls === 'scooter', label: 'Scooters' },
+  { f: (b) => b.cls === 'stunt', label: 'Stunt' },
+  { f: (b) => b.cls === 'mini' || (b.cls === 'mx' && b.cc <= 50), label: 'Mini, pit bike & 50 à boîte' },
 ];
+void (null as unknown as BikeClass);
 
 export class Interiors {
   kit: Kit;
@@ -452,7 +454,7 @@ export class Interiors {
 
   private catList(): BikeSpec[] {
     const c = SHOW_CATS[this.showCat];
-    return BIKES.filter((b) => c.cls.includes(b.cls));
+    return BIKES.filter(c.f);
   }
 
   private refreshShowroom(bb: Building): void {

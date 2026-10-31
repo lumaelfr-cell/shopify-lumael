@@ -238,6 +238,162 @@ export function decalTexture(style: string, primary: string, secondary: string, 
     }
     case 'none':
       break;
+    case 'factory:blue-wave': {
+      // aplat bleu, vague blanche basse et filet foncé
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(0, H * 0.66);
+      g.bezierCurveTo(W * 0.35, H * 0.5, W * 0.62, H * 0.82, W, H * 0.48);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.strokeStyle = accent;
+      g.lineWidth = 9;
+      g.beginPath();
+      g.moveTo(0, H * 0.72);
+      g.bezierCurveTo(W * 0.35, H * 0.56, W * 0.62, H * 0.88, W, H * 0.54);
+      g.stroke();
+      break;
+    }
+    case 'factory:green-slash': {
+      // vert, découpe noire anguleuse et filets blancs
+      g.fillStyle = '#111316';
+      g.beginPath();
+      g.moveTo(0, H * 0.58);
+      g.lineTo(W * 0.62, H * 0.42);
+      g.lineTo(W, H * 0.62);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.fillStyle = accent;
+      g.beginPath();
+      g.moveTo(0, H * 0.53);
+      g.lineTo(W * 0.62, H * 0.37);
+      g.lineTo(W * 0.66, H * 0.4);
+      g.lineTo(0, H * 0.57);
+      g.fill();
+      break;
+    }
+    case 'factory:red-block': {
+      // rouge avec grand bloc blanc arrière bas, séparé par un filet noir
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(W * 0.42, H);
+      g.lineTo(W * 0.6, H * 0.45);
+      g.lineTo(W, H * 0.4);
+      g.lineTo(W, H);
+      g.fill();
+      g.strokeStyle = accent;
+      g.lineWidth = 10;
+      g.beginPath();
+      g.moveTo(W * 0.4, H);
+      g.lineTo(W * 0.58, H * 0.43);
+      g.lineTo(W, H * 0.38);
+      g.stroke();
+      break;
+    }
+    case 'factory:orange-cut': {
+      // orange, bas noir à coupe franche, triangles blanc et bleu nuit
+      g.fillStyle = '#16181c';
+      g.beginPath();
+      g.moveTo(0, H * 0.7);
+      g.lineTo(W * 0.48, H * 0.7);
+      g.lineTo(W * 0.7, H * 0.36);
+      g.lineTo(W, H * 0.36);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(W * 0.52, H * 0.7);
+      g.lineTo(W * 0.72, H * 0.4);
+      g.lineTo(W * 0.8, H * 0.4);
+      g.lineTo(W * 0.6, H * 0.7);
+      g.fill();
+      g.fillStyle = accent;
+      g.fillRect(0, H * 0.74, W * 0.46, 10);
+      break;
+    }
+    case 'factory:white-blue': {
+      // blanc, bande bleu nuit et filet jaune
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(0, H * 0.6);
+      g.lineTo(W, H * 0.46);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.fillStyle = accent;
+      g.beginPath();
+      g.moveTo(0, H * 0.54);
+      g.lineTo(W, H * 0.4);
+      g.lineTo(W, H * 0.44);
+      g.lineTo(0, H * 0.58);
+      g.fill();
+      break;
+    }
+    case 'factory:yellow-blue': {
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(0, H * 0.7);
+      g.quadraticCurveTo(W * 0.5, H * 0.4, W, H * 0.55);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      break;
+    }
+    case 'factory:red-white': {
+      g.fillStyle = accent;
+      g.beginPath();
+      g.moveTo(0, H * 0.62);
+      g.lineTo(W * 0.55, H * 0.62);
+      g.lineTo(W * 0.75, H * 0.3);
+      g.lineTo(W * 0.85, H * 0.3);
+      g.lineTo(W * 0.62, H * 0.7);
+      g.lineTo(0, H * 0.7);
+      g.fill();
+      g.fillStyle = secondary;
+      g.fillRect(0, H * 0.78, W, H * 0.22);
+      break;
+    }
+    case 'factory:fantic': {
+      // blanc, chevron rouge et noir
+      g.lineWidth = 26;
+      for (const [col, off] of [[secondary, 0], ['#111111', 34]] as [string, number][]) {
+        g.strokeStyle = col;
+        g.beginPath();
+        g.moveTo(0, H * 0.82 - off);
+        g.lineTo(W * 0.5, H * 0.52 - off);
+        g.lineTo(W, H * 0.82 - off);
+        g.stroke();
+      }
+      break;
+    }
+    case 'factory:blue-white': {
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(0, H * 0.64);
+      g.lineTo(W * 0.7, H * 0.5);
+      g.lineTo(W, H * 0.7);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.fillStyle = accent;
+      g.fillRect(0, H * 0.58, W * 0.5, 9);
+      break;
+    }
+    case 'factory:red-beta': {
+      g.fillStyle = secondary;
+      g.beginPath();
+      g.moveTo(0, H * 0.55);
+      g.bezierCurveTo(W * 0.4, H * 0.42, W * 0.6, H * 0.7, W, H * 0.5);
+      g.lineTo(W, H);
+      g.lineTo(0, H);
+      g.fill();
+      g.fillStyle = '#111';
+      g.fillRect(0, H * 0.85, W, H * 0.15);
+      break;
+    }
     default: {
       // "usine" : grande vague + logo marque fictive
       g.fillStyle = secondary;
@@ -257,7 +413,7 @@ export function decalTexture(style: string, primary: string, secondary: string, 
     }
   }
   if (style !== 'none' && brand) {
-    g.font = 'italic 800 64px "Arial Black", Impact, sans-serif';
+    g.font = `italic 800 ${style.startsWith('factory:') ? 54 : 64}px "Arial Black", Impact, sans-serif`;
     g.fillStyle = style === 'bikelife' ? secondary : contrast(primary);
     g.globalAlpha = 0.95;
     g.fillText(brand.toUpperCase(), 30, 92);

@@ -3,7 +3,7 @@
 // et une ligne à retard (pot de détente), puis saturé. Partagé entre l'AudioWorklet
 // et le repli ScriptProcessor.
 
-export type EngineKind = '2t-mx' | '2t-small' | '4t-mx' | '4t-big' | 'scooter-2t' | 'scooter-4t' | 'car';
+export type EngineKind = '2t-mx' | '2t-small' | '4t-mx' | '4t-big' | 'scooter-2t' | 'scooter-4t' | 'car' | '4cyl' | 'twin270' | 'twin360';
 
 interface Preset {
   firePerRev: number; // allumages par tour
@@ -21,6 +21,8 @@ interface Preset {
   skip: number; // ratés au ralenti (2T)
   pops: number; // pétarades au lever de gaz (4T)
   gain: number;
+  /** allumages irréguliers : intervalles relatifs (ex. bicylindre calé à 270° : 0,75 / 1,25) */
+  pattern?: number[];
 }
 
 export const PRESETS: Record<EngineKind, Preset> = {
@@ -30,6 +32,12 @@ export const PRESETS: Record<EngineKind, Preset> = {
   '4t-big': { firePerRev: 0.5, decay: 0.0075, attack: 0.0003, noise: 0.26, formants: [[92, 1.3, 1.35], [400, 2, 0.5], [1050, 3, 0.22]], direct: 0.4, combMs: 4.4, combFb: 0.3, drive: 1.7, lpBase: 850, lpLoad: 3100, intake: 0.07, skip: 0.01, pops: 0.18, gain: 1.05 },
   'scooter-2t': { firePerRev: 1, decay: 0.0016, attack: 0.0001, noise: 0.55, formants: [[720, 2.6, 1.0], [1950, 3.5, 0.6], [4300, 4, 0.3]], direct: 0.22, combMs: 0.85, combFb: 0.46, drive: 2.5, lpBase: 3000, lpLoad: 3800, intake: 0.16, skip: 0.3, pops: 0, gain: 0.7 },
   'scooter-4t': { firePerRev: 0.5, decay: 0.0034, attack: 0.0002, noise: 0.3, formants: [[260, 2, 1.0], [880, 3, 0.45], [2100, 3.5, 0.2]], direct: 0.3, combMs: 2.0, combFb: 0.3, drive: 1.6, lpBase: 1400, lpLoad: 2600, intake: 0.1, skip: 0.02, pops: 0.05, gain: 0.8 },
+  // 4 cylindres en ligne 600 (2 allumages par tour, hurlement aigu dans les tours)
+  '4cyl': { firePerRev: 2, decay: 0.0017, attack: 0.0001, noise: 0.22, formants: [[300, 1.6, 1.0], [1150, 2.6, 0.62], [3000, 3.6, 0.36]], direct: 0.3, combMs: 1.15, combFb: 0.42, drive: 1.8, lpBase: 1700, lpLoad: 5400, intake: 0.2, skip: 0, pops: 0.07, gain: 0.9 },
+  // bicylindre calé à 270° : allumages irréguliers (270° / 450°), son rauque
+  twin270: { firePerRev: 1, decay: 0.0042, attack: 0.00022, noise: 0.28, formants: [[118, 1.4, 1.2], [470, 2.2, 0.55], [1300, 3, 0.25]], direct: 0.36, combMs: 2.7, combFb: 0.36, drive: 1.8, lpBase: 1000, lpLoad: 3500, intake: 0.1, skip: 0.01, pops: 0.15, gain: 1.0, pattern: [0.75, 1.25] },
+  // bicylindre calé à 360° (maxi-scooter) : régulier, plus feutré
+  twin360: { firePerRev: 1, decay: 0.0036, attack: 0.0002, noise: 0.25, formants: [[150, 1.6, 1.0], [520, 2.4, 0.45], [1400, 3, 0.2]], direct: 0.3, combMs: 2.3, combFb: 0.3, drive: 1.5, lpBase: 1000, lpLoad: 2600, intake: 0.08, skip: 0.01, pops: 0.04, gain: 0.85 },
   car: { firePerRev: 2, decay: 0.0032, attack: 0.0003, noise: 0.25, formants: [[115, 1.2, 1.0], [380, 2, 0.4], [900, 2.5, 0.15]], direct: 0.3, combMs: 2.6, combFb: 0.2, drive: 1.2, lpBase: 600, lpLoad: 1300, intake: 0.05, skip: 0, pops: 0, gain: 0.6 },
 };
 
@@ -78,6 +86,7 @@ export class EngineDSP {
   private intakeBq = new Biquad();
   private seed = 12345;
   private whinePh = 0;
+  private patIdx = 0;
   target: EngineParams = { rpm: 1500, load: 0, vol: 0, loud: 0.3, whine: 0 };
   private cur: EngineParams = { rpm: 1500, load: 0, vol: 0, loud: 0.3, whine: 0 };
 
@@ -127,8 +136,10 @@ export class EngineDSP {
     const lowLoad = c.load < 0.12;
     for (let i = from; i < to; i++) {
       this.phase += fFire / sr;
-      if (this.phase >= 1) {
-        this.phase -= 1 + (this.rand() - 0.5) * 0.03;
+      const thr = p.pattern ? p.pattern[this.patIdx % p.pattern.length] : 1;
+      if (this.phase >= thr) {
+        this.phase -= thr + (this.rand() - 0.5) * 0.03;
+        this.patIdx++;
         let a = 0.35 + 0.65 * c.load;
         if (lowLoad && this.rand() < p.skip * (rpm < 4000 ? 1 : 0.4)) a *= 0.15;
         if (lowLoad && rpm > 3500 && this.rand() < p.pops * 0.4) a *= 2.4;

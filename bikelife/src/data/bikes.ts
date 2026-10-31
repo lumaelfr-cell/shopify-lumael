@@ -6,9 +6,9 @@
 
 import { REAL_SPECS, RealSpec, parseTire, runningMass } from './realSpecs';
 
-export type BikeClass = 'mx' | 'mini' | 'sm' | 'stunt' | 'scooter';
+export type BikeClass = 'mx' | 'mini' | 'sm' | 'stunt' | 'scooter' | 'road';
 export type TireType = 'knobby' | 'enduro' | 'street' | 'slick';
-export type SoundKind = '2t-mx' | '2t-small' | '4t-mx' | '4t-big' | 'scooter-2t' | 'scooter-4t';
+export type SoundKind = '2t-mx' | '2t-small' | '4t-mx' | '4t-big' | 'scooter-2t' | 'scooter-4t' | '4cyl' | 'twin270' | 'twin360';
 
 export interface BikeColors {
   primary: string;
@@ -72,7 +72,9 @@ export interface BikeSpec {
   /** variante esthétique (forme des plastiques) */
   shape: number;
   /** paramètres spécifiques scooter */
-  scooterStyle?: 'sport' | 'round' | 'aggressive' | 'classic';
+  scooterStyle?: 'sport' | 'round' | 'aggressive' | 'classic' | 'maxi';
+  /** routières : carénage intégral (sportive) ou roadster */
+  roadStyle?: 'sport' | 'naked';
   stuntKit?: boolean;
 }
 
@@ -91,11 +93,11 @@ type Partial2<T> = { [K in keyof T]?: T[K] };
 
 const BRANDS: Record<string, BikeColors> = {
   Aozora: { primary: '#1f4fd1', secondary: '#f2f4f8', accent: '#0b1a3a', frame: '#b9c2cc', rim: '#1f4fd1', seat: '#16244a' },
-  Midori: { primary: '#5fd01e', secondary: '#111316', accent: '#f4f4f4', frame: '#2d6b12', rim: '#1a1a1a', seat: '#111316' },
+  Midori: { primary: '#5fd01e', secondary: '#111316', accent: '#f4f4f4', frame: '#2b2d31', rim: '#1a1a1a', seat: '#111316' },
   Hinode: { primary: '#e1121b', secondary: '#f4f4f4', accent: '#111111', frame: '#c4c9cf', rim: '#151515', seat: '#141414' },
   Kronos: { primary: '#ff6a00', secondary: '#f6f6f6', accent: '#1b2a55', frame: '#ff6a00', rim: '#181818', seat: '#1a1a1a' },
   Nordvik: { primary: '#eef2f6', secondary: '#13235b', accent: '#ffd51a', frame: '#1d3b8f', rim: '#151515', seat: '#13235b' },
-  Fiammo: { primary: '#f4f4f2', secondary: '#d01c2a', accent: '#ffcc00', frame: '#d01c2a', rim: '#1a1a1a', seat: '#1b1b1b' },
+  Fiammo: { primary: '#f4f4f2', secondary: '#d01c2a', accent: '#ffcc00', frame: '#bfc6ce', rim: '#1a1a1a', seat: '#1b1b1b' },
   Kiiro: { primary: '#ffd400', secondary: '#1a3c9e', accent: '#111111', frame: '#c4c9cf', rim: '#c9a227', seat: '#1a3c9e' },
   Brava: { primary: '#d4121f', secondary: '#111111', accent: '#f4f4f4', frame: '#d4121f', rim: '#151515', seat: '#111111' },
   Velox: { primary: '#121212', secondary: '#e01a22', accent: '#d8d8d8', frame: '#1a1a1a', rim: '#e01a22', seat: '#121212' },
@@ -104,7 +106,29 @@ const BRANDS: Record<string, BikeColors> = {
   Gilardi: { primary: '#c8101e', secondary: '#f2f2f2', accent: '#151515', frame: '#202020', rim: '#d9d9d9', seat: '#151515' },
   Sina: { primary: '#b9c0c8', secondary: '#4b525a', accent: '#1d1d1d', frame: '#2b2b2b', rim: '#8d949b', seat: '#1d1d1d' },
   Custom: { primary: '#1a1a1a', secondary: '#39ff6a', accent: '#ff2bd6', frame: '#111111', rim: '#39ff6a', seat: '#111111' },
+  Cobalt: { primary: '#1d4fb8', secondary: '#f4f4f4', accent: '#ffd51a', frame: '#1d4fb8', rim: '#151515', seat: '#13235b' },
+  Vermeil: { primary: '#d8211d', secondary: '#f4f4f4', accent: '#111111', frame: '#2b2d31', rim: '#151515', seat: '#111111' },
+  Pitstar: { primary: '#ff6a00', secondary: '#151515', accent: '#f4f4f4', frame: '#151515', rim: '#ff6a00', seat: '#151515' },
+  Rayo: { primary: '#f4f4f4', secondary: '#c8101e', accent: '#1d4fb8', frame: '#c8101e', rim: '#151515', seat: '#1b1b1b' },
 };
+
+const TQ_4CYL_600: [number, number][] = [[1300, 0.3], [4000, 0.55], [7000, 0.78], [9000, 0.92], [10500, 1.0], [12500, 0.98], [14500, 0.9], [16000, 0.75], [16500, 0.65]];
+const TQ_TWIN_700: [number, number][] = [[1200, 0.62], [3000, 0.82], [5000, 0.95], [6500, 1.0], [8000, 0.93], [9500, 0.78], [10000, 0.7]];
+const TQ_TWIN_MAXI: [number, number][] = [[1200, 0.6], [3000, 0.85], [5250, 1.0], [7000, 0.92], [8000, 0.8], [8500, 0.7]];
+const TQ_4T_125ROAD: [number, number][] = [[1500, 0.45], [4500, 0.72], [7000, 0.94], [8000, 1.0], [9500, 0.92], [10500, 0.8], [11000, 0.7]];
+
+/** Routières (sportive carénée, roadster) : rapports réels primaire × boîte × secondaire. */
+function road(o: Partial2<BikeSpec> & { id: string; brand: string; model: string; cc: number; stroke: 2 | 4 }): BikeSpec {
+  const c = BRANDS[o.brand] ?? BRANDS.Custom;
+  return {
+    cls: 'road', desc: '', idleRpm: 1300, engineInertia: 0.012, engineBrake: 14, sound: '4cyl', price: 16000, level: 8,
+    peakTorque: 60, torqueCurve: TQ_4CYL_600, redline: 16000, limiter: 16500, gears: [15, 11.6, 9.7, 8.4, 7.5, 6.7],
+    mass: 190, wheelbase: 1.4, rFront: 0.3, rRear: 0.315, rimFront: 17, rimRear: 17, comX: 1.4 * 0.5, comY: 0.74, pitchInertia: 62,
+    travelF: 0.12, travelR: 0.12, freqF: 2.0, freqR: 2.2, rake: 24, maxSteer: 30, brakeF: 1.3, brakeR: 0.5, cda: 0.42, tire: 'street',
+    seatHeight: 0.83, colors: { ...c }, shape: 1, roadStyle: 'sport',
+    ...(o as Partial<BikeSpec>),
+  } as BikeSpec;
+}
 
 function mx(o: Partial2<BikeSpec> & { id: string; brand: string; model: string; cc: number; stroke: 2 | 4 }): BikeSpec {
   const c = BRANDS[o.brand] ?? BRANDS.Custom;
@@ -269,6 +293,17 @@ export const BIKES: BikeSpec[] = [
   mx({ id: 'bra-bc450f', brand: 'Brava', model: 'BC 450F', cc: 450, stroke: 4, desc: '450 4T espagnol, couple de tracteur.', shape: 2 }),
   mx({ id: 'bra-bx50', brand: 'Brava', model: 'BX 50', cc: 50, stroke: 2, desc: 'Enduro 50 de quartier, le classique du bike life.', shape: 2, tire: 'enduro', price: 1900 }),
 
+  // ---------------- Enduro, pit bike, 50 à boîte
+  mx({ id: 'cob-se300', brand: 'Cobalt', model: 'SE 300 Factory', cc: 300, stroke: 2, peakTorque: 48, redline: 9000, limiter: 9400, gears: [27, 20.4, 16.2, 13.3, 11.2, 9.4], price: 11400, level: 4, tire: 'enduro', desc: 'Enduro 2T 300 français : couple énorme, phare et plaque.', shape: 1 }),
+  mx({ id: 'ver-rr300', brand: 'Vermeil', model: 'RR 300 2T', cc: 300, stroke: 2, peakTorque: 47, redline: 9000, limiter: 9400, gears: [27, 20.4, 16.2, 13.3, 11.2, 9.4], price: 10900, level: 4, tire: 'enduro', desc: 'Enduro 2T 300 italien, rouge et blanc, injection.', shape: 2 }),
+  mx({ id: 'pit-p125', brand: 'Pitstar', model: 'P125 Pit', cc: 125, stroke: 4, cls: 'mini', peakTorque: 9.5, torqueCurve: TQ_4T_125, redline: 9000, limiter: 9400, idleRpm: 1700, gears: [34, 22.5, 17.5, 14.4], engineInertia: 0.003, engineBrake: 3, price: 1600, level: 1, sound: '4t-mx', desc: 'Pit bike 125 en roues 14/12 pouces : petite, robuste, idéale pour les cours de cité.', shape: 3 }),
+  mx({ id: 'ray-mrt50', brand: 'Rayo', model: 'MRT 50', cc: 50, stroke: 2, price: 2900, tire: 'enduro', desc: '50 à boîte 6 vitesses espagnol, homologué route : le classique des quartiers.', shape: 2 }),
+
+  // ---------------- Routières
+  road({ id: 'aoz-rz600', brand: 'Aozora', model: 'RZ 600', cc: 599, stroke: 4, desc: 'Sportive 600 quatre cylindres : 118 ch, hurle jusqu’à 16 000 tr/min.', price: 18900, level: 9 }),
+  road({ id: 'aoz-mz07', brand: 'Aozora', model: 'MZ-07', cc: 689, stroke: 4, roadStyle: 'naked', sound: 'twin270', peakTorque: 67, torqueCurve: TQ_TWIN_700, redline: 9500, limiter: 10000, idleRpm: 1250, gears: [14.73, 11.0, 8.45, 6.73, 5.65, 4.99], engineInertia: 0.014, engineBrake: 16, price: 8900, level: 6, cda: 0.5, desc: 'Roadster bicylindre 689 cm³ calé à 270° : le couple pour lever en 2e.' }),
+  road({ id: 'aoz-mz125', brand: 'Aozora', model: 'MZ-125', cc: 125, stroke: 4, roadStyle: 'naked', sound: '4t-mx', peakTorque: 11.5, torqueCurve: TQ_4T_125ROAD, redline: 10500, limiter: 11000, idleRpm: 1500, gears: [33.2, 22.0, 16.0, 13.4, 11.2, 9.86], engineInertia: 0.004, engineBrake: 4, price: 5200, level: 2, cda: 0.5, desc: 'Roadster 125 : le permis A1 des quartiers, 15 ch.' }),
+
   // ---------------- Supermotards
   sm({ id: 'kro-690smr', brand: 'Kronos', model: '690 SMR', cc: 690, stroke: 4, desc: 'Gros mono 690 : wheeling en 3e, freinages d’anthologie.', shape: 3 }),
   sm({ id: 'nor-701sm', brand: 'Nordvik', model: '701 SM', cc: 690, stroke: 4, desc: 'Supermotard premium blanc et bleu.', shape: 3, price: 20500 }),
@@ -290,6 +325,7 @@ export const BIKES: BikeSpec[] = [
   scooter({ id: 'lio-speedstrike50', brand: 'Lionne', model: 'Speedstrike 50', cc: 50, stroke: 2, price: 3100, scooterStyle: 'sport', desc: 'Sportif à double optique, châssis rigide.' }),
   scooter({ id: 'gil-sprinter50', brand: 'Gilardi', model: 'Sprinter 50', cc: 50, stroke: 2, price: 3000, scooterStyle: 'aggressive', desc: 'Le sprinter rouge, grosses roues et tenue de route.' }),
   scooter({ id: 'gil-sprinter125', brand: 'Gilardi', model: 'Sprinter 125', cc: 125, stroke: 4, price: 4800, level: 3, scooterStyle: 'aggressive', desc: '125 4T : 100 km/h et du couple pour lever.' }),
+  scooter({ id: 'aoz-tx560', brand: 'Aozora', model: 'TX 560', cc: 562, stroke: 4, price: 12900, level: 7, scooterStyle: 'maxi', sound: 'twin360', comX: 1.3 * 0.46, peakTorque: 55.7, torqueCurve: TQ_TWIN_MAXI, redline: 8000, limiter: 8500, idleRpm: 1300, cvt: { low: 13, high: 4.6, holdRpm: 6000, engageRpm: 2500 }, engineInertia: 0.012, engineBrake: 6, mass: 220, pitchInertia: 70, comY: 0.7, travelF: 0.12, travelR: 0.117, cda: 0.5, maxSteer: 34, desc: 'Maxi-scooter bicylindre 562 cm³ : 47 ch, transmission par courroie.' }),
   scooter({ id: 'aoz-aerix70', brand: 'Aozora', model: 'Aerix 70 Kit', cc: 70, stroke: 2, price: 5600, level: 2, scooterStyle: 'sport', desc: 'Kit 70 cm³, pot de détente, variateur : la préparation ultime.', colors: { primary: '#0d0d0d', secondary: '#1f4fd1', accent: '#39ff6a', frame: '#0d0d0d', rim: '#39ff6a', seat: '#0d0d0d' } }),
 ];
 
@@ -333,6 +369,7 @@ for (const b of BIKES) {
 export const BIKE_BY_ID: Record<string, BikeSpec> = Object.fromEntries(BIKES.map((b) => [b.id, b]));
 
 export const CLASS_LABEL: Record<BikeClass, string> = {
+  road: 'Routière',
   mx: 'Motocross',
   mini: 'Mini-cross',
   sm: 'Supermotard',

@@ -58,6 +58,17 @@ export const REAL_SPECS: Record<string, RealSpec> = {
   'bra-bc450f': { ref: 'GasGas MC 450F (2024)', wheelbase: 1485, seat: 956, ground: 354, weight: 103.3, basis: 'sec', fuel: 7.2, tireF: '80/100-21', tireR: '120/80-19', travelF: 310, travelR: 300, rake: 26.1 },
   'bra-bx50': { ref: 'Derbi Senda DRD X-Treme 50 R', wheelbase: 1413, seat: 890, ground: 300, weight: 105, basis: 'ordre de marche', fuel: 7, tireF: '90/90-21', tireR: '120/80-18', travelF: 240, travelR: 250, rake: 27, estimated: ['hauteur de selle', 'garde au sol', 'poids', 'pneus', 'débattements', 'chasse'] },
 
+  // ------------------------------------------------ enduro, pit bike, 50 à boîte
+  'cob-se300': { ref: 'Sherco 300 SE Factory (2024)', wheelbase: 1480, seat: 950, ground: 370, weight: 103, basis: 'sec', fuel: 10.4, tireF: '90/90-21', tireR: '140/80-18', travelF: 300, travelR: 330, rake: 27, estimated: ['garde au sol', 'poids', 'chasse'] },
+  'ver-rr300': { ref: 'Beta RR 300 2T (2024)', wheelbase: 1482, seat: 930, ground: 320, weight: 103.5, basis: 'sec', fuel: 9.5, tireF: '90/90-21', tireR: '140/80-18', travelF: 290, travelR: 290, rake: 27, estimated: ['poids', 'débattements', 'chasse'] },
+  'pit-p125': { ref: 'Pit bike 125 4T type YCF Pilot (roues 14/12")', wheelbase: 1150, seat: 790, ground: 300, weight: 68, basis: 'sec', fuel: 3, tireF: '60/100-14', tireR: '80/100-12', travelF: 180, travelR: 160, rake: 26, estimated: ['empattement', 'hauteur de selle', 'garde au sol', 'poids', 'réservoir', 'débattements', 'chasse'], note: 'Pit bike générique : les cotes varient selon les fabricants.' },
+  'ray-mrt50': { ref: 'Rieju MRT 50 (2021)', wheelbase: 1365, seat: 890, ground: 300, weight: 89, basis: 'sec', fuel: 6.5, tireF: '90/90-21', tireR: '120/80-18', travelF: 240, travelR: 260, rake: 28, estimated: ['empattement', 'hauteur de selle', 'garde au sol', 'poids', 'réservoir', 'débattements', 'chasse'] },
+
+  // ------------------------------------------------ routières
+  'aoz-rz600': { ref: 'Yamaha YZF-R6 (2017-2020)', wheelbase: 1375, seat: 850, ground: 130, weight: 190, basis: 'ordre de marche', fuel: 17, tireF: '120/70-17', tireR: '180/55-17', travelF: 120, travelR: 120, rake: 24, length: 2040 },
+  'aoz-mz07': { ref: 'Yamaha MT-07 (2021)', wheelbase: 1400, seat: 805, ground: 140, weight: 184, basis: 'ordre de marche', fuel: 14, tireF: '120/70-17', tireR: '180/55-17', travelF: 130, travelR: 130, rake: 24.8, length: 2085 },
+  'aoz-mz125': { ref: 'Yamaha MT-125 (2020)', wheelbase: 1325, seat: 810, ground: 155, weight: 142, basis: 'ordre de marche', fuel: 11, tireF: '100/80-17', tireR: '140/70-17', travelF: 130, travelR: 110, rake: 25.5, estimated: ['garde au sol', 'débattement arrière', 'chasse'] },
+
   // ------------------------------------------------ supermotards
   'kro-690smr': { ref: 'KTM 690 SMC R (2023)', wheelbase: 1470, seat: 890, ground: 237, weight: 147, basis: 'sec', fuel: 13.5, tireF: '120/70-17', tireR: '160/60-17', travelF: 215, travelR: 240, rake: 26.4 },
   'nor-701sm': { ref: 'Husqvarna 701 Supermoto (2024)', wheelbase: 1470, seat: 890, ground: 238, weight: 147, basis: 'sec', fuel: 13, tireF: '120/70-17', tireR: '160/60-17', travelF: 215, travelR: 240, rake: 26.4 },
@@ -79,6 +90,7 @@ export const REAL_SPECS: Record<string, RealSpec> = {
   'lio-speedstrike50': { ref: 'Peugeot Speedfight 4 50 2T', wheelbase: 1306, seat: 800, ground: 125, weight: 100, basis: 'sec', fuel: 7, tireF: '130/60-13', tireR: '130/60-13', travelF: 80, travelR: 75, rake: 26, estimated: ['garde au sol', 'réservoir', 'débattements', 'chasse'] },
   'gil-sprinter50': { ref: 'Gilera Runner 50 SP', wheelbase: 1300, seat: 830, ground: 125, weight: 105, basis: 'ordre de marche', fuel: 7, tireF: '120/70-12', tireR: '130/70-12', travelF: 80, travelR: 80, rake: 26, estimated: ['empattement', 'garde au sol', 'pneus', 'débattements', 'chasse'] },
   'gil-sprinter125': { ref: 'Gilera Runner 125 ST', wheelbase: 1340, seat: 815, ground: 130, weight: 137, basis: 'ordre de marche', fuel: 9, tireF: '120/70-14', tireR: '140/60-13', travelF: 90, travelR: 85, rake: 26, length: 1880, estimated: ['garde au sol', 'réservoir', 'débattements', 'chasse'] },
+  'aoz-tx560': { ref: 'Yamaha TMAX 560 (2022)', wheelbase: 1575, seat: 800, ground: 125, weight: 220, basis: 'ordre de marche', fuel: 15, tireF: '120/70-15', tireR: '160/60-15', travelF: 120, travelR: 117, rake: 25, estimated: ['garde au sol', 'chasse'] },
   'aoz-aerix70': { ref: 'Yamaha Aerox 50 2T (kit 70 cm³)', wheelbase: 1300, seat: 804, ground: 120, weight: 99, basis: 'sec', fuel: 6.5, tireF: '130/60-13', tireR: '140/60-13', travelF: 80, travelR: 75, rake: 26, note: 'Cotes de l’Aerox, préparation moteur 70 cm³.', estimated: ['empattement', 'garde au sol', 'débattements', 'chasse'] },
 };
 

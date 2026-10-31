@@ -2,6 +2,7 @@
 // et des effets (visuels via BikeModel, physiques via `tuningFromConfig`).
 
 import type { BikeClass, BikeSpec, TireType } from './bikes';
+import { lookFor } from './modelStyles';
 
 export type ExhaustType = 'stock' | 'sport' | 'titanium' | 'carbon';
 export type BarsType = 'low' | 'mx' | 'high' | 'stunt';
@@ -35,6 +36,14 @@ export interface BikeConfig {
   brakes: 'stock' | 'oversize';
   stuntBar: boolean;
   cage: boolean;
+  /** année-modèle (certaines années changent la géométrie : échappement…) */
+  year?: string;
+  /** garde-boue arrière */
+  fenderColor?: string;
+  /** moyeux */
+  hubColor?: string;
+  /** poignées */
+  gripColor?: string;
 }
 
 export interface PartOption<T extends string | number | boolean> {
@@ -62,7 +71,7 @@ export const PART_SLOTS = {
     { value: 'stock', name: 'Origine', price: 0 },
     { value: 'race', name: 'Kit Race (écopes larges)', price: 600, classes: ['mx', 'mini', 'sm', 'stunt'] },
     { value: 'retro', name: 'Kit Rétro 90s', price: 750, classes: ['mx', 'mini', 'sm', 'stunt'] },
-    { value: 'stunt', name: 'Kit Street / Stunt', price: 900 },
+    { value: 'stunt', name: 'Kit Street / Stunt', price: 900, classes: ['mx', 'mini', 'sm', 'stunt'] },
   ] as PartOption<PlasticsKit>[],
   rimStyle: [
     { value: 'spoke', name: 'Rayons', price: 0, classes: ['mx', 'mini', 'sm', 'stunt'] },
@@ -76,10 +85,10 @@ export const PART_SLOTS = {
     { value: 'slick', name: 'Slicks stunt', price: 600, desc: 'Accroche maximale sur béton sec.' },
   ] as PartOption<TireType>[],
   bars: [
-    { value: 'mx', name: 'Cintre MX', price: 0 },
-    { value: 'low', name: 'Cintre bas', price: 150 },
-    { value: 'high', name: 'Cintre haut', price: 200 },
-    { value: 'stunt', name: 'Cintre stunt + frein au guidon', price: 450 },
+    { value: 'mx', name: 'Cintre MX', price: 0, classes: ['mx', 'mini', 'sm', 'stunt'] },
+    { value: 'low', name: 'Cintre bas', price: 150, classes: ['mx', 'mini', 'sm', 'stunt'] },
+    { value: 'high', name: 'Cintre haut', price: 200, classes: ['mx', 'mini', 'sm', 'stunt'] },
+    { value: 'stunt', name: 'Cintre stunt + frein au guidon', price: 450, classes: ['mx', 'mini', 'sm', 'stunt'] },
   ] as PartOption<BarsType>[],
   seat: [
     { value: 'standard', name: 'Origine', price: 0 },
@@ -95,8 +104,8 @@ export const PART_SLOTS = {
   ] as PartOption<ExhaustType>[],
   fender: [
     { value: 'stock', name: 'Origine', price: 0 },
-    { value: 'short', name: 'Garde-boue court', price: 150 },
-    { value: 'high', name: 'Garde-boue haut', price: 150 },
+    { value: 'short', name: 'Garde-boue court', price: 150, classes: ['mx', 'mini', 'sm', 'stunt'] },
+    { value: 'high', name: 'Garde-boue haut', price: 150, classes: ['mx', 'mini', 'sm', 'stunt'] },
   ] as PartOption<FenderType>[],
   suspension: [
     { value: 'stock', name: 'Origine', price: 0 },
@@ -158,7 +167,7 @@ export const PALETTE = [
 
 export function defaultConfig(spec: BikeSpec): BikeConfig {
   const c = spec.colors;
-  const isStreet = spec.cls === 'sm' || spec.cls === 'stunt' || spec.cls === 'scooter';
+  const isStreet = spec.cls === 'sm' || spec.cls === 'stunt' || spec.cls === 'scooter' || spec.cls === 'road';
   return {
     primary: c.primary,
     secondary: c.secondary,
@@ -167,7 +176,7 @@ export function defaultConfig(spec: BikeSpec): BikeConfig {
     plastics: spec.cls === 'stunt' ? 'stunt' : 'stock',
     decal: 'factory',
     rimColor: c.rim,
-    rimStyle: spec.cls === 'scooter' ? 'cast' : 'spoke',
+    rimStyle: spec.cls === 'scooter' || spec.cls === 'road' ? 'cast' : 'spoke',
     tire: spec.tire,
     bars: spec.cls === 'stunt' ? 'stunt' : 'mx',
     barColor: spec.cls === 'scooter' ? '#1a1a1a' : '#2b2b2b',
@@ -176,13 +185,17 @@ export function defaultConfig(spec: BikeSpec): BikeConfig {
     exhaust: 'stock',
     fender: 'stock',
     plateNumber: String(10 + (Math.abs(hash(spec.id)) % 890)),
-    plateColor: isStreet ? '#f4f4f4' : c.secondary,
+    plateColor: isStreet && spec.cls !== 'sm' ? '#f4f4f4' : lookFor(spec.id).sidePlate,
     suspension: spec.cls === 'stunt' ? 'stunt' : 'stock',
     engineStage: 0,
     gearing: 0,
     brakes: 'stock',
     stuntBar: !!spec.stuntKit,
     cage: !!spec.stuntKit,
+    year: lookFor(spec.id).years[0].year,
+    fenderColor: spec.cls === 'scooter' || spec.cls === 'road' || spec.stuntKit ? c.primary : lookFor(spec.id).rearFender,
+    hubColor: '#b8bcc2',
+    gripColor: '#1a1a1a',
   };
 }
 
