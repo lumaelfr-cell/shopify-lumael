@@ -1184,7 +1184,7 @@ export class City {
   // ----- éclairage nocturne
   private buildLightPools(): void {
     this.lightPoolMat = new THREE.MeshBasicMaterial({ map: this.tex.lightPool, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
-    const g = new THREE.PlaneGeometry(12, 12).rotateX(-Math.PI / 2);
+    const g = new THREE.PlaneGeometry(10, 10).rotateX(-Math.PI / 2);
     const im = new THREE.InstancedMesh(g, this.lightPoolMat, this.lamps.length);
     const m = new THREE.Matrix4();
     this.lamps.forEach((l, i) => {
@@ -1250,10 +1250,11 @@ export class City {
       c.visible = dx * dx + dz * dz < vd * vd;
     }
     for (const n of this.nightMats) n.mat.emissiveIntensity = n.base * night + (n.mat === this.m.sign ? 0.12 : 0);
-    this.lightPoolMat.opacity = clamp(night * 1.2, 0, 0.85);
+    this.lightPoolMat.opacity = clamp(night * 0.4, 0, 0.3);
     for (const w of this.wetMats) {
-      w.mat.roughness = w.dry * (1 - wet * 0.65);
-      w.mat.metalness = wet * 0.25;
+      // chaussée mouillée : plus sombre et plus brillante (sans devenir un miroir)
+      w.mat.roughness = w.dry * (1 - wet * 0.5);
+      w.mat.color.setScalar(1 - wet * 0.42);
     }
   }
 }

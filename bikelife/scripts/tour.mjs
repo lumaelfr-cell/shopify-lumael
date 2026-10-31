@@ -2,6 +2,7 @@
 import { createRequire } from 'module';
 const { chromium, devices } = createRequire(import.meta.url)('playwright');
 const [url, out] = process.argv.slice(2);
+const W = Number(process.env.W || 1100), H = Number(process.env.H || 620);
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const logs = [];
 async function session(opts, fn) {
@@ -18,7 +19,7 @@ async function session(opts, fn) {
 }
 const ev = (page, s) => page.evaluate(s);
 const settle = (page, n = 6) => page.evaluate((n) => new Promise((r) => { let k = 0; const f = () => (++k >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
-await session({ viewport: { width: 1280, height: 720 } }, async (page) => {
+await session({ viewport: { width: W, height: H } }, async (page) => {
   await page.click('text=Garage & personnalisation');
   await settle(page, 4);
   await page.screenshot({ path: `${out}/g1-garage.png` });

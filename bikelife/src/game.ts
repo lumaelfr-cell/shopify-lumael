@@ -96,6 +96,8 @@ export class Game implements GameAPI {
   fps = 60;
   private menuOrbit = 0;
   private lastTopSpeedSave = 0;
+  private distAcc = 0;
+  private clutchHeld = false;
 
   constructor(private canvas: HTMLCanvasElement) {
     const mobile = isMobile();
@@ -350,7 +352,7 @@ export class Game implements GameAPI {
   }
 
   setTime(hh: number): void {
-    this.atmo.time = hh;
+    this.atmo.setTime(hh);
   }
 
   getWeather(): Weather {
@@ -472,6 +474,7 @@ export class Game implements GameAPI {
   }
 
   openGarage(): void {
+    this.garageReturn = this.state === 'paused' || this.state === 'ride' ? 'ride' : 'menu';
     this.menus.close();
     this.state = 'garage';
     document.getElementById('hud')!.classList.add('hidden');
@@ -489,6 +492,10 @@ export class Game implements GameAPI {
     if (ride) {
       if (!(this.mode instanceof FreeRide) && !this.testRide) this.quitMode();
       this.enterRide();
+    } else if (this.garageReturn === 'ride') {
+      this.state = 'paused';
+      document.getElementById('hud')!.classList.remove('hidden');
+      this.menus.showPause();
     } else {
       this.state = 'menu';
       this.menus.showMain();
@@ -703,6 +710,7 @@ export class Game implements GameAPI {
       this.hornCd = 0.4;
     }
     const phys = this.player.phys;
+    this.clutchHeld = ctl.clutch;
     // entrées moto
     const bi: BikeInput = this.frozen
       ? { ...emptyInput(), frontBrake: 1, rearBrake: 1, throttle: ctl.throttle, clutch: true }
@@ -754,7 +762,11 @@ export class Game implements GameAPI {
       if (this.safe.length > 30) this.safe.shift();
     }
     // stats
-    this.prog.p.stats.distance += phys.speed * dt;
+    this.distAcc += phys.speed * dt;
+    if (this.distAcc > 50) {
+      this.prog.stat('distance', this.distAcc);
+      this.distAcc = 0;
+    }
     if (phys.kmh > (this.prog.p.records.topSpeed ?? 0) + 0.5 && performance.now() - this.lastTopSpeedSave > 1500) {
       this.lastTopSpeedSave = performance.now();
       const prevTop = this.prog.p.records.topSpeed ?? 0;
@@ -957,7 +969,7 @@ export class Game implements GameAPI {
       rpm: e.rpm,
       redline: this.player.spec.redline,
       gear: e.isCVT ? 'A' : String(e.gear),
-      clutch: e.engagement < 0.5 && !e.isCVT,
+      clutch: this.clutchHeld && !e.isCVT,
       pitchDeg: p.pitch * RAD,
       balanceDeg: p.balanceAngle * RAD,
       loopDeg,

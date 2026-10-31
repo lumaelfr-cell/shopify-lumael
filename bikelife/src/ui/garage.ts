@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { h, clear } from './dom';
+import { h, clear, confirmDialog } from './dom';
 import type { Progression } from '../gameplay/progression';
 import { garageSlots } from '../gameplay/progression';
 import { BIKES, BIKE_BY_ID, BikeSpec, bikeName, CLASS_LABEL, estimateHp, BikeClass } from '../data/bikes';
@@ -327,7 +327,7 @@ export class GarageView {
       bottom.append(h('button', { class: 'btn primary', disabled: !can.ok, onclick: () => { if (this.prog.buyBike(spec.id)) { this.host.audio.ui('buy'); this.selectBike(spec.id); this.host.onChange(); } } }, can.ok ? `Acheter ${spec.price.toLocaleString('fr-FR')} $` : can.why ?? 'Indisponible'));
     }
     bottom.append(h('button', { class: 'btn', onclick: () => { if (this.pending().length) this.revert(); this.host.back(); } }, 'Retour'));
-    this.root.append(h('div', { class: 'screen', id: 'garage' }, panel), info, bottom);
+    this.root.append(h('div', { class: 'screen', id: 'garage' }, panel, info, bottom));
   }
 
   private statBlock(spec: BikeSpec, cfg: BikeConfig): HTMLElement {
@@ -354,12 +354,15 @@ export class GarageView {
     if (this.owned()) {
       body.append(h('div', { class: 'slot-title' }, 'Caractéristiques'), this.statBlock(this.spec, this.cfg), h('div', { class: 'muted', style: 'font-size:13px;margin:6px 0' }, this.spec.desc));
       if (Object.keys(p.bikes).length > 1) {
+        const value = Math.round((this.spec.price || 1500) * 0.6);
         body.append(h('button', { class: 'btn small danger', onclick: () => {
-          if (!confirm(`Vendre ${bikeName(this.spec)} pour ${Math.round(this.spec.price * 0.6).toLocaleString('fr-FR')} $ ?`)) return;
-          this.prog.sellBike(this.viewId);
-          this.selectBike(this.prog.p.current);
-          this.host.onChange();
-        } }, `Vendre (${Math.round((this.spec.price || 1500) * 0.6).toLocaleString('fr-FR')} $)`));
+          void confirmDialog(`Vendre ${bikeName(this.spec)} pour ${value.toLocaleString('fr-FR')} $ ?`, 'Vendre').then((yes) => {
+            if (!yes) return;
+            this.prog.sellBike(this.viewId);
+            this.selectBike(this.prog.p.current);
+            this.host.onChange();
+          });
+        } }, `Vendre (${value.toLocaleString('fr-FR')} $)`));
       }
     }
   }

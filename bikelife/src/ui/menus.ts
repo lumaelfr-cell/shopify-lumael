@@ -1,7 +1,7 @@
 // Écrans de menu : principal, modes, défis, contre-la-montre, carte, pause,
 // paramètres, multijoueur, résultats, succès.
 
-import { h, clear, medalStr } from './dom';
+import { h, clear, medalStr, confirmDialog, infoDialog } from './dom';
 import type { Progression, Quality } from '../gameplay/progression';
 import { ACHIEVEMENTS, xpForLevel, garageSlots } from '../gameplay/progression';
 import type { AudioManager } from '../audio/audio';
@@ -94,13 +94,15 @@ export class Menus {
       ${p.daily.goals.map((gl) => `<div class="muted">${gl.done ? '✔' : '•'} ${gl.label} — <span class="gold">${gl.reward} $</span> (${Math.round(this.g.prog.goalProgress(gl) * 100)} %)</div>`).join('')}`;
     const side = h('div', { class: 'side' },
       h('div', { class: 'logo', html: 'BIKE <span>LIFE</span><small>STREET KINGS</small>' }),
-      this.btn('▶  ROULER EN VILLE', () => this.g.startRide(), 'primary'),
-      this.btn('🏁  Modes de jeu & défis', () => this.showModes()),
-      this.btn('🔧  Garage & personnalisation', () => this.g.openGarage()),
-      this.btn('🗺  Carte & téléportation', () => this.showMap(() => this.showMain())),
-      this.btn('🌐  Multijoueur', () => this.showMP(() => this.showMain())),
-      this.btn('🏆  Succès & records', () => this.showAchievements(() => this.showMain())),
-      this.btn('⚙  Paramètres', () => this.showSettings(() => this.showMain())),
+      h('div', { class: 'menu-btns' },
+        this.btn('▶  ROULER EN VILLE', () => this.g.startRide(), 'primary wide'),
+        this.btn('🏁  Modes & défis', () => this.showModes()),
+        this.btn('🔧  Garage', () => this.g.openGarage()),
+        this.btn('🗺  Carte', () => this.showMap(() => this.showMain())),
+        this.btn('🌐  Multijoueur', () => this.showMP(() => this.showMain())),
+        this.btn('🏆  Succès & records', () => this.showAchievements(() => this.showMain())),
+        this.btn('⚙  Paramètres', () => this.showSettings(() => this.showMain())),
+      ),
       info,
     );
     const el = h('div', { class: 'screen', id: 'main-menu' }, side);
@@ -276,8 +278,8 @@ export class Menus {
       h('div', { class: 'muted', style: 'font-size:13px' }, pr.storageOk ? 'Progression enregistrée automatiquement sur cet appareil (localStorage).' : '⚠ Stockage local indisponible : la progression ne sera pas conservée.'),
       h('div', { class: 'row', style: 'margin-top:6px' },
         this.btn('Exporter', () => { ta.value = pr.exportJSON(); ta.select(); }, 'small'),
-        this.btn('Importer', () => { if (pr.importJSON(ta.value)) { this.g.applySettings(); this.showSettings(back); } else alert('Sauvegarde invalide'); }, 'small'),
-        this.btn('Réinitialiser la progression', () => { if (confirm('Effacer toute la progression ?')) { pr.reset(); this.g.applySettings(); this.g.toMainMenu(); } }, 'small danger'),
+        this.btn('Importer', () => { if (pr.importJSON(ta.value)) { this.g.applySettings(); this.showSettings(back); } else infoDialog('Sauvegarde invalide : collez le texte exporté complet.'); }, 'small'),
+        this.btn('Réinitialiser la progression', () => { void confirmDialog('Effacer toute la progression ? Cette action est définitive.', 'Tout effacer').then((yes) => { if (yes) { pr.reset(); this.g.applySettings(); this.g.toMainMenu(); } }); }, 'small danger'),
       ),
       ta,
     );

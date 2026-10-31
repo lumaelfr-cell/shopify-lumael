@@ -196,7 +196,7 @@ export class TrickSystem {
           this.trickPose = null;
         }
       }
-      this.live = { label: tp ? tp.label.toUpperCase() : 'AIR', points: A.pts + A.time * 150, sub: `${A.time.toFixed(2)} s · ${(A.maxY - A.y0 + 0.3).toFixed(1)} m` };
+      if (A.time > 0.3 || tp) this.live = { label: tp ? tp.label.toUpperCase() : 'AIR', points: A.pts + A.time * 150, sub: `${A.time.toFixed(2)} s · ${(A.maxY - A.y0 + 0.3).toFixed(1)} m` };
     } else if (A.active) {
       A.active = false;
       const dist = Math.hypot(b.x - A.x0, b.z - A.z0);

@@ -87,7 +87,7 @@ export const PARKING_STRUCT = { x0: -255, z0: 22, x1: -205, z1: 72, levels: [CUR
 export const WORLD_BOUNDS = { minX: -900, maxX: 900, minZ: -1490, maxZ: 900 };
 
 export const SPOTS: Spot[] = [
-  { id: 'garage', name: 'Garage Bike Life', x: -60, z: 6.6, yaw: Math.PI / 2, desc: 'Ton garage sur le grand boulevard.' },
+  { id: 'garage', name: 'Garage Bike Life', x: -57, z: 12.8, yaw: Math.PI / 2, desc: 'Ton garage sur le grand boulevard.' },
   { id: 'boulevard', name: 'Grand Boulevard', x: -515, z: 3, yaw: Math.PI / 2, desc: 'Ligne droite de 500 m pour les wheelings.' },
   { id: 'corniche', name: 'Route de la Corniche', x: 4, z: -575, yaw: Math.PI, desc: 'Presque 1 km de ligne droite hors de la ville.' },
   { id: 'stunt', name: 'Stunt Park', x: -47, z: 445, yaw: Math.PI, desc: 'Kickers, funbox, spine et grand saut.' },

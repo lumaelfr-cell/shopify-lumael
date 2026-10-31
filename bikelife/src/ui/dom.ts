@@ -32,3 +32,25 @@ export function esc(s: string): string {
 export function medalStr(n: number): string {
   return ['☆☆☆', '★☆☆', '★★☆', '★★★'][Math.max(0, Math.min(3, n))];
 }
+
+/** Boîte de confirmation intégrée (remplace window.confirm, bloqué dans certains cadres). */
+export function confirmDialog(text: string, ok = 'Confirmer', cancel = 'Annuler'): Promise<boolean> {
+  return new Promise((resolve) => {
+    const close = (v: boolean) => {
+      wrap.remove();
+      resolve(v);
+    };
+    const wrap = h('div', { class: 'screen dim', style: 'z-index:90' },
+      h('div', { class: 'card', style: 'width:min(420px,100%);text-align:center' },
+        h('div', { style: 'font-size:18px;font-weight:700;margin-bottom:14px' }, text),
+        h('div', { class: 'row', style: 'justify-content:center' },
+          h('button', { class: 'btn primary', onclick: () => close(true) }, ok),
+          h('button', { class: 'btn', onclick: () => close(false) }, cancel))));
+    document.body.append(wrap);
+  });
+}
+
+/** Message bref intégré (remplace window.alert). */
+export function infoDialog(text: string): void {
+  void confirmDialog(text, 'OK', 'Fermer');
+}

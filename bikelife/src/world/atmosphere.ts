@@ -42,6 +42,13 @@ export class Atmosphere {
     scene.add(this.sky);
     this.envSky = new Sky();
     this.envSky.scale.setScalar(50);
+    // le ciel physique est très lumineux (HDR) : on l'atténue pour l'exposition du jeu
+    for (const sk of [this.sky, this.envSky]) {
+      const m = sk.material as THREE.ShaderMaterial;
+      m.uniforms.skyScale = { value: 0.5 };
+      m.fragmentShader = m.fragmentShader.replace('gl_FragColor = vec4( texColor, 1.0 );', 'gl_FragColor = vec4( texColor * skyScale, 1.0 );').replace('void main() {', 'uniform float skyScale;\nvoid main() {');
+      m.needsUpdate = true;
+    }
     this.envScene.add(this.envSky);
     this.pmrem = new THREE.PMREMGenerator(renderer);
 
@@ -122,6 +129,11 @@ export class Atmosphere {
     this.envTimer = 0;
   }
 
+  setTime(h: number): void {
+    this.time = ((h % 24) + 24) % 24;
+    this.envTimer = 0;
+  }
+
   update(dt: number, cam: THREE.PerspectiveCamera, focus: THREE.Vector3): void {
     this.time = (this.time + (dt / 60) * this.timeSpeed) % 24;
     const t = this.time;
@@ -158,15 +170,15 @@ export class Atmosphere {
     const moon = new THREE.Color('#7f95c9');
     const dirToLight = this.sunDir.y > -0.05 ? this.sunDir.clone() : new THREE.Vector3(-0.3, 0.8, -0.4).normalize();
     this.sun.color.copy(this.sunDir.y > -0.05 ? sunCol : moon);
-    this.sun.intensity = this.sunDir.y > -0.05 ? (0.4 + 2.8 * sunUp) * (1 - this.cloud * 0.55) : 0.35;
+    this.sun.intensity = this.sunDir.y > -0.05 ? (0.3 + 2.4 * sunUp) * (1 - this.cloud * 0.55) : 0.3;
     this.sun.position.copy(focus).addScaledVector(dirToLight, 120);
     this.sun.target.position.copy(focus);
-    this.hemi.intensity = lerp(0.28, 1.0, sunUp) * (1 - this.cloud * 0.2) + (this.weather === 'fog' ? 0.15 : 0);
+    this.hemi.intensity = lerp(0.22, 0.62, sunUp) * (1 - this.cloud * 0.15) + (this.weather === 'fog' ? 0.12 : 0);
     this.hemi.color.set(this.night > 0.5 ? '#3b4a72' : '#bcd6f2');
     this.hemi.groundColor.set(this.night > 0.5 ? '#2a2620' : '#5a5040');
 
     // brouillard
-    const day = new THREE.Color('#b7cce0'), dusk = new THREE.Color('#d9a07a'), nightC = new THREE.Color('#0d1424'), grey = new THREE.Color('#8b939b');
+    const day = new THREE.Color('#9db3c9'), dusk = new THREE.Color('#c48d6c'), nightC = new THREE.Color('#0d1424'), grey = new THREE.Color('#8b939b');
     const duskAmt = clamp(1 - Math.abs(this.sunDir.y - 0.05) / 0.18, 0, 1);
     this.fogColor.copy(day).lerp(dusk, duskAmt * 0.7).lerp(nightC, this.night).lerp(grey, this.cloud * 0.6 * (1 - this.night));
     const baseDensity = 1.9 / this.viewDist;
@@ -181,7 +193,8 @@ export class Atmosphere {
     this.rainMat.uniforms.uCam.value.copy(cam.position);
     this.rainMat.uniforms.uOpacity.value = 0.45;
 
-    // carte d'environnement
+    // carte d'environnement (intensité mise à jour en continu, image régénérée périodiquement)
+    this.scene.environmentIntensity = lerp(0.15, 0.75, 1 - this.night) * (1 - this.cloud * 0.25);
     this.envTimer -= dt;
     const key = `${Math.round(this.time * 4)}:${this.weather}`;
     if (this.envEnabled && (this.envTimer <= 0 || (key !== this.lastEnvKey && this.envTimer < 20))) {
@@ -202,7 +215,6 @@ export class Atmosphere {
     if (this.envRT) this.envRT.dispose();
     this.envRT = rt;
     this.scene.environment = rt.texture;
-    this.scene.environmentIntensity = lerp(0.25, 1, 1 - this.night) * (1 - this.cloud * 0.3);
   }
 
   dispose(): void {

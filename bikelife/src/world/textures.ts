@@ -177,9 +177,9 @@ export class WorldTextures {
     });
     this.lightPool = mk(128, 128, (g, w, h) => {
       const grd = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
-      grd.addColorStop(0, 'rgba(255,214,150,0.95)');
-      grd.addColorStop(0.4, 'rgba(255,190,120,0.45)');
-      grd.addColorStop(1, 'rgba(255,170,90,0)');
+      grd.addColorStop(0, 'rgba(255,200,130,0.9)');
+      grd.addColorStop(0.35, 'rgba(255,180,110,0.4)');
+      grd.addColorStop(1, 'rgba(255,160,80,0)');
       g.fillStyle = grd;
       g.fillRect(0, 0, w, h);
     }, true, false);
