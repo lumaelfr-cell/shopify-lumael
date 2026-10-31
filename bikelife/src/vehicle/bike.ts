@@ -9,7 +9,7 @@ import type { RiderConfig } from '../data/apparel';
 import { BikePhysics, BikeInput, AssistLevel } from '../physics/bikePhysics';
 import type { CollisionWorld, GroundHit } from '../physics/collision';
 import { buildBikeVisual, BikeVisual } from './bikeModel';
-import { Rider, TrickName } from './rider';
+import { Rider, TrickName, BodyTargets } from './rider';
 import { clamp, damp } from '../core/math';
 import { isLoose } from '../physics/collision';
 
@@ -61,6 +61,14 @@ export class PlayerBike {
   wreck: { t: number; bikeV: THREE.Vector3; bikeW: THREE.Vector3; riderV: THREE.Vector3; riderW: THREE.Vector3; riderObj: THREE.Group } | null = null;
   headWorld = new THREE.Vector3();
   private gh: GroundHit = { h: 0, surf: 'asphalt', id: -1 };
+  /** moto garée (pilote descendu) */
+  parked = false;
+  /** guidon tordu après des chutes (rad, visuel) */
+  barBend = 0;
+  /** phare cassé (état mécanique très bas) */
+  lightBroken = false;
+  private standMesh: THREE.Group | null = null;
+  private standRoll = 0;
 
   constructor(spec: BikeSpec, cfg: BikeConfig, riderCfg: RiderConfig, private world: CollisionWorld, private scene: THREE.Scene) {
     this.spec = spec;
@@ -78,12 +86,105 @@ export class PlayerBike {
   private buildVisual(): void {
     if (this.visual) {
       this.rig.offset.remove(this.visual.root);
-      this.visual.root.remove(this.rider.root);
+      if (this.rider.root.parent === this.visual.root) this.visual.root.remove(this.rider.root);
       this.visual.dispose();
     }
     this.visual = buildBikeVisual(this.spec, this.cfg);
     this.rig.offset.add(this.visual.root);
+    if (!this.parked) this.visual.root.add(this.rider.root);
+    else this.buildStand();
+  }
+
+  // ------------------------------------------------------------ garer / descendre
+  /** Gare la moto (béquille) et détache le pilote : retourne la pose actuelle en coordonnées monde. */
+  park(): { targets: BodyTargets | null; matrix: THREE.Matrix4 } {
+    const p = this.phys;
+    p.vx = p.vz = p.vy = 0;
+    this.rig.outer.updateMatrixWorld(true);
+    const matrix = this.visual.root.matrixWorld.clone();
+    const targets = this.rider.last;
+    if (this.rider.root.parent) this.rider.root.parent.remove(this.rider.root);
+    this.parked = true;
+    this.buildStand();
+    return { targets, matrix };
+  }
+
+  /** Remonte sur la moto (le pilote est rattaché au modèle). */
+  unpark(): void {
+    if (!this.parked) return;
+    this.parked = false;
+    if (this.standMesh) {
+      this.standMesh.parent?.remove(this.standMesh);
+      this.standMesh.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
+      this.standMesh = null;
+    }
+    if (this.rider.root.parent) this.rider.root.parent.remove(this.rider.root);
+    this.rider.root.position.set(0, 0, 0);
+    this.rider.root.rotation.set(0, 0, 0);
     this.visual.root.add(this.rider.root);
+    this.phys.reset(this.phys.x, this.phys.z, this.phys.yaw, this.phys.y - this.phys.comHeight);
+  }
+
+  /** Béquille adaptée : trépied (cross/stunt), latérale (motard/route), centrale (scooter). */
+  private buildStand(): void {
+    if (this.standMesh) {
+      this.standMesh.parent?.remove(this.standMesh);
+      this.standMesh = null;
+    }
+    const s = this.spec;
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: s.cls === 'scooter' ? '#2a2a2a' : '#3a3d42', roughness: 0.4, metalness: 0.8 });
+    const gc = s.groundClearance;
+    if (s.cls === 'scooter') {
+      this.standRoll = 0;
+      for (const sx of [-1, 1]) {
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, gc + 0.02, 6).translate(sx * 0.12, gc / 2, s.wheelbase * 0.36), mat);
+        g.add(m);
+      }
+      g.add(new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.02, 0.05).translate(0, 0.01, s.wheelbase * 0.36), mat));
+    } else if (s.cls === 'mx' || s.cls === 'mini' || s.cls === 'stunt') {
+      // trépied de bord de piste sous le sabot moteur
+      this.standRoll = 0;
+      const z = s.wheelbase * 0.5;
+      g.add(new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.025, 0.28).translate(0, gc - 0.012, z), mat));
+      for (const [lx, lz] of [[0.16, 0.14], [-0.16, 0.14], [0, -0.18]]) {
+        const top = new THREE.Vector3(lx * 0.4, gc - 0.02, z + lz * 0.4);
+        const bot = new THREE.Vector3(lx, 0, z + lz);
+        const d = bot.clone().sub(top);
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, d.length(), 6), mat);
+        leg.position.copy(top).addScaledVector(d, 0.5);
+        leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+        g.add(leg);
+      }
+    } else {
+      // béquille latérale côté gauche : la moto penche légèrement
+      this.standRoll = -0.16;
+      const top = new THREE.Vector3(0.12, gc + 0.08, s.wheelbase * 0.42);
+      const bot = new THREE.Vector3(0.36, 0.0, s.wheelbase * 0.36);
+      const d = bot.clone().sub(top);
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, d.length(), 6), mat);
+      leg.position.copy(top).addScaledVector(d, 0.5);
+      leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+      g.add(leg);
+    }
+    g.traverse((o) => ((o as THREE.Mesh).castShadow = true));
+    this.visual.root.add(g);
+    this.standMesh = g;
+  }
+
+  /** Pose du pilote assis sur la moto (repère modèle) pour l'animation de montée. */
+  seatedTargets(): BodyTargets | null {
+    const was = this.rider.root.parent;
+    this.rig.outer.updateMatrixWorld(true);
+    this.inv.copy(this.visual.root.matrixWorld).invert();
+    this.visual.gripL.getWorldPosition(this.gripL).applyMatrix4(this.inv);
+    this.visual.gripR.getWorldPosition(this.gripR).applyMatrix4(this.inv);
+    this.rider.pose({
+      seat: this.visual.seat, pegL: this.visual.pegL, pegR: this.visual.pegR, gripL: this.gripL, gripR: this.gripR,
+      stand: 0, lean: 0, pitch: 0, roll: 0, steer: 0, trick: null, trickW: 0, footDown: 1, scooter: this.visual.isScooter, firstPerson: false,
+    });
+    void was;
+    return this.rider.last;
   }
 
   /** Change de moto ou de configuration (garage) en gardant la position. */
@@ -109,11 +210,13 @@ export class PlayerBike {
 
   reset(x: number, z: number, yaw: number, y?: number): void {
     this.endWreck();
+    if (this.parked) this.unpark();
     this.phys.reset(x, z, yaw, y);
     this.stand = 0;
   }
 
   step(dt: number, inp: BikeInput): void {
+    if (this.parked) return;
     if (this.wreck) {
       this.updateWreck(dt);
       return;
@@ -126,11 +229,20 @@ export class PlayerBike {
   sync(dt: number, ex: PoseExtras): void {
     if (this.wreck) return;
     const p = this.phys;
+    if (this.parked) {
+      this.rig.set(this.spec, p.comHeight, p.x, p.y, p.z, p.yaw, 0, this.standRoll);
+      this.visual.update(0.35, p.front.comp, p.rear.comp, p.front.rot, p.rear.rot);
+      this.headlight.intensity = 0;
+      if (this.visual.headlightMat) this.visual.headlightMat.emissiveIntensity = 0.05;
+      if (this.visual.taillightMat) this.visual.taillightMat.emissiveIntensity = 0.1;
+      this.rig.outer.updateMatrixWorld(true);
+      return;
+    }
     const stopped = p.speed < 0.7 && p.state === 'ground';
     this.footDown = damp(this.footDown, stopped ? 1 : 0, 5, dt);
     const visRoll = p.roll - this.footDown * 0.11;
     this.rig.set(this.spec, p.comHeight, p.x, p.y, p.z, p.yaw, p.pitch, visRoll);
-    this.visual.update(p.steerVis, p.front.comp, p.rear.comp, p.front.rot, p.rear.rot);
+    this.visual.update(p.steerVis + this.barBend, p.front.comp, p.rear.comp, p.front.rot, p.rear.rot);
     // pilote debout en l'air, sur terre rapide, en stoppie
     const loose = isLoose(p.rear.surf);
     const wantStand = !this.visual.isScooter && (p.state === 'air' || p.state === 'stoppie' || (loose && p.speed > 9) || p.lastLandImpact > 4 && p.groundedTime < 0.4) ? 1 : 0;
@@ -154,8 +266,8 @@ export class PlayerBike {
       const local = this.visual.isScooter ? new THREE.Vector3(0, -0.1, 1) : new THREE.Vector3(0, -0.54, 0.85);
       const fwd = local.applyQuaternion(hl.getWorldQuaternion(new THREE.Quaternion()));
       this.headlight.target.position.copy(this.headlight.position).addScaledVector(fwd, 10);
-      this.headlight.intensity = ex.night > 0.05 ? 260 * ex.night : 0;
-      if (this.visual.headlightMat) this.visual.headlightMat.emissiveIntensity = 0.3 + ex.night * 3;
+      this.headlight.intensity = ex.night > 0.05 && !this.lightBroken ? 260 * ex.night : 0;
+      if (this.visual.headlightMat) this.visual.headlightMat.emissiveIntensity = this.lightBroken ? 0 : 0.3 + ex.night * 3;
     } else this.headlight.intensity = 0;
     if (this.visual.taillightMat) this.visual.taillightMat.emissiveIntensity = 0.6 + ex.night * 2 + (p.front.longF < -200 || p.rear.longF < -200 ? 2 : 0);
   }

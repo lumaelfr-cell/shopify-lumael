@@ -24,7 +24,7 @@ export function laneOffsets(i: number): number[] {
   return [2.1];
 }
 
-export type District = 'downtown' | 'commercial' | 'residential' | 'cite' | 'industrial' | 'park' | 'plaza' | 'stunt' | 'training' | 'parking' | 'garage' | 'mall';
+export type District = 'downtown' | 'commercial' | 'residential' | 'cite' | 'industrial' | 'park' | 'plaza' | 'stunt' | 'training' | 'parking' | 'garage' | 'mall' | 'station' | 'apartments' | 'abandoned' | 'local';
 
 export function blockDistrict(bx: number, bz: number): District {
   const key = `${bx},${bz}`;
@@ -38,6 +38,10 @@ export function blockDistrict(bx: number, bz: number): District {
     '8,4': 'mall',
     '2,9': 'park',
     '9,7': 'mall',
+    '3,5': 'station',
+    '2,6': 'apartments',
+    '9,5': 'abandoned',
+    '9,6': 'local',
   };
   if (special[key]) return special[key];
   if (bx >= 9) return 'industrial';
@@ -98,6 +102,11 @@ export const SPOTS: Spot[] = [
   { id: 'industrial', name: 'Zone industrielle', x: 330, z: -177.9, yaw: Math.PI / 2, desc: 'Entrepôts, quais et conteneurs.' },
   { id: 'cite', name: 'La Cité', x: -362.1, z: 50, yaw: 0, desc: 'Les barres d’immeubles et leurs parkings.' },
   { id: 'downtown', name: 'Centre-ville', x: 45, z: 3, yaw: Math.PI / 2, desc: 'Gratte-ciel et grandes avenues.' },
+  { id: 'atelier', name: 'Atelier & concession', x: -32.5, z: 8, yaw: Math.PI / 2, desc: 'Réparation, pièces, motos neuves et équipement, à côté du garage.' },
+  { id: 'station', name: 'Station-service', x: -235, z: -5, yaw: -Math.PI / 2, desc: 'Plein d’essence, supérette 24/7 et fast-food.' },
+  { id: 'local', name: 'Le Local (Bike Life)', x: 305, z: 7, yaw: -Math.PI / 2, desc: 'Le QG de la bande : motos, sono, défis du quartier.' },
+  { id: 'immeuble', name: 'Résidence Les Tilleuls', x: -321, z: 7, yaw: Math.PI / 2, desc: 'Immeuble de 4 niveaux à visiter, accès au toit.' },
+  { id: 'entrepot', name: 'Entrepôt abandonné', x: 315, z: -7, yaw: Math.PI, desc: 'À explorer à pied ou à moto : mezzanine, rampes de fortune.' },
 ];
 
 export const spotById = (id: string): Spot => SPOTS.find((s) => s.id === id) ?? SPOTS[0];

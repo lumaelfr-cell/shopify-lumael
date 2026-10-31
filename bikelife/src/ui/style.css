@@ -216,3 +216,23 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   /* les boutons du bas (Essayer / Acheter / Retour) passent sur 2 lignes : on laisse la place pour faire défiler la fin du panneau au-dessus */
   #garage .gpanel { padding-bottom: 130px; }
 }
+
+/* ---- monde : invite d'interaction, panneaux, état */
+#hud-prompt { cursor: pointer; pointer-events: auto; }
+#hud-prompt .key { display: inline-block; min-width: 26px; padding: 2px 8px; margin-right: 8px; border-radius: 7px; background: #f4f4f4; color: #111; font-weight: 900; font-size: 14px; }
+#hud-prompt .alt { margin-top: 6px; font-size: 13px; color: var(--muted); }
+#hud-prompt .row { justify-content: center; gap: 8px; margin-top: 8px; }
+#hud-profile .status { font-size: 12px; color: #cfd6df; margin-top: 2px; white-space: nowrap; }
+#hud-profile .status b { color: #fff; }
+#hud-profile .status .warn { color: #ffcc33; }
+#hud-profile .status .bad { color: #ff5d5d; }
+#hud-alert { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 22; padding: 8px 14px; border-radius: 12px; background: rgba(160,20,20,0.85); color: #fff; font-weight: 800; letter-spacing: 1px; pointer-events: none; }
+.panel-card { width: min(640px, 100%); }
+.panel-rows { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.panel-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; }
+.panel-row .pr-title { font-weight: 800; }
+.panel-row .pr-sub { font-size: 13px; }
+.panel-row .pr-right { font-weight: 800; color: #ffd166; white-space: nowrap; }
+.speech { padding: 10px 12px; border-radius: 12px; background: rgba(34,184,255,0.1); border: 1px solid rgba(34,184,255,0.35); margin-bottom: 10px; }
+.speech b { color: #22b8ff; display: block; margin-bottom: 4px; }
+#fade { position: fixed; inset: 0; z-index: 60; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s; }

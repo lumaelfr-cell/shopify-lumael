@@ -45,7 +45,7 @@ export class CameraRig {
   private activeAuto = false;
   private sideSign = 1;
   orbit = 0; // menu : rotation automatique
-  raycast: ((ax: number, ay: number, az: number, bx: number, by: number, bz: number) => number) | null = null;
+  raycast: ((ax: number, ay: number, az: number, bx: number, by: number, bz: number, step?: number) => number) | null = null;
 
   constructor(aspect: number) {
     this.cam = new THREE.PerspectiveCamera(this.baseFov, aspect, 0.08, 1400);
@@ -168,6 +168,65 @@ export class CameraRig {
     } else this.cam.up.set(0, 1, 0);
     this.cam.lookAt(this.look);
     this.cam.fov = damp(this.cam.fov, fov, 4, dt);
+    this.cam.updateProjectionMatrix();
+  }
+
+  // ---------------------------------------------------------------- à pied
+  /** cap de la caméra à pied (sert de référence aux déplacements) */
+  footYaw = 0;
+  private footPitch = 0.28;
+  private manualT = 9;
+
+  snapFoot(yaw: number): void {
+    this.footYaw = yaw;
+    this.footPitch = 0.28;
+    this.manualT = 9;
+  }
+
+  /**
+   * Caméra à la troisième personne (épaule) ou vue subjective quand le joueur
+   * marche. `dX/dY` : rotation demandée cette frame (souris, stick, doigt).
+   */
+  updateFoot(dt: number, t: { x: number; y: number; z: number; yaw: number; forward: boolean; head: THREE.Vector3; groundY: number }, dX: number, dY: number, indoor: boolean): void {
+    if (Math.abs(dX) + Math.abs(dY) > 1e-4) this.manualT = 0;
+    else this.manualT += dt;
+    this.footYaw += dX * 1.1;
+    this.footPitch = clamp(this.footPitch + dY * 0.9, -0.55, 1.15);
+    // recentre derrière le personnage quand on avance sans toucher à la caméra
+    if (t.forward && this.manualT > 1.2) this.footYaw = dampAngle(this.footYaw, t.yaw, 1.4, dt);
+    const fpv = this.mode === 'fpv';
+    const cy = Math.cos(this.footYaw), sy = Math.sin(this.footYaw);
+    const desired = new THREE.Vector3();
+    const look = new THREE.Vector3();
+    if (fpv) {
+      desired.copy(t.head);
+      const p = this.footPitch - 0.28;
+      look.set(t.head.x + sy * Math.cos(p) * 10, t.head.y - Math.sin(p) * 10, t.head.z + cy * Math.cos(p) * 10);
+    } else {
+      const dist = indoor ? 2.5 : 3.6;
+      const p = this.footPitch;
+      const side = indoor ? 0.35 : 0.45; // caméra d'épaule
+      const pivot = new THREE.Vector3(t.x - cy * side, t.y + 1.5, t.z + sy * side);
+      desired.set(pivot.x - sy * dist * Math.cos(p), pivot.y + Math.sin(p) * dist * 0.85, pivot.z - cy * dist * Math.cos(p));
+      if (this.raycast) {
+        // pas fin : les cloisons intérieures ne font que 12 à 30 cm
+        const f = this.raycast(pivot.x, pivot.y, pivot.z, desired.x, desired.y, desired.z, 0.08);
+        if (f < 1) desired.set(lerp(pivot.x, desired.x, Math.max(0, f - 0.06)), lerp(pivot.y, desired.y, Math.max(0, f - 0.06)), lerp(pivot.z, desired.z, Math.max(0, f - 0.06)));
+      }
+      if (desired.y < t.groundY + 0.3) desired.y = t.groundY + 0.3;
+      look.set(pivot.x + sy * 2, pivot.y - 0.1 - (p - 0.28) * 0.8, pivot.z + cy * 2);
+    }
+    const rate = fpv ? 60 : 14;
+    this.pos.x = damp(this.pos.x, desired.x, rate, dt);
+    this.pos.y = damp(this.pos.y, desired.y, rate, dt);
+    this.pos.z = damp(this.pos.z, desired.z, rate, dt);
+    // pas de lissage qui ferait traverser un mur
+    if (!fpv && this.raycast && this.raycast(t.x, t.y + 1.5, t.z, this.pos.x, this.pos.y, this.pos.z, 0.08) < 1) this.pos.copy(desired);
+    this.look.copy(look);
+    this.cam.position.copy(this.pos);
+    this.cam.up.set(0, 1, 0);
+    this.cam.lookAt(this.look);
+    this.cam.fov = damp(this.cam.fov, fpv ? 75 : 60, 6, dt);
     this.cam.updateProjectionMatrix();
   }
 

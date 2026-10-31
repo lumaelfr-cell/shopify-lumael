@@ -20,6 +20,15 @@ export interface Controls {
   horn: boolean;
   lookX: number;
   lookY: number;
+  // ---- à pied / interactions
+  moveX: number; // + = droite
+  moveY: number; // + = avant
+  sprint: boolean;
+  footJump: boolean; // front montant
+  interact: boolean; // front montant (F, Y manette, bouton ACTION)
+  challenges: boolean; // front montant (Entrée, croix gauche) : défis du lieu
+  lookDX: number; // rotation de caméra de cette frame (souris glissée, stick droit, glisser tactile)
+  lookDY: number;
 }
 
 export interface TouchState {
@@ -45,7 +54,9 @@ export class Input {
   private kbFront = 0;
   private prevPad: boolean[] = [];
   touch: TouchState = { active: false, steer: 0, lean: 0, throttle: 0, frontBrake: 0, rearBrake: 0, clutch: false, jump: false, trick: false, lookX: 0 };
-  touchEdges = { camera: false, pause: false, respawn: false, shiftUp: false, shiftDown: false };
+  touchEdges = { camera: false, pause: false, respawn: false, shiftUp: false, shiftDown: false, interact: false, footJump: false };
+  private dX = 0;
+  private dY = 0;
   lastDevice: InputDevice = 'keyboard';
   enabled = true;
   mouseLookX = 0;
@@ -70,8 +81,18 @@ export class Input {
       if (!this.mouseDown) return;
       this.mouseLookX += e.movementX * 0.005;
       this.mouseLookY += e.movementY * 0.004;
+      this.dX += e.movementX * 0.005;
+      this.dY += e.movementY * 0.004;
     });
     target.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  /** Glisser du doigt hors des commandes tactiles : rotation de caméra. */
+  addLook(dx: number, dy: number): void {
+    this.dX += dx;
+    this.dY += dy;
+    this.mouseLookX += dx;
+    this.mouseLookY += dy;
   }
 
   private k(...codes: string[]): boolean {
@@ -86,9 +107,11 @@ export class Input {
     const c: Controls = {
       throttle: 0, frontBrake: 0, rearBrake: 0, steer: 0, lean: 0, clutch: false, jump: false, trick: false,
       shiftUp: false, shiftDown: false, camera: false, pause: false, respawn: false, horn: false, lookX: 0, lookY: 0,
+      moveX: 0, moveY: 0, sprint: false, footJump: false, interact: false, challenges: false, lookDX: 0, lookDY: 0,
     };
     if (!this.enabled) {
       this.pressed.clear();
+      this.dX = this.dY = 0;
       return c;
     }
     // ---- clavier (gaz progressifs pour doser les wheelings)
@@ -114,6 +137,15 @@ export class Input {
     c.horn = this.k('KeyH');
     c.lookX = this.mouseLookX;
     c.lookY = this.mouseLookY;
+    c.moveX = (this.k('KeyD', 'ArrowRight') ? 1 : 0) - (this.k('KeyA', 'ArrowLeft') ? 1 : 0);
+    c.moveY = (this.k('KeyW', 'ArrowUp') ? 1 : 0) - (this.k('KeyS', 'ArrowDown') ? 1 : 0);
+    c.sprint = this.k('ShiftLeft', 'ShiftRight');
+    c.footJump = this.edge('Space');
+    c.interact = this.edge('KeyF');
+    c.challenges = this.edge('Enter') || this.edge('NumpadEnter');
+    c.lookDX = this.dX;
+    c.lookDY = this.dY;
+    this.dX = this.dY = 0;
     if (!this.mouseDown) {
       this.mouseLookX *= Math.max(0, 1 - dt * 2.5);
       this.mouseLookY *= Math.max(0, 1 - dt * 2.5);
@@ -146,6 +178,14 @@ export class Input {
       c.horn = c.horn || pr(12);
       c.lookX += dz(p.axes[2] ?? 0) * 1.2;
       c.lookY += dz(p.axes[3] ?? 0) * 0.6;
+      c.lookDX += dz(p.axes[2] ?? 0) * 2.6 * dt;
+      c.lookDY += dz(p.axes[3] ?? 0) * 1.6 * dt;
+      if (Math.abs(dz(p.axes[0] ?? 0)) > Math.abs(c.moveX)) c.moveX = dz(p.axes[0] ?? 0);
+      if (Math.abs(dz(p.axes[1] ?? 0)) > Math.abs(c.moveY)) c.moveY = -dz(p.axes[1] ?? 0);
+      c.sprint = c.sprint || pr(1) || pr(10);
+      c.footJump = c.footJump || ed(0);
+      c.interact = c.interact || ed(3);
+      c.challenges = c.challenges || ed(14);
       this.prevPad = p.buttons.map((x) => x.pressed);
       break;
     }
@@ -162,6 +202,10 @@ export class Input {
       c.jump = c.jump || t.jump;
       c.trick = c.trick || t.trick;
       c.lookX += t.lookX;
+      if (Math.abs(t.steer) > Math.abs(c.moveX)) c.moveX = t.steer;
+      if (Math.abs(t.lean) > Math.abs(c.moveY)) c.moveY = t.lean;
+      // joystick poussé à fond = course
+      c.sprint = c.sprint || Math.hypot(t.steer, t.lean) > 0.92;
     }
     const te = this.touchEdges;
     c.camera = c.camera || te.camera;
@@ -169,10 +213,19 @@ export class Input {
     c.respawn = c.respawn || te.respawn;
     c.shiftUp = c.shiftUp || te.shiftUp;
     c.shiftDown = c.shiftDown || te.shiftDown;
-    te.camera = te.pause = te.respawn = te.shiftUp = te.shiftDown = false;
+    c.interact = c.interact || te.interact;
+    c.footJump = c.footJump || te.footJump;
+    te.camera = te.pause = te.respawn = te.shiftUp = te.shiftDown = te.interact = te.footJump = false;
     c.steer = clamp(c.steer, -1, 1);
     c.lean = clamp(c.lean, -1, 1);
+    c.moveX = clamp(c.moveX, -1, 1);
+    c.moveY = clamp(c.moveY, -1, 1);
     return c;
+  }
+
+  /** Touche / bouton d'action maintenu (appui long = descendre de la moto). */
+  get interactHeld(): boolean {
+    return this.k('KeyF') || !!this.prevPad[3];
   }
 
   /** Pour les menus : touche appuyée (front montant). */

@@ -1,6 +1,7 @@
 // Équipement et tenues du pilote.
 
-export type HelmetType = 'mx' | 'street' | 'jet';
+/** 'none' : tête nue (PNJ uniquement, absent de la boutique) */
+export type HelmetType = 'mx' | 'street' | 'jet' | 'none';
 export type EyewearType = 'goggles' | 'visor' | 'mask';
 export type TopType = 'jersey' | 'hoodie' | 'puffer' | 'windbreaker' | 'tee';
 export type PantsType = 'mx' | 'jeans' | 'joggers';

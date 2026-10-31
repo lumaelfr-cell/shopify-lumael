@@ -28,6 +28,8 @@ export class Atmosphere {
   timeSpeed = 1; // heures de jeu par minute réelle
   weather: Weather = 'clear';
   night = 0;
+  /** 0 dehors .. 1 à l'intérieur d'un bâtiment (lumière du ciel réduite) */
+  indoor = 0;
   wetness = 0;
   fogDensity = 0;
   viewDist = 600;
@@ -173,7 +175,8 @@ export class Atmosphere {
     this.sun.intensity = this.sunDir.y > -0.05 ? (0.3 + 2.4 * sunUp) * (1 - this.cloud * 0.55) : 0.55;
     this.sun.position.copy(focus).addScaledVector(dirToLight, 120);
     this.sun.target.position.copy(focus);
-    this.hemi.intensity = lerp(0.42, 0.62, sunUp) * (1 - this.cloud * 0.15) + (this.weather === 'fog' ? 0.12 : 0);
+    this.hemi.intensity = (lerp(0.42, 0.62, sunUp) * (1 - this.cloud * 0.15) + (this.weather === 'fog' ? 0.12 : 0)) * (1 - this.indoor * 0.4);
+    if (!this.sun.castShadow) this.sun.intensity *= 1 - this.indoor * 0.6;
     this.hemi.color.set(this.night > 0.5 ? '#5a6c9e' : '#bcd6f2');
     this.hemi.groundColor.set(this.night > 0.5 ? '#2a2620' : '#5a5040');
 
@@ -194,7 +197,7 @@ export class Atmosphere {
     this.rainMat.uniforms.uOpacity.value = 0.45;
 
     // carte d'environnement (intensité mise à jour en continu, image régénérée périodiquement)
-    this.scene.environmentIntensity = lerp(0.15, 0.75, 1 - this.night) * (1 - this.cloud * 0.25);
+    this.scene.environmentIntensity = lerp(0.15, 0.75, 1 - this.night) * (1 - this.cloud * 0.25) * (1 - this.indoor * 0.78);
     this.envTimer -= dt;
     const key = `${Math.round(this.time * 4)}:${this.weather}`;
     if (this.envEnabled && (this.envTimer <= 0 || (key !== this.lastEnvKey && this.envTimer < 20))) {

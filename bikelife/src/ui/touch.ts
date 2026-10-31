@@ -21,6 +21,9 @@ export class TouchControls {
   private ctls: Ctl[] = [];
   private active = new Map<number, Ctl>();
   private stickOrigin = { x: 0, y: 0 };
+  private looks = new Map<number, { x: number; y: number }>();
+  mode: 'bike' | 'foot' = 'bike';
+  private actionAvailable = false;
   editing = false;
   onLayoutChange: ((l: TouchLayout) => void) | null = null;
   trickAvailable = false;
@@ -41,6 +44,26 @@ export class TouchControls {
     root.addEventListener('touchend', (e) => this.onEnd(e), { passive: false });
     root.addEventListener('touchcancel', (e) => this.onEnd(e), { passive: false });
     window.addEventListener('resize', () => this.place());
+    // glisser le doigt ailleurs que sur les commandes : rotation de la caméra
+    const free = (e: TouchEvent) => !this.root.classList.contains('hidden') && !this.root.contains(e.target as Node) && !(e.target as HTMLElement)?.closest?.('#ui, #hud-prompt, button');
+    window.addEventListener('touchstart', (e) => {
+      if (!free(e)) return;
+      for (const t of Array.from(e.changedTouches)) this.looks.set(t.identifier, { x: t.clientX, y: t.clientY });
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      for (const t of Array.from(e.changedTouches)) {
+        const lk = this.looks.get(t.identifier);
+        if (!lk || this.root.contains(e.target as Node)) continue;
+        this.input.addLook((t.clientX - lk.x) * 0.0065, (t.clientY - lk.y) * 0.005);
+        lk.x = t.clientX;
+        lk.y = t.clientY;
+      }
+    }, { passive: true });
+    const end = (e: TouchEvent) => {
+      for (const t of Array.from(e.changedTouches)) if (!this.root.contains(e.target as Node)) this.looks.delete(t.identifier);
+    };
+    window.addEventListener('touchend', end, { passive: true });
+    window.addEventListener('touchcancel', end, { passive: true });
   }
 
   private build(): void {
@@ -68,7 +91,10 @@ export class TouchControls {
     add('respawn', 'tap', 46, 46, 0.44, 0.06, '↺', 'small');
     add('shiftDown', 'tap', 46, 46, 0.62, 0.45, '−', 'small');
     add('shiftUp', 'tap', 46, 46, 0.62, 0.36, '+', 'small');
+    add('interact', 'tap', 80, 80, 0.86, 0.36, 'ACTION', 'pink');
+    add('footJump', 'tap', 84, 84, 0.8, 0.66, 'SAUT');
     this.place();
+    this.applyMode();
   }
 
   setLayout(l: TouchLayout): void {
@@ -76,8 +102,44 @@ export class TouchControls {
     this.place();
   }
 
+  private gearsWanted = false;
+
   showGears(v: boolean): void {
-    for (const c of this.ctls) if (c.id === 'shiftUp' || c.id === 'shiftDown') c.el.classList.toggle('hidden', !v);
+    this.gearsWanted = v;
+    this.applyMode();
+  }
+
+  /** Disposition à moto ou à pied (les boutons inutiles sont masqués). */
+  setMode(m: 'bike' | 'foot'): void {
+    if (this.mode === m) return;
+    this.mode = m;
+    this.active.clear();
+    this.applyMode();
+  }
+
+  /** Bouton ACTION visible à moto seulement quand une interaction est possible. */
+  setAction(available: boolean): void {
+    if (available === this.actionAvailable) return;
+    this.actionAvailable = available;
+    this.applyMode();
+  }
+
+  private applyMode(): void {
+    const foot = this.mode === 'foot';
+    const bikeOnly = new Set(['throttle', 'front', 'rear', 'wheelie', 'jump', 'trick', 'respawn']);
+    for (const c of this.ctls) {
+      let hide = false;
+      if (bikeOnly.has(c.id)) hide = foot;
+      if (c.id === 'footJump') hide = !foot;
+      if (c.id === 'shiftUp' || c.id === 'shiftDown') hide = foot || !this.gearsWanted;
+      if (c.id === 'interact') hide = !this.editing && !this.actionAvailable;
+      c.el.classList.toggle('hidden', hide);
+    }
+    const hint = this.ctls.find((c) => c.id === 'stick')?.el.querySelectorAll('.hint');
+    if (hint && hint.length === 2) {
+      hint[0].textContent = foot ? '▲ marcher' : '▲ avant';
+      hint[1].textContent = foot ? '▼ reculer' : '▼ arrière';
+    }
   }
 
   place(): void {
@@ -110,7 +172,10 @@ export class TouchControls {
     e.preventDefault();
     for (const t of Array.from(e.changedTouches)) {
       const c = this.hit(t.clientX, t.clientY);
-      if (!c) continue;
+      if (!c) {
+        if (!this.editing) this.looks.set(t.identifier, { x: t.clientX, y: t.clientY });
+        continue;
+      }
       if (this.editing) {
         this.active.set(t.identifier, c);
         continue;
@@ -129,6 +194,13 @@ export class TouchControls {
   private onMove(e: TouchEvent): void {
     e.preventDefault();
     for (const t of Array.from(e.changedTouches)) {
+      const lk = this.looks.get(t.identifier);
+      if (lk) {
+        this.input.addLook((t.clientX - lk.x) * 0.0065, (t.clientY - lk.y) * 0.005);
+        lk.x = t.clientX;
+        lk.y = t.clientY;
+        continue;
+      }
       let c = this.active.get(t.identifier);
       if (!c) continue;
       if (this.editing) {
@@ -153,6 +225,7 @@ export class TouchControls {
   private onEnd(e: TouchEvent): void {
     e.preventDefault();
     for (const t of Array.from(e.changedTouches)) {
+      this.looks.delete(t.identifier);
       const c = this.active.get(t.identifier);
       this.active.delete(t.identifier);
       if (this.editing && c) this.onLayoutChange?.(this.layout);
@@ -244,6 +317,7 @@ export class TouchControls {
     this.editing = v;
     this.root.classList.toggle('edit', v);
     this.active.clear();
+    this.applyMode();
   }
 
   resetLayout(): void {

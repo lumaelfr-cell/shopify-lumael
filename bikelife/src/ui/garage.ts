@@ -16,7 +16,7 @@ import { Rider } from '../vehicle/rider';
 import type { AudioManager } from '../audio/audio';
 import { clamp } from '../core/math';
 
-type Tab = 'mine' | 'shop' | 'paint' | 'parts' | 'perf' | 'rider' | 'presets';
+export type Tab = 'mine' | 'shop' | 'paint' | 'parts' | 'perf' | 'rider' | 'presets';
 
 export interface GarageHost {
   prog: Progression;
@@ -133,6 +133,18 @@ export class GarageView {
     this.rider.setConfig(this.riderCfg);
     this.tab = 'mine';
     this.rebuild();
+    this.render();
+  }
+
+  /** Ouvre directement un onglet (depuis un commerce / l'atelier), éventuellement sur une moto. */
+  openAt(tab: Tab, bikeId?: string): void {
+    this.open();
+    if (bikeId && bikeId !== this.viewId) {
+      this.viewId = bikeId;
+      this.cfg = this.owned(bikeId) ? structuredClone(this.prog.p.bikes[bikeId].config) : defaultConfig(BIKE_BY_ID[bikeId]);
+      this.rebuild();
+    }
+    this.tab = tab;
     this.render();
   }
 

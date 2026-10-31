@@ -32,6 +32,12 @@ export interface HudState {
   player: { x: number; z: number; yaw: number };
   markers: { x: number; z: number; color: string; size?: number; label?: string }[];
   mpLines: string[];
+  /** ligne d'état : carburant, état de la moto, santé, endurance */
+  status: string;
+  /** joueur à pied (compteur masqué) */
+  foot: boolean;
+  /** alerte (réserve, panne sèche, santé basse) */
+  alert: string | null;
 }
 
 export class Hud {
@@ -51,7 +57,7 @@ export class Hud {
     this.root = root;
     clear(root);
     const tl = h('div', { id: 'hud-top-left' });
-    const profile = h('div', { id: 'hud-profile', class: 'panel' }, h('div', { class: 'lvl' }, h('b', {}, '1')), h('div', {}, h('div', { class: 'money' }, '0 $'), h('div', { class: 'bike' }, '')));
+    const profile = h('div', { id: 'hud-profile', class: 'panel' }, h('div', { class: 'lvl' }, h('b', {}, '1')), h('div', {}, h('div', { class: 'money' }, '0 $'), h('div', { class: 'bike' }, ''), h('div', { class: 'status' }, '')));
     const mode = h('div', { id: 'hud-mode', class: 'panel hidden' });
     const goals = h('div', { id: 'hud-goals', class: 'panel' });
     const mp = h('div', { id: 'mp-list', class: 'panel hidden' });
@@ -60,6 +66,7 @@ export class Hud {
     const combo = h('div', { id: 'hud-combo', class: 'hidden' }, h('div', { class: 'v' }), h('div', { class: 'bar' }, h('i')));
     const big = h('div', { id: 'hud-big', class: 'hidden' });
     const crash = h('div', { id: 'hud-crash', class: 'hidden' }, h('div', { class: 't' }, 'CHUTE !'), h('div', { class: 's' }));
+    const alert = h('div', { id: 'hud-alert', class: 'hidden' });
     this.toastBox = h('div', { id: 'toasts' });
     const tr = h('div', { id: 'hud-top-right' });
     this.mini = h('canvas', { id: 'minimap', width: 336, height: 336 });
@@ -86,8 +93,8 @@ export class Hud {
     const help = h('div', { id: 'help', class: 'panel' });
     help.innerHTML = `<b>Z/W</b> gaz · <b>S</b> frein avant · <b>Espace</b> frein arrière<br><b>Q/A · D</b> diriger · <b>↑ ↓</b> pencher avant / arrière<br><b>Maj</b> embrayage (tenir + gaz, relâcher = wheeling)<br><b>J</b> saut · <b>K</b>+direction figure en l'air · <b>C</b> caméra<br><b>R</b> réapparaître · <b>Échap</b> pause · <b>H</b> klaxon · <b>F1</b> masquer`;
     const chat = h('div', { id: 'chat-log' });
-    root.append(tl, trick, combo, big, crash, this.toastBox, tr, speedo, gauge, help, chat);
-    for (const id of ['hud-profile', 'hud-mode', 'hud-goals', 'hud-trick', 'hud-combo', 'hud-big', 'hud-crash', 'hud-cam', 'speedo', 'wheelie-gauge', 'help', 'mp-list', 'chat-log']) this.els[id] = root.querySelector('#' + id)!;
+    root.append(tl, trick, combo, big, crash, alert, this.toastBox, tr, speedo, gauge, help, chat);
+    for (const id of ['hud-alert', 'hud-profile', 'hud-mode', 'hud-goals', 'hud-trick', 'hud-combo', 'hud-big', 'hud-crash', 'hud-cam', 'speedo', 'wheelie-gauge', 'help', 'mp-list', 'chat-log']) this.els[id] = root.querySelector('#' + id)!;
     window.addEventListener('keydown', (e) => {
       if (e.code === 'F1') {
         e.preventDefault();
@@ -126,6 +133,10 @@ export class Hud {
     lvl.querySelector('b')!.textContent = String(s.level);
     E['hud-profile'].querySelector('.money')!.textContent = `${s.money.toLocaleString('fr-FR')} $`;
     E['hud-profile'].querySelector('.bike')!.textContent = s.bikeName;
+    E['hud-profile'].querySelector('.status')!.innerHTML = s.status;
+    E.speedo.classList.toggle('hidden', s.foot);
+    E['hud-alert'].classList.toggle('hidden', !s.alert);
+    if (s.alert) E['hud-alert'].textContent = s.alert;
     // mode
     if (s.mode) {
       E['hud-mode'].classList.remove('hidden');

@@ -38,7 +38,14 @@ export interface Collider {
   minZ: number;
   maxZ: number;
   tag?: string;
+  /** collider réservé à une couche ('bike' : bloque seulement les motos, 'foot' : seulement les piétons) */
+  layer?: Layer;
+  /** ne sert jamais de sol (portes, vitres, personnages) */
+  noGround?: boolean;
 }
+
+/** Couche de collision interrogée : moto ou piéton. */
+export type Layer = 'bike' | 'foot';
 
 export interface GroundHit {
   h: number;
@@ -79,18 +86,18 @@ export class CollisionWorld {
     return (ix + 2048) * 4096 + (iz + 2048);
   }
 
-  addBox(o: { x: number; z: number; hx: number; hz: number; yaw?: number; y0?: number; y1: number; surf?: Surface; solid?: boolean; tag?: string }): Collider {
+  addBox(o: { x: number; z: number; hx: number; hz: number; yaw?: number; y0?: number; y1: number; surf?: Surface; solid?: boolean; tag?: string; layer?: Layer; walkable?: boolean }): Collider {
     const yaw = o.yaw ?? 0;
     return this.add({
       kind: 'box', x: o.x, z: o.z, hx: o.hx, hz: o.hz, cos: Math.cos(yaw), sin: Math.sin(yaw),
-      y0: o.y0 ?? 0, y1: o.y1, r: 0, surf: o.surf ?? 'concrete', solid: o.solid ?? true, tag: o.tag,
+      y0: o.y0 ?? 0, y1: o.y1, r: 0, surf: o.surf ?? 'concrete', solid: o.solid ?? true, tag: o.tag, layer: o.layer, noGround: o.walkable === false,
     });
   }
 
-  addCylinder(o: { x: number; z: number; r: number; y0?: number; y1: number; surf?: Surface; solid?: boolean; tag?: string }): Collider {
+  addCylinder(o: { x: number; z: number; r: number; y0?: number; y1: number; surf?: Surface; solid?: boolean; tag?: string; layer?: Layer; walkable?: boolean }): Collider {
     return this.add({
       kind: 'cyl', x: o.x, z: o.z, hx: o.r, hz: o.r, cos: 1, sin: 0, y0: o.y0 ?? 0, y1: o.y1, r: o.r,
-      surf: o.surf ?? 'concrete', solid: o.solid ?? true, tag: o.tag,
+      surf: o.surf ?? 'concrete', solid: o.solid ?? true, tag: o.tag, layer: o.layer, noGround: o.walkable === false,
     });
   }
 
@@ -189,7 +196,7 @@ export class CollisionWorld {
   }
 
   /** Sol praticable le plus haut sous `yMax` en (x,z). */
-  groundAt(x: number, z: number, yMax: number, out: GroundHit): GroundHit {
+  groundAt(x: number, z: number, yMax: number, out: GroundHit, layer: Layer = 'bike'): GroundHit {
     this.base(x, z, out);
     if (out.h > yMax) {
       // sol de base au-dessus (ne devrait pas arriver) : on le garde quand même
@@ -198,6 +205,7 @@ export class CollisionWorld {
     if (arr) {
       for (let i = 0; i < arr.length; i++) {
         const c = this.colliders[arr[i]];
+        if (c.noGround || (c.layer && c.layer !== layer)) continue;
         const top = this.topAt(c, x, z);
         if (top === top && top <= yMax && top > out.h) {
           out.h = top;
@@ -214,7 +222,7 @@ export class CollisionWorld {
    * `yFeet` = bas de la capsule, `yHead` = haut. Tout obstacle dont le dessus dépasse
    * `yFeet + step` est considéré comme un mur.
    */
-  collideCapsule(x: number, z: number, yFeet: number, yHead: number, r: number, step: number, out: WallHit): WallHit {
+  collideCapsule(x: number, z: number, yFeet: number, yHead: number, r: number, step: number, out: WallHit, layer: Layer = 'bike'): WallHit {
     out.px = 0;
     out.pz = 0;
     out.nx = 0;
@@ -236,6 +244,7 @@ export class CollisionWorld {
           this.stamp[id] = sid;
           const c = this.colliders[id];
           if (!c.solid) continue;
+          if (c.layer && c.layer !== layer) continue;
           if (x + r < c.minX || x - r > c.maxX || z + r < c.minZ || z - r > c.maxZ) continue;
           if (c.y0 >= yHead) continue;
           let nx = 0, nz = 0, depth = 0;
@@ -316,7 +325,7 @@ export class CollisionWorld {
       if (arr) {
         for (let k = 0; k < arr.length; k++) {
           const c = this.colliders[arr[k]];
-          if (!c.solid || c.y1 < 0.6) continue;
+          if (!c.solid || c.y1 < 0.6 || c.layer) continue;
           const top = this.topAt(c, x, z);
           if (top === top && y < top && y > c.y0) return Math.max(0, (i - 1) / n);
         }

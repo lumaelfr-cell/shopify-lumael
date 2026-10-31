@@ -37,6 +37,10 @@ export interface OwnedBike {
   id: string;
   config: BikeConfig;
   presets: { name: string; config: BikeConfig }[];
+  /** essence dans le réservoir (L) */
+  fuel?: number;
+  /** état mécanique 0..100 (100 = neuve) */
+  cond?: number;
 }
 
 export interface DailyGoal {
@@ -86,6 +90,14 @@ export interface Profile {
   stats: Stats;
   settings: Settings;
   lastPos: { x: number; z: number; yaw: number } | null;
+  /** santé du pilote 0..100 */
+  health: number;
+  /** sac : articles achetés (id → quantité) */
+  inv: Record<string, number>;
+  /** trouvailles déjà ramassées */
+  found: string[];
+  /** frigos utilisés aujourd'hui (une boisson offerte par frigo et par jour) */
+  fridge: { date: string; used: string[] };
 }
 
 const KEY = 'bikelife-street-kings-v1';
@@ -145,6 +157,7 @@ export function newProfile(): Profile {
     version: SAVE_VERSION, money: 2500, xp: 0, level: 1, bikes, current: STARTER_BIKES[0], rider: defaultRider(), riderPresets: [],
     parts: [...new Set(parts)], apparel: stockApparel(), records: {}, bikeRecords: {}, challenges: {}, timeTrials: {}, ghosts: {}, achievements: [],
     daily: { date: '', goals: [] }, stats: emptyStats(), settings: defaultSettings(), lastPos: null,
+    health: 100, inv: { water: 1, jerrycan: 1 }, found: [], fridge: { date: '', used: [] },
   };
 }
 
@@ -223,6 +236,10 @@ export class Progression {
       p.parts = [...parts];
       p.apparel = [...new Set([...(p.apparel ?? []), ...stockApparel()])];
       if (!Object.keys(p.bikes).length) return newProfile();
+      p.inv = p.inv ?? {};
+      p.found = p.found ?? [];
+      p.fridge = p.fridge ?? { date: '', used: [] };
+      if (typeof p.health !== 'number') p.health = 100;
       return p;
     } catch (e) {
       console.warn('[save] lecture impossible, nouveau profil', e);
@@ -324,6 +341,44 @@ export class Progression {
     this.checkAchievements();
     this.save();
     return true;
+  }
+
+  /** Litres dans le réservoir de la moto (plein par défaut). */
+  fuel(id = this.p.current): number {
+    const o = this.p.bikes[id];
+    if (!o) return 0;
+    if (typeof o.fuel !== 'number') o.fuel = BIKE_BY_ID[id].real?.fuel ?? 7;
+    return o.fuel;
+  }
+
+  setFuel(v: number, id = this.p.current): void {
+    const o = this.p.bikes[id];
+    if (!o) return;
+    o.fuel = Math.max(0, Math.min(this.tank(id), v));
+    this.touch();
+  }
+
+  tank(id = this.p.current): number {
+    return BIKE_BY_ID[id]?.real?.fuel ?? 7;
+  }
+
+  cond(id = this.p.current): number {
+    const o = this.p.bikes[id];
+    if (!o) return 100;
+    return typeof o.cond === 'number' ? o.cond : 100;
+  }
+
+  setCond(v: number, id = this.p.current): void {
+    const o = this.p.bikes[id];
+    if (!o) return;
+    o.cond = Math.max(0, Math.min(100, v));
+    this.touch();
+  }
+
+  addItem(id: string, n = 1): void {
+    this.p.inv[id] = (this.p.inv[id] ?? 0) + n;
+    if (this.p.inv[id] <= 0) delete this.p.inv[id];
+    this.touch();
   }
 
   sellBike(id: string): number {

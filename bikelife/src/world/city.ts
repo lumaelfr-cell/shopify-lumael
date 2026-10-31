@@ -11,6 +11,8 @@ import {
   blockDistrict, blockInterior, blockRect, lineCoord, roadWidth, CENTER_ISLAND_R, District,
 } from './layout';
 import { merge } from '../vehicle/geom';
+import { hQuad, vQuad, boxGeo, profileGeo, prismRoof } from './worldGeom';
+import { Interiors } from './buildings';
 
 const CHUNK = 300;
 
@@ -103,119 +105,6 @@ class Instances {
   }
 }
 
-// ------------------------------------------------------------------ géométrie monde
-function hQuad(x0: number, z0: number, x1: number, z1: number, y: number, su = 4, sv = 4, uv?: (x: number, z: number) => [number, number]): THREE.BufferGeometry {
-  const g = new THREE.BufferGeometry();
-  const p = [x0, y, z0, x0, y, z1, x1, y, z1, x1, y, z0];
-  const f = uv ?? ((x: number, z: number) => [x / su, z / sv] as [number, number]);
-  const uvs = [...f(x0, z0), ...f(x0, z1), ...f(x1, z1), ...f(x1, z0)];
-  g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
-  g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  g.setIndex([0, 1, 2, 0, 2, 3]);
-  return g;
-}
-
-/** Quad vertical entre (x0,z0) et (x1,z1), de y0 à y1, face vers la normale (droite du segment). */
-function vQuad(x0: number, z0: number, x1: number, z1: number, y0: number, y1: number, su: number, sv: number, u0 = 0): THREE.BufferGeometry {
-  const g = new THREE.BufferGeometry();
-  const len = Math.hypot(x1 - x0, z1 - z0);
-  const nx = (z1 - z0) / len, nz = -(x1 - x0) / len;
-  g.setAttribute('position', new THREE.Float32BufferAttribute([x0, y0, z0, x1, y0, z1, x1, y1, z1, x0, y1, z0], 3));
-  g.setAttribute('normal', new THREE.Float32BufferAttribute([nx, 0, nz, nx, 0, nz, nx, 0, nz, nx, 0, nz], 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute([u0, y0 / sv, u0 + len / su, y0 / sv, u0 + len / su, y1 / sv, u0, y1 / sv], 2));
-  g.setIndex([0, 2, 1, 0, 3, 2]);
-  return g;
-}
-
-/** Boîte axis-aligned en coordonnées monde, UV en mètres. */
-function boxGeo(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number, su = 4, sv = 4): THREE.BufferGeometry {
-  const parts = [
-    vQuad(x0, z1, x0, z0, y0, y1, su, sv),
-    vQuad(x1, z0, x1, z1, y0, y1, su, sv),
-    vQuad(x0, z0, x1, z0, y0, y1, su, sv),
-    vQuad(x1, z1, x0, z1, y0, y1, su, sv),
-    hQuad(x0, z0, x1, z1, y1, su, sv),
-  ];
-  return merge(parts);
-}
-
-/** Mesh d'une rampe à profil (z local, h) extrudée sur sa largeur, en monde. */
-function profileGeo(x: number, z: number, hx: number, yaw: number, y0: number, pts: [number, number][], su = 3): THREE.BufferGeometry {
-  const zc = (pts[0][0] + pts[pts.length - 1][0]) / 2;
-  const pos: number[] = [];
-  const uv: number[] = [];
-  const idx: number[] = [];
-  let v = 0;
-  const push = (lx: number, ly: number, lz: number, u: number, w: number) => {
-    pos.push(lx, ly, lz - zc);
-    uv.push(u, w);
-    return v++;
-  };
-  // dessus
-  let acc = 0;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const [za, ha] = pts[i], [zb, hb] = pts[i + 1];
-    const seg = Math.hypot(zb - za, hb - ha);
-    const a = push(-hx, ha, za, -hx / su, acc / su), b = push(hx, ha, za, hx / su, acc / su);
-    const c = push(hx, hb, zb, hx / su, (acc + seg) / su), d = push(-hx, hb, zb, -hx / su, (acc + seg) / su);
-    idx.push(a, d, c, a, c, b);
-    acc += seg;
-  }
-  // flancs
-  for (const sx of [-1, 1]) {
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [za, ha] = pts[i], [zb, hb] = pts[i + 1];
-      const a = push(sx * hx, 0, za, za / su, 0), b = push(sx * hx, 0, zb, zb / su, 0);
-      const c = push(sx * hx, hb, zb, zb / su, hb / su), d = push(sx * hx, ha, za, za / su, ha / su);
-      if (sx > 0) idx.push(a, b, c, a, c, d);
-      else idx.push(a, c, b, a, d, c);
-    }
-  }
-  // faces avant/arrière
-  for (const end of [0, pts.length - 1]) {
-    const [ze, he] = pts[end];
-    if (he < 0.01) continue;
-    const a = push(-hx, 0, ze, 0, 0), b = push(hx, 0, ze, 2 * hx / su, 0), c = push(hx, he, ze, 2 * hx / su, he / su), d = push(-hx, he, ze, 0, he / su);
-    if (end === 0) idx.push(a, c, b, a, d, c);
-    else idx.push(a, b, c, a, c, d);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  const m = new THREE.Matrix4().makeRotationY(yaw);
-  const zcW = zc;
-  g.applyMatrix4(m);
-  g.translate(x + Math.sin(yaw) * zcW, y0, z + Math.cos(yaw) * zcW);
-  return g;
-}
-
-function prismRoof(x0: number, z0: number, x1: number, z1: number, y: number, h: number, alongX: boolean): THREE.BufferGeometry {
-  const pos: number[] = [];
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  const o = 0.4;
-  if (alongX) {
-    pos.push(x0 - o, y, z0 - o, x1 + o, y, z0 - o, x1 + o, y + h, cz, x0 - o, y, z0 - o, x1 + o, y + h, cz, x0 - o, y + h, cz);
-    pos.push(x1 + o, y, z1 + o, x0 - o, y, z1 + o, x0 - o, y + h, cz, x1 + o, y, z1 + o, x0 - o, y + h, cz, x1 + o, y + h, cz);
-    pos.push(x0, y, z0, x0, y + h, cz, x0, y, z1);
-    pos.push(x1, y, z1, x1, y + h, cz, x1, y, z0);
-  } else {
-    pos.push(x1 + o, y, z0 - o, x1 + o, y, z1 + o, cx, y + h, z1 + o, x1 + o, y, z0 - o, cx, y + h, z1 + o, cx, y + h, z0 - o);
-    pos.push(x0 - o, y, z1 + o, x0 - o, y, z0 - o, cx, y + h, z0 - o, x0 - o, y, z1 + o, cx, y + h, z0 - o, cx, y + h, z1 + o);
-    pos.push(x0, y, z1, cx, y + h, z1, x1, y, z1);
-    pos.push(x1, y, z0, cx, y + h, z0, x0, y, z0);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  const uv: number[] = [];
-  for (let i = 0; i < pos.length; i += 3) uv.push(pos[i] / 3 + pos[i + 2] / 3, pos[i + 1] / 3);
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.computeVertexNormals();
-  return g;
-}
-
 // ------------------------------------------------------------------ ville
 export interface NightMat {
   mat: THREE.MeshStandardMaterial;
@@ -257,6 +146,7 @@ export class City {
   private receiveOnly = new Set<THREE.Material>();
   private mapCtx: CanvasRenderingContext2D;
   private shadowsProps: boolean;
+  interiors!: Interiors;
 
   constructor(world: CollisionWorld, opts: { propShadows: boolean }) {
     this.world = world;
@@ -412,6 +302,10 @@ export class City {
     this.buildOutskirts();
     this.buildMXPark();
     this.buildCorniche();
+    // bâtiments visitables (intérieurs modélisés, collisions, portes)
+    this.interiors = new Interiors(this.world);
+    this.group.add(this.interiors.root);
+    for (const b of this.interiors.buildings) if (b.id !== 'station') this.mapRect(b.x0, b.z0, b.x1, b.z1, '#6b5a4a');
     this.chunks = this.batches.build(this.group, this.receiveOnly);
     for (const c of this.chunks) c.userData.r = CHUNK * 0.75;
     this.chunks.push(...this.inst.build(this.group, this.shadowsProps));
@@ -592,8 +486,9 @@ export class City {
     const interiorMat: Record<District, THREE.Material> = {
       downtown: this.m.concrete, commercial: this.m.parking, residential: this.m.grass, cite: this.m.asphalt, industrial: this.m.concrete,
       park: this.m.grass, plaza: this.m.concrete, stunt: this.m.concrete, training: this.m.asphalt, parking: this.m.asphalt, garage: this.m.concrete, mall: this.m.parking,
+      station: this.m.asphalt, apartments: this.m.asphalt, abandoned: this.m.concrete, local: this.m.asphalt,
     };
-    const surfMap: Partial<Record<District, Surface>> = { residential: 'grass', park: 'grass', cite: 'asphalt', training: 'asphalt', parking: 'asphalt', commercial: 'asphalt', mall: 'asphalt' };
+    const surfMap: Partial<Record<District, Surface>> = { residential: 'grass', park: 'grass', cite: 'asphalt', training: 'asphalt', parking: 'asphalt', commercial: 'asphalt', mall: 'asphalt', station: 'asphalt', apartments: 'asphalt', local: 'asphalt' };
     if (d === 'plaza') this.buildPlaza(R, I);
     else this.platform(R, surfMap[d] ?? 'concrete', interiorMat[d]);
     this.streetFurniture(R, d);
@@ -609,11 +504,16 @@ export class City {
       case 'training': this.training(I); break;
       case 'parking': this.parkingStructure(I); break;
       case 'garage': this.garageBlock(I); break;
+      case 'station': this.stationBlock(I); break;
+      case 'apartments': this.apartmentsBlock(I); break;
+      case 'abandoned': this.abandonedBlock(I); break;
+      case 'local': this.localBlock(I); break;
       default: break;
     }
     const mapCol: Record<District, string> = {
       downtown: '#77736c', commercial: '#8a8379', residential: '#55794a', cite: '#7c7a74', industrial: '#7b7f82', park: '#4f8a3f', plaza: '#a29d93',
       stunt: '#b0aaa0', training: '#4a4c50', parking: '#6d6a66', garage: '#8a8379', mall: '#6a6c70',
+      station: '#4a4c50', apartments: '#7c7a74', abandoned: '#7b7f82', local: '#4a4c50',
     };
     if (d === 'park' || d === 'residential' || d === 'stunt' || d === 'training') this.mapRect(I.x0, I.z0, I.x1, I.z1, mapCol[d]);
   }
@@ -929,14 +829,52 @@ export class City {
   }
 
   private garageBlock(I: Rect): void {
-    // le garage du joueur fait face au boulevard (z = I.z0)
-    const gx0 = I.x0 + 4, gx1 = gx0 + 30, gz0 = I.z0, gz1 = gz0 + 20;
-    this.building(gx0, gz0, gx1, gz1, 8, 'industrial');
-    const door = vQuad(gx0 + 9, gz0 - 0.03, gx0 + 19, gz0 - 0.03, CURB, CURB + 5, 10, 5);
-    this.batches.add(gx0, gz0, this.m.door, door);
-    this.sign((gx0 + gx1) / 2, gz0 - 0.08, CURB + 6.5, 12, Math.PI);
-    this.graffiti(gx0 + 4, gz0 - 0.06, CURB + 2.6, 6, Math.PI);
-    this.commercial({ x0: gx1 + 2, z0: I.z0, x1: I.x1, z1: I.z1 }, true);
+    // garage du joueur, atelier, concession et magasin d'équipement : bâtiments
+    // visitables construits par `Interiors`. Ici : cour, arbres et bancs.
+    for (const x of [-77, -45.5]) this.tree(x, 42, CURB, 0.8);
+    this.inst.add('bench', -70, CURB, 45.5, 0);
+    this.inst.add('bench', -55, CURB, 45.5, 0);
+    for (let i = 0; i < 4; i++) this.inst.add('bollard', -49 + i * 2, CURB, 16, 0);
+    void I;
+  }
+
+  private stationBlock(I: Rect): void {
+    // station-service, supérette et fast-food : voir `Interiors` ; fond de bloc bâti
+    this.building(I.x0, I.z0, I.x0 + 26, I.z0 + 11, 9, 'brick');
+    this.building(I.x0 + 27, I.z0, I.x1 - 14, I.z0 + 11, 13, 'apartment');
+    this.building(I.x1 - 13, I.z0, I.x1, I.z0 + 11, 7, 'shop');
+    for (let i = 0; i < 4; i++) this.parkedCar(-216 + (i % 2) * 2.8, -66 + Math.floor(i / 2) * 6, 0);
+    this.inst.add('bin', -219, CURB, -44.5, 0);
+  }
+
+  private apartmentsBlock(I: Rect): void {
+    // la résidence visitable est construite par `Interiors` (nord du bloc) ; ici une
+    // seconde barre d'immeubles, la pelouse et les voitures des résidents.
+    this.building(I.x0 + 6, I.z1 - 18, I.x1 - 6, I.z1 - 6, 24, 'apartment');
+    this.graffiti(I.x0 + 16, I.z1 - 18.05, CURB + 1.8, 6, Math.PI);
+    const lawn: Rect = { x0: I.x0 + 6, z0: I.z0 + 28, x1: I.x1 - 6, z1: I.z1 - 22 };
+    this.batches.add(lawn.x0, lawn.z0, this.m.grass, hQuad(lawn.x0, lawn.z0, lawn.x1, lawn.z1, CURB + 0.006, 6, 6));
+    this.surfacePatch(lawn, 'grass', CURB + 0.007);
+    for (let i = 0; i < 5; i++) this.tree(lawn.x0 + 4 + i * 13, (lawn.z0 + lawn.z1) / 2, CURB, 0.9);
+    for (let i = 0; i < 5; i++) this.parkedCar(I.x1 - 6 - i * 3.2, I.z0 + 4, 0);
+  }
+
+  private abandonedBlock(I: Rect): void {
+    // entrepôt abandonné (voir `Interiors`) : cour encombrée
+    for (let k = 0; k < 3; k++) {
+      const z = I.z1 - 10 + k * 2.6;
+      this.batches.add(I.x0 + 4, z, this.containerMats[k % this.containerMats.length], boxGeo(I.x0 + 2, CURB, z - 1.2, I.x0 + 14, CURB + 2.6, z + 1.2, 12, 2.6));
+    }
+    this.world.addBox({ x: I.x0 + 8, z: I.z1 - 7.4, hx: 6, hz: 3.8, y0: 0, y1: CURB + 2.6, surf: 'metal' });
+    for (let i = 0; i < 6; i++) this.inst.add('tire', I.x1 - 4, CURB, I.z0 + 6 + i * 1.2, 0);
+    this.inst.add('dumpster', I.x1 - 6, CURB, I.z1 - 4, 0);
+    this.world.addBox({ x: I.x1 - 6, z: I.z1 - 4, hx: 0.95, hz: 0.55, y0: CURB, y1: CURB + 1.3 });
+  }
+
+  private localBlock(I: Rect): void {
+    for (let i = 0; i < 10; i++) this.inst.add('cone', I.x0 + 30 + (i % 2) * 6, CURB, I.z1 - 22 + i * 2, 0);
+    this.building(I.x1 - 18, I.z0 + 2, I.x1 - 2, I.z0 + 26, 8, 'industrial');
+    this.graffiti(I.x1 - 18.05, I.z0 + 14, CURB + 3, 7, -Math.PI / 2);
   }
 
   private training(I: Rect): void {

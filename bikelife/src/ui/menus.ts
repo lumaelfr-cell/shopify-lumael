@@ -39,6 +39,9 @@ export interface GameAPI {
   isRiding(): boolean;
   modeActive(): boolean;
   mpConnect(url: string, room: string): void;
+  showInventory(): void;
+  towBike(): void;
+  isOnFoot(): boolean;
 }
 
 export class Menus {
@@ -207,6 +210,8 @@ export class Menus {
     col.append(
       this.btn('▶ Reprendre', () => this.g.resume(), 'primary'),
       this.btn('↺ Réapparaître', () => { this.g.respawn(); this.g.resume(); }),
+      this.btn('🎒 Sac (articles)', () => this.g.showInventory()),
+      this.btn('🚛 Dépanneuse (60 $)', () => { this.g.towBike(); this.g.resume(); }),
       this.btn('🏁 Modes & défis', () => this.showModes()),
       this.btn('🗺 Carte & téléportation', () => this.showMap(() => this.showPause())),
       this.btn('🔧 Garage', () => this.g.openGarage()),

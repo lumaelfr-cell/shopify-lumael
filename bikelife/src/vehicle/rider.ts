@@ -214,6 +214,21 @@ export class Rider {
     const helmTex = patternTexture(c.helmetPattern, c.helmetColor, c.helmetColor2);
     const helmMat = Mats.textured(`helm:${helmTex.uuid}`, helmTex, { roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.05 });
     const skin = Mats.plastic(c.skin, 0.6);
+    if (c.helmet === 'none') {
+      // tête nue (PNJ, piéton) : visage + cheveux (couleur = helmetColor)
+      const face = new THREE.SphereGeometry(0.105, 16, 12);
+      face.scale(0.88, 1.08, 0.98);
+      g.add(new THREE.Mesh(face, skin));
+      const hair = new THREE.SphereGeometry(0.112, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.55);
+      hair.scale(0.9, 1.05, 1.02);
+      hair.translate(0, 0.012, -0.01);
+      g.add(new THREE.Mesh(hair, Mats.plastic(c.helmetColor, 0.9)));
+      const nose = new THREE.ConeGeometry(0.018, 0.04, 6).rotateX(Math.PI / 2).translate(0, -0.01, 0.105);
+      g.add(new THREE.Mesh(nose, skin));
+      for (const sx of [-1, 1]) g.add(new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 4).translate(sx * 0.035, 0.02, 0.092), Mats.plastic('#1a1410', 0.4)));
+      g.traverse((o) => (o.castShadow = true));
+      return g;
+    }
     const shell = new THREE.SphereGeometry(0.145, 20, 14);
     shell.scale(0.95, 1.0, 1.08);
     const sh = new THREE.Mesh(shell, helmMat);
@@ -264,9 +279,11 @@ export class Rider {
     return g;
   }
 
+  /** Dernière pose appliquée (repère local du pilote) : sert aux transitions monter / descendre. */
+  last: BodyTargets | null = null;
+
   /** Calcule et applique la pose dans le repère moto. */
   pose(p: PoseInput): void {
-    const t = this.tmp;
     const trick = p.trick;
     const w = p.trickW;
     const stand = p.stand;
@@ -281,9 +298,9 @@ export class Rider {
     // ---- figures : cibles alternatives
     let footTL = p.pegL.clone().add(new THREE.Vector3(0.02, 0.07, -0.02));
     let footTR = p.pegR.clone().add(new THREE.Vector3(-0.02, 0.07, -0.02));
-    let handTL = p.gripL.clone();
-    let handTR = p.gripR.clone();
-    let torsoTilt = lerp(lerp(0.32, 0.6, stand), lerp(0.28, 0.5, stand), 0) + p.lean * 0.22 + (p.scooter ? -0.15 : 0);
+    const handTL = p.gripL.clone();
+    const handTR = p.gripR.clone();
+    let torsoTilt = lerp(0.32, 0.6, stand) + p.lean * 0.22 + (p.scooter ? -0.15 : 0);
     if (p.footDown > 0.01) {
       footTL = footTL.lerp(new THREE.Vector3(0.36, 0.06, pegMid.z + 0.12), p.footDown);
     }
@@ -310,22 +327,42 @@ export class Rider {
       }
       pel.lerp(tp, w);
     }
+    const noHands = trick === 'nohander' && w > 0;
+    this.poseFree({
+      pelvis: pel, torsoTilt, side: -Math.sin(p.roll) * 0.15, footL: footTL, footR: footTR, handL: handTL, handR: handTR,
+      reach: !(trick === 'nohander' && w > 0.5), headComp: p.pitch, headYaw: p.steer * 0.25, headRoll: -p.roll * 0.3,
+      firstPerson: p.firstPerson, raiseHands: noHands ? w : 0,
+    });
+  }
+
+  /**
+   * Pose libre (marche, PNJ, transitions) : bassin, inclinaison du torse et cibles des
+   * mains / pieds dans le repère du pilote (+z = avant, +x = gauche, +y = haut).
+   */
+  poseFree(b: BodyTargets): void {
+    const t = this.tmp;
+    const pel = b.pelvis.clone();
+    let torsoTilt = b.torsoTilt;
+    const handTL = b.handL.clone();
+    const handTR = b.handR.clone();
     this.pelvisPos.copy(pel);
     // ---- torse : on penche jusqu'à ce que les mains atteignent le guidon
     const armLen = 0.29 + 0.27;
-    let dir = new THREE.Vector3();
-    let neck = new THREE.Vector3();
+    const dir = new THREE.Vector3();
+    const neck = new THREE.Vector3();
     for (let it = 0; it < 4; it++) {
-      dir.set(Math.sin(p.roll) * -0.15, Math.cos(torsoTilt), Math.sin(torsoTilt)).normalize();
+      dir.set(b.side, Math.cos(torsoTilt), Math.sin(torsoTilt)).normalize();
       neck.copy(pel).addScaledVector(dir, 0.5);
+      if (!b.reach) break;
       const shL = neck.clone().add(new THREE.Vector3(0.19, -0.04, 0));
       const reach = shL.distanceTo(handTL);
-      if (reach > armLen * 0.97 && !(trick === 'nohander' && w > 0.5)) torsoTilt += Math.min(0.25, (reach - armLen * 0.95) * 1.6);
+      if (reach > armLen * 0.97) torsoTilt += Math.min(0.25, (reach - armLen * 0.95) * 1.6);
       else break;
     }
     this.neckPos.copy(neck);
-    // orientation du torse
-    const fwd = new THREE.Vector3(0, 0, 1).sub(dir.clone().multiplyScalar(dir.z)).normalize();
+    // orientation du torse (rotation propre autour de la verticale pour la marche)
+    const fwd0 = new THREE.Vector3(Math.sin(b.twist ?? 0), 0, Math.cos(b.twist ?? 0));
+    const fwd = fwd0.sub(dir.clone().multiplyScalar(dir.dot(fwd0))).normalize();
     const right = new THREE.Vector3().crossVectors(dir, fwd).normalize();
     const m = new THREE.Matrix4().makeBasis(right, dir, fwd);
     this.torso.position.copy(pel).addScaledVector(dir, -0.02);
@@ -334,22 +371,25 @@ export class Rider {
     this.pelvis.position.copy(pel);
     this.pelvis.quaternion.copy(this.torso.quaternion);
     // ---- tête (compense le tangage pour regarder devant)
-    const headUp = dir.clone().lerp(new THREE.Vector3(0, Math.cos(p.pitch), Math.sin(p.pitch)), 0.6).normalize();
+    const comp = b.headComp ?? 0;
+    const headUp = dir.clone().lerp(new THREE.Vector3(0, Math.cos(comp), Math.sin(comp)), 0.6).normalize();
     this.headPos.copy(neck).addScaledVector(headUp, 0.16);
     this.neck.set(neck.clone().addScaledVector(dir, -0.03), this.headPos);
     this.head.position.copy(this.headPos);
-    this.head.rotation.set(Math.atan2(headUp.z, headUp.y) - 0.15, p.steer * 0.25, -p.roll * 0.3);
-    this.head.visible = !p.firstPerson;
-    this.neck.mesh.visible = !p.firstPerson;
+    this.head.rotation.set(Math.atan2(headUp.z, headUp.y) - 0.15 + (b.headPitch ?? 0), b.headYaw ?? 0, b.headRoll ?? 0);
+    this.head.visible = !b.firstPerson;
+    this.neck.mesh.visible = !b.firstPerson;
     // ---- bras
     t.shL.copy(neck).addScaledVector(right, 0.19).addScaledVector(dir, -0.05);
     t.shR.copy(neck).addScaledVector(right, -0.19).addScaledVector(dir, -0.05);
-    if (trick === 'nohander' && w > 0) {
-      handTL.lerp(t.shL.clone().add(new THREE.Vector3(0.25, 0.42, 0.05)), w);
-      handTR.lerp(t.shR.clone().add(new THREE.Vector3(-0.25, 0.42, 0.05)), w);
+    if (b.raiseHands) {
+      handTL.lerp(t.shL.clone().add(new THREE.Vector3(0.25, 0.42, 0.05)), b.raiseHands);
+      handTR.lerp(t.shR.clone().add(new THREE.Vector3(-0.25, 0.42, 0.05)), b.raiseHands);
     }
-    solve2Bone(t.shL, handTL, 0.29, 0.27, new THREE.Vector3(0.7, -0.5, -0.4), t.elL, t.wrL);
-    solve2Bone(t.shR, handTR, 0.29, 0.27, new THREE.Vector3(-0.7, -0.5, -0.4), t.elR, t.wrR);
+    const elbowL = b.elbowPoleL ?? new THREE.Vector3(0.7, -0.5, -0.4);
+    const elbowR = b.elbowPoleR ?? new THREE.Vector3(-0.7, -0.5, -0.4);
+    solve2Bone(t.shL, handTL, 0.29, 0.27, elbowL, t.elL, t.wrL);
+    solve2Bone(t.shR, handTR, 0.29, 0.27, elbowR, t.elR, t.wrR);
     this.limbs.upperArmL.set(t.shL, t.elL);
     this.limbs.foreArmL.set(t.elL, t.wrL);
     this.limbs.upperArmR.set(t.shR, t.elR);
@@ -365,9 +405,9 @@ export class Rider {
     // ---- jambes
     t.hipL.copy(pel).addScaledVector(right, 0.095).addScaledVector(dir, -0.04);
     t.hipR.copy(pel).addScaledVector(right, -0.095).addScaledVector(dir, -0.04);
-    const kneePole = new THREE.Vector3(0, 0.25, 1);
-    solve2Bone(t.hipL, footTL, 0.44, 0.45, kneePole.clone().add(new THREE.Vector3(0.35, 0, 0)), t.kneeL, t.ankleL);
-    solve2Bone(t.hipR, footTR, 0.44, 0.45, kneePole.clone().add(new THREE.Vector3(-0.35, 0, 0)), t.kneeR, t.ankleR);
+    const kneePole = b.kneePole ?? new THREE.Vector3(0, 0.25, 1);
+    solve2Bone(t.hipL, b.footL, 0.44, 0.45, kneePole.clone().add(new THREE.Vector3(0.35, 0, 0)), t.kneeL, t.ankleL);
+    solve2Bone(t.hipR, b.footR, 0.44, 0.45, kneePole.clone().add(new THREE.Vector3(-0.35, 0, 0)), t.kneeR, t.ankleR);
     this.limbs.thighL.set(t.hipL, t.kneeL);
     this.limbs.shinL.set(t.kneeL, t.ankleL);
     this.limbs.thighR.set(t.hipR, t.kneeR);
@@ -376,18 +416,58 @@ export class Rider {
     this.joints.knR.position.copy(t.kneeR);
     const ankles = [t.ankleL, t.ankleR];
     const knees = [t.kneeL, t.kneeR];
+    const flat = [b.footFlatL ?? 0, b.footFlatR ?? 0];
     for (let i = 0; i < 2; i++) {
       const f = this.feet[i];
       f.position.copy(ankles[i]);
       const shinDir = ankles[i].clone().sub(knees[i]).normalize();
-      // pied perpendiculaire au tibia, pointant vers l'avant
-      const footFwd = new THREE.Vector3(0, 0, 1).sub(shinDir.clone().multiplyScalar(shinDir.z)).normalize();
-      const r = new THREE.Vector3().crossVectors(shinDir.clone().negate(), footFwd).normalize();
-      f.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(r, shinDir.clone().negate(), footFwd));
+      // pied perpendiculaire au tibia, pointant vers l'avant (ou à plat au sol en marchant)
+      const down = shinDir.clone().lerp(new THREE.Vector3(0, -1, 0), flat[i]).normalize();
+      const fwdRef = new THREE.Vector3(Math.sin(b.twist ?? 0) * 0, 0, 1);
+      const footFwd = fwdRef.sub(down.clone().multiplyScalar(down.dot(fwdRef))).normalize();
+      const r = new THREE.Vector3().crossVectors(down.clone().negate(), footFwd).normalize();
+      f.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(r, down.clone().negate(), footFwd));
       if (this.bootShafts[i]) {
         const top = ankles[i].clone().lerp(knees[i], this.cfg.shoes === 'mxboots' ? 0.75 : 0.25);
         this.bootShafts[i].set(ankles[i].clone().addScaledVector(shinDir, 0.02), top);
       }
     }
+    this.last = { ...b, pelvis: pel, torsoTilt, handL: t.wrL.clone(), handR: t.wrR.clone(), footL: t.ankleL.clone(), footR: t.ankleR.clone() };
   }
+}
+
+/** Cibles de pose libre (repère local du pilote). */
+export interface BodyTargets {
+  pelvis: THREE.Vector3;
+  torsoTilt: number; // 0 = droit, >0 penché vers l'avant
+  side: number; // inclinaison latérale du torse
+  twist?: number; // rotation du buste autour de la verticale
+  footL: THREE.Vector3;
+  footR: THREE.Vector3;
+  handL: THREE.Vector3;
+  handR: THREE.Vector3;
+  reach: boolean; // pencher le torse pour atteindre les mains (guidon)
+  headComp?: number; // tangage à compenser par la tête
+  headPitch?: number;
+  headYaw?: number;
+  headRoll?: number;
+  firstPerson: boolean;
+  raiseHands?: number;
+  kneePole?: THREE.Vector3;
+  elbowPoleL?: THREE.Vector3;
+  elbowPoleR?: THREE.Vector3;
+  footFlatL?: number;
+  footFlatR?: number;
+}
+
+/** Interpolation entre deux poses (transitions monter / descendre). */
+export function lerpTargets(a: BodyTargets, b: BodyTargets, k: number): BodyTargets {
+  const v = (p: THREE.Vector3, q: THREE.Vector3) => p.clone().lerp(q, k);
+  return {
+    ...b,
+    pelvis: v(a.pelvis, b.pelvis), torsoTilt: lerp(a.torsoTilt, b.torsoTilt, k), side: lerp(a.side, b.side, k), twist: lerp(a.twist ?? 0, b.twist ?? 0, k),
+    footL: v(a.footL, b.footL), footR: v(a.footR, b.footR), handL: v(a.handL, b.handL), handR: v(a.handR, b.handR),
+    reach: false, headComp: lerp(a.headComp ?? 0, b.headComp ?? 0, k), headYaw: lerp(a.headYaw ?? 0, b.headYaw ?? 0, k), headRoll: lerp(a.headRoll ?? 0, b.headRoll ?? 0, k),
+    footFlatL: lerp(a.footFlatL ?? 0, b.footFlatL ?? 0, k), footFlatR: lerp(a.footFlatR ?? 0, b.footFlatR ?? 0, k),
+  };
 }

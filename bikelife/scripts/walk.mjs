@@ -1,0 +1,186 @@
+// Test de bout en bout « à pied » : descendre de la moto, marcher, collisions,
+// portes, intérieurs, commerces, escaliers, remonter. node scripts/walk.mjs <url> <outdir>
+import { createRequire } from 'module';
+const { chromium } = createRequire(import.meta.url)('playwright');
+const [url, out] = process.argv.slice(2);
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
+const page = await browser.newPage({ viewport: { width: Number(process.env.W || 960), height: Number(process.env.H || 540) } });
+page.setDefaultTimeout(120000);
+const q = process.env.Q || 'low';
+await page.addInitScript((q) => { try { localStorage.setItem('bikelife-street-kings-v1', JSON.stringify({ money: 5000, level: 3, settings: { quality: q, showHelp: false, tutorialDone: true } })); } catch {} }, q);
+const logs = [];
+const fails = [];
+page.on('console', (m) => { if (m.type() === 'error') logs.push(`[${m.type()}] ${m.text()}`); });
+page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
+await page.goto(url, { waitUntil: 'load' });
+await page.waitForFunction(() => window.__ready === true, null, { timeout: 120000 });
+const shot = async (n) => page.screenshot({ path: `${out}/${n}.png` });
+const ev = (f, a) => page.evaluate(f, a);
+const frames = (n = 8) => page.evaluate((n) => new Promise((r) => { let k = 0; const f = () => (++k >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+const check = (name, ok, extra = '') => { logs.push(`${ok ? 'OK  ' : 'FAIL'} ${name} ${extra}`); if (!ok) fails.push(name); };
+const tap = async (key) => { await page.keyboard.down(key); await frames(3); await page.keyboard.up(key); await frames(4); };
+const hold = async (key, cond, arg, t = 90000) => {
+  await page.keyboard.down(key);
+  await page.waitForFunction(cond, arg, { timeout: t, polling: 100 }).catch(() => logs.push('timeout ' + cond.toString().slice(0, 70)));
+  await page.keyboard.up(key);
+  await frames(3);
+};
+const W = () => ev(() => { const g = window.__game, w = g.walker; return { onFoot: g.onFoot, x: +w.x.toFixed(2), y: +w.y.toFixed(2), z: +w.z.toFixed(2), state: g.state, prompt: document.getElementById('hud-prompt').classList.contains('hidden') ? '' : document.getElementById('hud-prompt').innerText }; });
+
+await page.click('text=ROULER EN VILLE');
+await frames(10);
+await ev(() => window.__game.teleport('garage'));
+await frames(20);
+let s = await W();
+logs.push('prompt sur la moto : ' + s.prompt);
+check('invite « Descendre » à l’arrêt', /Descendre/.test(s.prompt));
+await tap('KeyF');
+await frames(40);
+s = await W();
+check('descendu de la moto', s.onFoot, JSON.stringify(s));
+await shot('01-dismount');
+// marcher vers l'avant 1,5 s
+const before = await W();
+await hold('KeyW', (b) => Math.hypot(window.__game.walker.x - b.x, window.__game.walker.z - b.z) > 1.5, before, 30000);
+const after = await W();
+check('marche', Math.hypot(after.x - before.x, after.z - before.z) > 1.0, `${JSON.stringify(before)} → ${JSON.stringify(after)}`);
+// mur : le garage (façade nord z = 15), on fonce dans le mur depuis l'extérieur
+await ev(() => { const g = window.__game; g.walker.place(-56, 0.3, 12.5, 0); g.rig.snapFoot(0); g.__t0 = g.prog.p.stats.playTime; });
+await hold('KeyW', () => window.__game.prog.p.stats.playTime - window.__game.__t0 > 2.5, null);
+s = await W();
+check('mur de façade bloque', s.z < 15.0, JSON.stringify(s));
+// entrée par le rideau ouvert
+await ev(() => { const g = window.__game; g.walker.place(-65, 0.3, 12.8, 0); g.rig.snapFoot(0); });
+await hold('KeyW', () => window.__game.walker.z > 18, null, 40000);
+s = await W();
+check('entrée dans le garage par le rideau', s.z > 16.5, JSON.stringify(s));
+await frames(20);
+await shot('02-garage-inside');
+let inB = await ev(() => window.__game.inBuilding?.id ?? null);
+check('dans le bâtiment « garage »', inB === 'garage', String(inB));
+// établi → interface du garage
+await ev(() => { const g = window.__game; g.walker.place(-73.5, 0.3, 32.6, Math.PI); g.rig.snapFoot(Math.PI); });
+await frames(10);
+s = await W();
+check('invite établi', /Établi/.test(s.prompt), s.prompt);
+await tap('KeyF');
+await frames(10);
+s = await W();
+check('interface garage ouverte depuis l’établi', s.state === 'garage', s.state);
+await shot('03-garage-ui');
+await ev(() => window.__game['closeGarage'](false));
+await frames(10);
+s = await W();
+check('retour à pied dans le garage', s.state === 'ride' && s.onFoot, JSON.stringify(s));
+// rideau : fermer puis vérifier le blocage
+await ev(() => { const g = window.__game; g.walker.place(-65, 0.3, 16.5, Math.PI); g.rig.snapFoot(Math.PI); });
+await frames(6);
+s = await W();
+check('invite rideau', /rideau/.test(s.prompt), s.prompt);
+await tap('KeyF');
+await page.waitForFunction(() => window.__game.city.interiors.doors.find((d) => d.o.id === 'garage-main').open === 0, null, { timeout: 60000 }).catch(() => logs.push('rideau pas fermé'));
+await ev(() => { window.__game.__t0 = window.__game.prog.p.stats.playTime; });
+await hold('KeyW', () => window.__game.prog.p.stats.playTime - window.__game.__t0 > 3, null);
+s = await W();
+check('rideau fermé bloque', s.z > 15.1, JSON.stringify(s));
+await shot('04-rollup-closed');
+await ev(() => { const g = window.__game; g.walker.place(-65, 0.3, 16.5, Math.PI); });
+await frames(4);
+await tap('KeyF');
+// concession : borne de rayon
+await ev(() => { const g = window.__game; g.walker.place(-57.1, 0.3, 52.6, Math.PI); g.rig.snapFoot(Math.PI); });
+await page.waitForTimeout(1500);
+s = await W();
+check('invite borne concession', /Rayon/.test(s.prompt), s.prompt);
+await ev(() => { const g = window.__game; g.walker.place(-61, 0.3, 51.5, Math.PI); g.rig.snapFoot(Math.PI * 1.0); });
+await page.waitForTimeout(2500);
+await shot('05-concession');
+await ev(() => { const g = window.__game; g.walker.place(-72.1, 0.3, 55.6, -Math.PI / 2); g.rig.snapFoot(-Math.PI / 2); });
+await frames(10);
+s = await W();
+logs.push('invite moto exposée : ' + s.prompt);
+check('moto exposée à vendre', /\$|garage|offerte/.test(s.prompt), s.prompt);
+await tap('KeyF');
+await frames(5);
+const panelTxt = await ev(() => document.getElementById('world-panel')?.innerText ?? '');
+check('fiche de vente', /Acheter|Possédée|Niveau|requis/.test(panelTxt), panelTxt.slice(0, 120).replace(/\n/g, ' | '));
+await shot('06-for-sale');
+await page.keyboard.press('Escape');
+await frames(5);
+// supérette : achat
+await ev(() => window.__game.teleport('station'));
+await frames(10);
+await tap('KeyF');
+await frames(40);
+await ev(() => { const g = window.__game; g.walker.place(-229, 0.3, -47.8, Math.PI); g.rig.snapFoot(Math.PI); });
+await page.waitForTimeout(800);
+s = await W();
+check('invite caisse supérette', /Caisse|Parler/.test(s.prompt), s.prompt);
+const money0 = await ev(() => window.__game.prog.p.money);
+await ev(() => window.__game['showShop']('superette'));
+await frames(4);
+await page.click('#world-panel .panel-row:nth-child(2) button:has-text("Acheter")');
+await frames(4);
+const r1 = await ev(() => ({ money: window.__game.prog.p.money, inv: window.__game.prog.p.inv }));
+check('achat boisson énergisante', r1.money === money0 - 3 && (r1.inv.energy ?? 0) >= 1, JSON.stringify(r1));
+await shot('07-superette-panel');
+await page.keyboard.press('Escape');
+await frames(4);
+await ev(() => { const g = window.__game; g.walker.place(-237, 0.3, -52, 0); g.rig.snapFoot(0); });
+await page.waitForTimeout(1500);
+await shot('08-superette');
+// fast-food
+await ev(() => { const g = window.__game; g.walker.place(-203, 0.3, -28.6, Math.PI); g.rig.snapFoot(Math.PI); });
+await frames(6);
+s = await W();
+check('porte du fast-food', /porte/.test(s.prompt), s.prompt);
+await tap('KeyF');
+await page.waitForFunction(() => window.__game.city.interiors.doors.find((d) => d.o.id === 'fastfood-main').open > 0.95, null, { timeout: 60000 }).catch(() => logs.push('porte pas ouverte'));
+await hold('KeyW', () => window.__game.walker.z < -33, null, 40000);
+s = await W();
+check('entrée fast-food après ouverture', s.z < -31, JSON.stringify(s));
+await shot('09-fastfood');
+// immeuble : escaliers jusqu'au 1er
+await ev(() => { const g = window.__game; g.walker.place(-325.8, 0.3, 34.9, Math.PI / 2); g.rig.snapFoot(Math.PI / 2); });
+await frames(4);
+await hold('KeyW', () => window.__game.walker.x > -316.6, null, 60000);
+s = await W();
+check('montée de l’escalier (1er étage, y ≈ 3,35)', s.y > 3.0 && s.y < 3.8, JSON.stringify(s));
+await shot('10-stairs');
+await ev(() => { const g = window.__game; g.walker.place(-328, 3.6, 28, -Math.PI / 2); g.rig.snapFoot(-Math.PI / 2); });
+await page.waitForTimeout(1500);
+s = await W();
+check('appartement A du 1er (plancher)', Math.abs(s.y - 3.35) < 0.1, JSON.stringify(s));
+await shot('11-apartment');
+// toit
+await ev(() => { const g = window.__game; g.walker.place(-320, 13.2, 30, 0); g.rig.snapFoot(0); });
+await page.waitForTimeout(1200);
+s = await W();
+check('toit praticable', Math.abs(s.y - 12.95) < 0.1, JSON.stringify(s));
+await shot('12-roof');
+// entrepôt + local
+await ev(() => { const g = window.__game; g.walker.place(315, 0.3, -36, Math.PI); g.rig.snapFoot(Math.PI); });
+await page.waitForTimeout(1500);
+await shot('13-entrepot');
+await ev(() => { const g = window.__game; g.walker.place(305, 0.3, 30, Math.PI); g.rig.snapFoot(Math.PI); });
+await page.waitForTimeout(1500);
+await shot('14-local');
+// remonter sur la moto : on retourne à la station (moto garée)
+await ev(() => { const g = window.__game, p = g.player.phys; g.walker.place(p.x + 1.2, p.y, p.z, 0); });
+await frames(8);
+s = await W();
+check('invite monter', /Monter/.test(s.prompt), s.prompt);
+await tap('KeyF');
+await page.waitForFunction(() => !window.__game.onFoot, null, { timeout: 30000 }).catch(() => logs.push('pas remonté'));
+s = await W();
+check('remonté sur la moto', !s.onFoot, JSON.stringify(s));
+// carburant
+const f0 = await ev(() => window.__game.prog.fuel());
+await hold('KeyW', () => window.__game.player.phys.kmh > 30, null, 60000);
+const f1 = await ev(() => window.__game.prog.fuel());
+check('consommation d’essence', f1 < f0, `${f0} → ${f1}`);
+const stats = await ev(() => ({ calls: window.__game.renderer.info.render.calls, tris: window.__game.renderer.info.render.triangles, fps: window.__game.fps }));
+logs.push('rendu : ' + JSON.stringify(stats));
+console.log(logs.join('\n'));
+console.log(fails.length ? `ÉCHECS : ${fails.join(', ')}` : 'TOUT EST OK');
+await browser.close();
