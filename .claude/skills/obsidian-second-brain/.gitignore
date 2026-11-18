@@ -1,0 +1,20 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+
+# Local config (never commit)
+.env
+*.local
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
