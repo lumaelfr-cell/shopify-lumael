@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Livrable print — gabarit design-as-code</title>
+<!-- fonts.css : TOUJOURS généré par scripts/fetch_fonts.py (mapping graisse->fichier
+     garanti). Chemin prévu pour le scaffold du skill (fonts/ à la RACINE du projet,
+     cette source dans Livrables/<Nom>/) : ../../fonts/fonts.css — ADAPTER si le
+     layout diffère. build.py refuse de builder si ce lien ne résout pas (et c'est
+     voulu : un href cassé = polices système en silence). Jamais de Google Fonts
+     distant (jury hors-ligne), jamais de police variable (Type3 dans le PDF). -->
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+/* ══ GABARIT PRINT ══════════════════════════════════════════════════════════
+   Exemple : affiche 40×60 cm portrait, fond perdu 5 mm -> @page 410×610 mm.
+   @page = format FINI + 2×fond perdu, TOUJOURS. Règle de décision du fond perdu :
+   ≤ A3 = 3 mm · affiches ≥ 40×60 = 5 mm · au-delà, demander à l'imprimeur.
+   Formats courants (fini -> @page avec bleed) :
+     A4 portrait  210×297 +3mm -> 216×303   ·  A4 paysage 303×216
+     A3 portrait  297×420 +3mm -> 303×426   ·  A3 paysage 426×303
+     40×60 cm     400×600 +5mm -> 410×610   ·  60×40 cm   610×410
+   Changer @page ET --bleed ensemble : tout le reste (coupes, marges) suit. */
+@page{size:410mm 610mm;margin:0}
+:root{
+  --ink:#141210;      /* encre  */
+  --paper:#F2EDE1;    /* papier */
+  --accent:#E4FF1A;   /* accent */
+  --bleed:5mm;        /* fond perdu : DOIT rester synchro avec @page ci-dessus */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+
+.poster{position:relative;width:410mm;height:610mm;overflow:hidden;
+  background:var(--paper);color:var(--ink);
+  font-family:"Montserrat",system-ui,sans-serif}
+
+/* Police display MONO-GRAISSE (Anton, etc.) : font-weight:400 OBLIGATOIRE.
+   Posée sur <h1>/<b> sans ça, le navigateur réclame 700, synthétise un faux
+   gras et rastérise le texte en Type3 (illisible hors de cette machine). */
+.display{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;line-height:.92}
+
+/* ── Traits de coupe : pilotés par var(--bleed), posés dans le fond perdu.
+   Chaque trait vit SUR la ligne de coupe et s'arrête 1.5 mm avant de croiser
+   l'autre ligne : aucune encre dans le format fini, quel que soit le bleed. ── */
+.crop{position:absolute;width:var(--bleed);height:var(--bleed);pointer-events:none;z-index:9}
+.crop::before,.crop::after{content:"";position:absolute;background:var(--ink)}
+.crop::before{height:.35mm;width:calc(var(--bleed) - 1.5mm)}   /* trait horizontal */
+.crop::after{width:.35mm;height:calc(var(--bleed) - 1.5mm)}    /* trait vertical   */
+.c-tl{top:0;left:0}.c-tl::before{bottom:-.175mm;left:0}.c-tl::after{right:-.175mm;top:0}
+.c-tr{top:0;right:0}.c-tr::before{bottom:-.175mm;right:0}.c-tr::after{left:-.175mm;top:0}
+.c-bl{bottom:0;left:0}.c-bl::before{top:-.175mm;left:0}.c-bl::after{right:-.175mm;bottom:0}
+.c-br{bottom:0;right:0}.c-br::before{top:-.175mm;right:0}.c-br::after{left:-.175mm;bottom:0}
+
+/* Contenu : marges intérieures >= 20 mm depuis le format FINI (la coupe = bord
+   de page - fond perdu). Tout élément « plein bord » déborde DANS le fond
+   perdu, jamais ne s'arrête pile à la coupe. */
+.inner{position:absolute;inset:calc(var(--bleed) + 20mm)}
+
+/* Pictos/symboles (✓ ✕ → ⊘ …) : hors des subsets latin, ils partent en Type3
+   ou en police système. En print, les dessiner en SVG inline plutôt qu'en
+   caractère — et JAMAIS de text-shadow sur du texte (rastérise aussi). */
+
+/* ── DOCUMENT MULTI-PAGES (dossier, magazine, deck) : dé-commenter et adapter.
+   1 <section class="page"> = 1 page PDF, à la taille exacte de @page.
+   build.py lit le fil d'ariane .crumb (.part + .mono) pour poser les signets ;
+   une section avec la classe « pg-off » est masquée ET ignorée des signets.
+.page{position:relative;width:410mm;height:610mm;overflow:hidden;background:var(--paper);
+  page-break-after:always}
+.page.pg-off{display:none}
+.crumb{position:absolute;top:8mm;left:10mm;display:flex;gap:6mm;
+  font-family:"Courier Prime",monospace;font-size:9pt;text-transform:uppercase}
+.crumb .part{background:var(--ink);color:var(--paper);padding:1mm 3mm}
+.crumb .mono{opacity:.7}
+.folio{position:absolute;bottom:8mm;right:10mm;font-family:"Courier Prime",monospace;font-size:9pt}
+── */
+</style>
+</head>
+<body>
+<section class="poster">
+  <div class="inner">
+    <h1 class="display" style="font-size:60pt">Titre du livrable</h1>
+    <p style="font-weight:600;font-size:15pt;max-width:250mm">Corps de texte : chaque
+    font-weight utilisé ici doit exister en VRAI fichier dans fonts/fonts.css
+    (généré par fetch_fonts.py — relancer avec la liste complète des graisses).</p>
+  </div>
+  <span class="crop c-tl"></span><span class="crop c-tr"></span>
+  <span class="crop c-bl"></span><span class="crop c-br"></span>
+</section>
+</body>
+</html>
