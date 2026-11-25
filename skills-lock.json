@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "byted-las-video-inpaint": {
+      "source": "bytedance/agentkit-samples",
+      "commit": "55e299d5f37269f45535ba7727600abd3e0a3b28",
+      "sourceType": "github",
+      "skillPath": "skills/byted-las-video-inpaint/SKILL.md",
+      "computedHash": "424a3d9de7309689e6d0ca71aed755deef1ae38ea36ac1a413ecd3b482d7911d"
+    }
+  }
+}
